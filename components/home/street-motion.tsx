@@ -10,6 +10,7 @@ export function StreetMotion() {
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
+    layoutEffect: false,
   });
 
   const [reducedMotion, setReducedMotion] = useState(false);

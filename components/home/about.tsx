@@ -10,6 +10,7 @@ export function About() {
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
+    layoutEffect: false,
   });
 
   const bgY = useTransform(scrollYProgress, [0, 1], [40, -40]);

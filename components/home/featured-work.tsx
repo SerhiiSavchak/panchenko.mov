@@ -13,6 +13,7 @@ export function FeaturedWork() {
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
+    layoutEffect: false,
   });
 
   const [reducedMotion, setReducedMotion] = useState(false);

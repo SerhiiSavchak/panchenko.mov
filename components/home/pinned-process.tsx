@@ -37,6 +37,7 @@ export function PinnedProcess() {
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"],
+    layoutEffect: false,
   });
 
   return (
