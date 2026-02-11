@@ -64,6 +64,15 @@ body {
   50% { clip-path: inset(10% 0 80% 0); transform: translate(0, 0); }
 }
 
+/* Hide scrollbar for reel rails */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

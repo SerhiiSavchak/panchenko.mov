@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { VideoBackground } from "@/components/video-background";
+import { useRef, useEffect, useState, useCallback } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/magnetic-button";
+import { HERO_FALLBACKS } from "@/lib/media";
+
+const CYCLING_WORDS = ["RAP", "CARS", "FIGHT", "BRAND"];
 
 interface HeroProps {
   onQuoteOpen: () => void;
@@ -11,6 +13,7 @@ interface HeroProps {
 
 export function Hero({ onQuoteOpen }: HeroProps) {
   const ref = useRef(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -21,11 +24,35 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [wordIndex, setWordIndex] = useState(0);
+  const [videoSrc, setVideoSrc] = useState("/hero.mp4");
+
   useEffect(() => {
     setReducedMotion(
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     );
   }, []);
+
+  // Cycle words
+  useEffect(() => {
+    if (reducedMotion) return;
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % CYCLING_WORDS.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [reducedMotion]);
+
+  // Video playback with fallback
+  const handleVideoError = useCallback(() => {
+    const fallback = HERO_FALLBACKS[Math.floor(Math.random() * HERO_FALLBACKS.length)];
+    setVideoSrc(fallback);
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.play().catch(() => {});
+  }, [videoSrc]);
 
   return (
     <section ref={ref} className="relative h-screen overflow-hidden">
@@ -33,11 +60,22 @@ export function Hero({ onQuoteOpen }: HeroProps) {
         style={reducedMotion ? {} : { scale }}
         className="absolute inset-0"
       >
-        <VideoBackground
-          src="/hero.mp4"
-          poster="/hero.jpg"
-          overlay
-        />
+        <div className="absolute inset-0 overflow-hidden">
+          <video
+            ref={videoRef}
+            key={videoSrc}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/hero.jpg"
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={handleVideoError}
+          >
+            <source src={videoSrc} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-background/70" aria-hidden="true" />
+        </div>
       </motion.div>
 
       <motion.div
@@ -67,20 +105,44 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="font-display text-[clamp(3rem,12vw,10rem)] leading-[0.85] tracking-tight text-foreground text-balance"
         >
-          {"LET'S MAKE"}
+          FROM STREET
           <br />
-          <span className="text-accent">SOMETHING</span>
-          <br />
-          TIMELESS
+          TO{" "}
+          <span className="text-accent relative inline-block min-w-[3ch]">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={CYCLING_WORDS[wordIndex]}
+                initial={reducedMotion ? {} : { opacity: 0, y: 20, filter: "blur(8px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={reducedMotion ? {} : { opacity: 0, y: -20, filter: "blur(8px)" }}
+                transition={{ duration: 0.4 }}
+                className="inline-block"
+              >
+                {CYCLING_WORDS[wordIndex]}
+              </motion.span>
+            </AnimatePresence>
+          </span>
         </motion.h1>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="mt-6 flex flex-col items-center gap-1 text-sm md:text-base text-muted-foreground max-w-xl"
+        >
+          <span>Toronto-based filmmaker.</span>
+          <span>{"In-house @hutsyfinancial."}</span>
+          <span>{"Brand & product storytelling."}</span>
+          <span>Cinematic short-form.</span>
+        </motion.div>
 
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="mt-6 text-sm md:text-base text-muted-foreground max-w-xl leading-relaxed"
+          transition={{ delay: 0.8 }}
+          className="mt-4 text-xs uppercase tracking-widest text-accent"
         >
-          {"Cinematic short-form \u2022 Music videos (rap/trap) \u2022 Cars \u2022 Fight energy \u2022 Brand storytelling \u2014 Toronto"}
+          {"Let\u2019s make something timeless."}
         </motion.p>
 
         <motion.div

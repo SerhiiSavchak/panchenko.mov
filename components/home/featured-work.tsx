@@ -1,12 +1,38 @@
 "use client";
 
+import { useRef, useState, useEffect } from "react";
 import { works } from "@/data/work";
 import { WorkCard } from "@/components/work-card";
 import { Section } from "@/components/section";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 
 export function FeaturedWork() {
   const featured = works.slice(0, 9);
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+
+  const [reducedMotion, setReducedMotion] = useState(false);
+  useEffect(() => {
+    setReducedMotion(
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }, []);
+
+  // Depth parallax offsets for different columns
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, -30]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, -60]);
+  const y3 = useTransform(scrollYProgress, [0, 1], [0, -20]);
+
+  const getParallax = (index: number) => {
+    const col = index % 3;
+    if (col === 0) return y1;
+    if (col === 1) return y2;
+    return y3;
+  };
 
   return (
     <Section id="featured">
@@ -27,9 +53,14 @@ export function FeaturedWork() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+      <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {featured.map((work, i) => (
-          <WorkCard key={work.slug} work={work} index={i} />
+          <motion.div
+            key={work.slug}
+            style={reducedMotion ? {} : { y: getParallax(i) }}
+          >
+            <WorkCard work={work} index={i} />
+          </motion.div>
         ))}
       </div>
     </Section>
