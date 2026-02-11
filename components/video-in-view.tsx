@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
-import { REEL_FALLBACKS } from "@/lib/media";
+import { REEL_VIDEOS } from "@/lib/media";
 
 interface VideoInViewProps {
   src: string;
@@ -18,15 +18,17 @@ export function VideoInView({
 }: VideoInViewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoSrc, setVideoSrc] = useState(src);
+  const [triedFallback, setTriedFallback] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   const handleError = useCallback(() => {
-    if (videoSrc === src && REEL_FALLBACKS.length > 0) {
-      setVideoSrc(REEL_FALLBACKS[fallbackIndex % REEL_FALLBACKS.length]);
+    if (!triedFallback) {
+      setTriedFallback(true);
+      setVideoSrc(REEL_VIDEOS[fallbackIndex % REEL_VIDEOS.length]);
     } else {
       setHasError(true);
     }
-  }, [videoSrc, src, fallbackIndex]);
+  }, [triedFallback, fallbackIndex]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -40,7 +42,7 @@ export function VideoInView({
           video.pause();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.25 }
     );
 
     observer.observe(video);
@@ -50,13 +52,17 @@ export function VideoInView({
   if (hasError) {
     return (
       <div
-        className={`bg-muted ${className}`}
+        className={`bg-muted flex items-center justify-center ${className}`}
         style={
           poster
-            ? { backgroundImage: `url(${poster})`, backgroundSize: "cover" }
+            ? { backgroundImage: `url(${poster})`, backgroundSize: "cover", backgroundPosition: "center" }
             : undefined
         }
-      />
+      >
+        {!poster && (
+          <span className="text-muted-foreground text-xs uppercase tracking-wider">No preview</span>
+        )}
+      </div>
     );
   }
 

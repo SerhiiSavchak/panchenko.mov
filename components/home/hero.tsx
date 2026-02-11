@@ -3,9 +3,15 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/magnetic-button";
-import { HERO_FALLBACKS } from "@/lib/media";
+import { HERO_THEMES, type HeroThemeKey } from "@/lib/media";
 
-const CYCLING_WORDS = ["RAP", "CARS", "FIGHT", "BRAND"];
+const CYCLING_WORDS: HeroThemeKey[] = ["rap", "cars", "fight", "brand"];
+const DISPLAY_WORDS: Record<HeroThemeKey, string> = {
+  rap: "RAP",
+  cars: "CARS",
+  fight: "FIGHT",
+  brand: "BRAND",
+};
 
 interface HeroProps {
   onQuoteOpen: () => void;
@@ -13,7 +19,6 @@ interface HeroProps {
 
 export function Hero({ onQuoteOpen }: HeroProps) {
   const ref = useRef(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -25,57 +30,54 @@ export function Hero({ onQuoteOpen }: HeroProps) {
 
   const [reducedMotion, setReducedMotion] = useState(false);
   const [wordIndex, setWordIndex] = useState(0);
-  const [videoSrc, setVideoSrc] = useState("/hero.mp4");
+  const currentKey = CYCLING_WORDS[wordIndex];
+  const theme = HERO_THEMES[currentKey];
 
   useEffect(() => {
-    setReducedMotion(
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
+    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
-  // Cycle words
+  // Cycle words every 2.5s
   useEffect(() => {
     if (reducedMotion) return;
     const interval = setInterval(() => {
       setWordIndex((prev) => (prev + 1) % CYCLING_WORDS.length);
-    }, 2000);
+    }, 2500);
     return () => clearInterval(interval);
   }, [reducedMotion]);
 
-  // Video playback with fallback
-  const handleVideoError = useCallback(() => {
-    const fallback = HERO_FALLBACKS[Math.floor(Math.random() * HERO_FALLBACKS.length)];
-    setVideoSrc(fallback);
-  }, []);
-
+  // Preload next video
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.play().catch(() => {});
-  }, [videoSrc]);
+    const nextIndex = (wordIndex + 1) % CYCLING_WORDS.length;
+    const nextKey = CYCLING_WORDS[nextIndex];
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "video";
+    link.href = HERO_THEMES[nextKey].video;
+    document.head.appendChild(link);
+    return () => { document.head.removeChild(link); };
+  }, [wordIndex]);
 
   return (
     <section ref={ref} className="relative h-screen overflow-hidden">
-      <motion.div
-        style={reducedMotion ? {} : { scale }}
-        className="absolute inset-0"
-      >
-        <div className="absolute inset-0 overflow-hidden">
-          <video
-            ref={videoRef}
-            key={videoSrc}
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster="/hero.jpg"
-            className="absolute inset-0 w-full h-full object-cover"
-            onError={handleVideoError}
+      <motion.div style={reducedMotion ? {} : { scale }} className="absolute inset-0">
+        {/* Video crossfade */}
+        <AnimatePresence mode="sync">
+          <motion.div
+            key={currentKey}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2 }}
+            className="absolute inset-0"
           >
-            <source src={videoSrc} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-background/70" aria-hidden="true" />
-        </div>
+            <HeroVideo src={theme.video} poster={theme.poster} />
+          </motion.div>
+        </AnimatePresence>
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-background/65" aria-hidden="true" />
+        {/* Film grain */}
+        <div className="absolute inset-0 noise-overlay opacity-[0.04]" aria-hidden="true" />
       </motion.div>
 
       <motion.div
@@ -84,19 +86,17 @@ export function Hero({ onQuoteOpen }: HeroProps) {
       >
         {/* Floating badges */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
-          {["In-house @hutsyfinancial", "Toronto", "Cinematic short-form"].map(
-            (badge) => (
-              <motion.span
-                key={badge}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="px-3 py-1 text-[10px] uppercase tracking-widest border border-border text-muted-foreground bg-background/40 backdrop-blur-sm"
-              >
-                {badge}
-              </motion.span>
-            )
-          )}
+          {["In-house @hutsyfinancial", "Toronto", "Cinematic short-form"].map((badge) => (
+            <motion.span
+              key={badge}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="px-3 py-1 text-[10px] uppercase tracking-widest border border-border text-muted-foreground bg-background/40 backdrop-blur-sm"
+            >
+              {badge}
+            </motion.span>
+          ))}
         </div>
 
         <motion.h1
@@ -108,17 +108,17 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           FROM STREET
           <br />
           TO{" "}
-          <span className="text-accent relative inline-block min-w-[3ch]">
+          <span className="text-accent relative inline-block min-w-[4ch]">
             <AnimatePresence mode="wait">
               <motion.span
-                key={CYCLING_WORDS[wordIndex]}
+                key={DISPLAY_WORDS[currentKey]}
                 initial={reducedMotion ? {} : { opacity: 0, y: 20, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 exit={reducedMotion ? {} : { opacity: 0, y: -20, filter: "blur(8px)" }}
                 transition={{ duration: 0.4 }}
-                className="inline-block"
+                className="inline-block neon-glow"
               >
-                {CYCLING_WORDS[wordIndex]}
+                {DISPLAY_WORDS[currentKey]}
               </motion.span>
             </AnimatePresence>
           </span>
@@ -140,7 +140,7 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="mt-4 text-xs uppercase tracking-widest text-accent"
+          className="mt-4 text-xs uppercase tracking-widest text-accent neon-glow"
         >
           {"Let\u2019s make something timeless."}
         </motion.p>
@@ -151,12 +151,8 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           transition={{ delay: 0.9 }}
           className="flex flex-wrap items-center justify-center gap-4 mt-10"
         >
-          <MagneticButton variant="primary" onClick={onQuoteOpen}>
-            Book a Shoot
-          </MagneticButton>
-          <MagneticButton variant="secondary" href="#featured">
-            Watch Work
-          </MagneticButton>
+          <MagneticButton variant="primary" onClick={onQuoteOpen}>Book a Shoot</MagneticButton>
+          <MagneticButton variant="secondary" href="#featured">Watch Work</MagneticButton>
         </motion.div>
       </motion.div>
 
@@ -174,5 +170,28 @@ export function Hero({ onQuoteOpen }: HeroProps) {
         />
       </motion.div>
     </section>
+  );
+}
+
+function HeroVideo({ src, poster }: { src: string; poster: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleCanPlay = useCallback(() => {
+    videoRef.current?.play().catch(() => {});
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      muted
+      loop
+      playsInline
+      preload="auto"
+      poster={poster}
+      onCanPlay={handleCanPlay}
+      className="absolute inset-0 w-full h-full object-cover"
+    >
+      <source src={src} type="video/mp4" />
+    </video>
   );
 }

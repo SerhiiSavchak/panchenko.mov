@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef, useMemo, useEffect } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Section } from "@/components/section";
+import { CONSTRUCTOR_MEDIA } from "@/lib/media";
 
-// --- Pricing data ---
 const PROJECT_TYPES = [
   { id: "rap", label: "Rap / Trap", min: 650, max: 950 },
   { id: "cars", label: "Cars", min: 450, max: 750 },
@@ -50,9 +51,7 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
 
   const [reducedMotion, setReducedMotion] = useState(false);
   useEffect(() => {
-    setReducedMotion(
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
+    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
   const [projectType, setProjectType] = useState<string>("rap");
@@ -76,31 +75,14 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
     const edit = EDIT_TIERS.find((e) => e.id === editTier)!;
     const tm = TEAM_OPTIONS.find((t) => t.id === team)!;
     const rs = RUSH_OPTIONS.find((r) => r.id === rush)!;
-
-    let baseMin = proj.min;
-    let baseMax = proj.max;
-
-    // Extra hours
-    baseMin += extraHours * EXTRA_HOUR.min;
-    baseMax += extraHours * EXTRA_HOUR.max;
-
-    // Multipliers
+    let baseMin = proj.min + extraHours * EXTRA_HOUR.min;
+    let baseMax = proj.max + extraHours * EXTRA_HOUR.max;
     baseMin *= edit.multiplier * tm.multiplier * rs.multiplier;
     baseMax *= edit.multiplier * tm.multiplier * rs.multiplier;
-
-    // Add-ons
     ADD_ONS.forEach((ao) => {
-      if (addOns.has(ao.id)) {
-        baseMin += ao.min;
-        baseMax += ao.max;
-      }
+      if (addOns.has(ao.id)) { baseMin += ao.min; baseMax += ao.max; }
     });
-
-    // Comfort range
-    baseMin = Math.round(baseMin * 0.88);
-    baseMax = Math.round(baseMax * 1.12);
-
-    return { min: baseMin, max: baseMax };
+    return { min: Math.round(baseMin * 0.88), max: Math.round(baseMax * 1.12) };
   }, [projectType, editTier, team, rush, extraHours, addOns]);
 
   const rushTimeline = RUSH_OPTIONS.find((r) => r.id === rush)!.timeline;
@@ -111,12 +93,12 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
     if (edit.id === "pro") items.push("Cinematic color grading", "2 revision rounds");
     if (edit.id === "insane") items.push("Advanced color + VFX", "Unlimited revisions", "Priority turnaround");
     if (edit.id === "basic") items.push("Basic color grading", "1 revision round");
-    ADD_ONS.forEach((ao) => {
-      if (addOns.has(ao.id)) items.push(ao.label);
-    });
+    ADD_ONS.forEach((ao) => { if (addOns.has(ao.id)) items.push(ao.label); });
     items.push("All social formats");
     return items;
   }, [editTier, addOns]);
+
+  const media = CONSTRUCTOR_MEDIA[projectType as keyof typeof CONSTRUCTOR_MEDIA] ?? CONSTRUCTOR_MEDIA.rap;
 
   return (
     <Section id="build-your-shoot">
@@ -126,88 +108,102 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
           initial={{ scaleX: 0 }}
           animate={inView ? { scaleX: 1 } : undefined}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="h-px bg-accent mb-10 origin-left"
+          className="h-px bg-gradient-to-r from-accent to-accent-secondary mb-10 origin-left"
         />
 
-        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-          Interactive
-        </span>
-        <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1 mb-12">
-          Build Your Shoot
-        </h2>
+        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">Interactive</span>
+        <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1 mb-6">Build Your Shoot</h2>
+
+        {/* Dynamic Media Panel */}
+        <div className="relative mb-12 aspect-[21/9] overflow-hidden rounded-sm border border-border neon-box-glow">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={projectType}
+              initial={reducedMotion ? {} : { opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={reducedMotion ? {} : { opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.6 }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={media.image}
+                alt={`${projectType} preview`}
+                fill
+                sizes="(max-width: 768px) 100vw, 80vw"
+                className="object-cover"
+                priority={false}
+              />
+              {/* Overlay per type */}
+              <MediaOverlay type={media.overlay} reducedMotion={reducedMotion} />
+              {/* Dark gradient for readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Panel power-on animation */}
+          {inView && !reducedMotion && (
+            <>
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="absolute top-0 left-0 right-0 h-px bg-accent/60 origin-left"
+              />
+              <motion.div
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: 1 }}
+                transition={{ duration: 0.4, delay: 0.5 }}
+                className="absolute top-0 right-0 bottom-0 w-px bg-accent/40 origin-top"
+              />
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+                className="absolute bottom-0 left-0 right-0 h-px bg-accent/60 origin-right"
+              />
+              <motion.div
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: 1 }}
+                transition={{ duration: 0.4, delay: 0.9 }}
+                className="absolute top-0 left-0 bottom-0 w-px bg-accent/40 origin-bottom"
+              />
+            </>
+          )}
+
+          {/* Current type label */}
+          <div className="absolute bottom-4 left-4 z-10">
+            <motion.span
+              key={projectType}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="font-display text-3xl md:text-5xl text-accent neon-glow"
+            >
+              {DISPLAY_LABELS[projectType as keyof typeof DISPLAY_LABELS] ?? projectType.toUpperCase()}
+            </motion.span>
+          </div>
+        </div>
 
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
           {/* Left: Controls */}
           <div className="lg:w-1/2 flex flex-col gap-8">
-            {/* Project Type */}
-            <OptionGroup
-              label="Project Type"
-              options={PROJECT_TYPES.map((p) => ({ id: p.id, label: p.label }))}
-              value={projectType}
-              onChange={setProjectType}
-              reducedMotion={reducedMotion}
-            />
-
-            {/* Edit Tier */}
-            <OptionGroup
-              label="Edit Level"
-              options={EDIT_TIERS.map((e) => ({ id: e.id, label: e.label }))}
-              value={editTier}
-              onChange={setEditTier}
-              reducedMotion={reducedMotion}
-            />
-
-            {/* Team */}
-            <OptionGroup
-              label="Team"
-              options={TEAM_OPTIONS.map((t) => ({ id: t.id, label: t.label }))}
-              value={team}
-              onChange={setTeam}
-              reducedMotion={reducedMotion}
-            />
-
-            {/* Rush */}
-            <OptionGroup
-              label="Turnaround"
-              options={RUSH_OPTIONS.map((r) => ({ id: r.id, label: r.label }))}
-              value={rush}
-              onChange={setRush}
-              reducedMotion={reducedMotion}
-            />
+            <OptionGroup label="Project Type" options={PROJECT_TYPES.map((p) => ({ id: p.id, label: p.label }))} value={projectType} onChange={setProjectType} reducedMotion={reducedMotion} />
+            <OptionGroup label="Edit Level" options={EDIT_TIERS.map((e) => ({ id: e.id, label: e.label }))} value={editTier} onChange={setEditTier} reducedMotion={reducedMotion} />
+            <OptionGroup label="Team" options={TEAM_OPTIONS.map((t) => ({ id: t.id, label: t.label }))} value={team} onChange={setTeam} reducedMotion={reducedMotion} />
+            <OptionGroup label="Turnaround" options={RUSH_OPTIONS.map((r) => ({ id: r.id, label: r.label }))} value={rush} onChange={setRush} reducedMotion={reducedMotion} />
 
             {/* Extra Hours */}
             <div>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-2">
-                Extra Hours (2h included)
-              </span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-2">Extra Hours (2h included)</span>
               <div className="flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => setExtraHours(Math.max(0, extraHours - 1))}
-                  className="w-10 h-10 border border-border text-foreground hover:border-accent hover:text-accent transition-colors flex items-center justify-center cursor-pointer"
-                  aria-label="Decrease hours"
-                >
-                  -
-                </button>
-                <span className="font-display text-2xl text-accent w-8 text-center">
-                  {extraHours}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setExtraHours(extraHours + 1)}
-                  className="w-10 h-10 border border-border text-foreground hover:border-accent hover:text-accent transition-colors flex items-center justify-center cursor-pointer"
-                  aria-label="Increase hours"
-                >
-                  +
-                </button>
+                <button type="button" onClick={() => setExtraHours(Math.max(0, extraHours - 1))} className="w-10 h-10 border border-border text-foreground hover:border-accent hover:text-accent transition-colors flex items-center justify-center cursor-pointer" aria-label="Decrease hours">-</button>
+                <span className="font-display text-2xl text-accent w-8 text-center">{extraHours}</span>
+                <button type="button" onClick={() => setExtraHours(extraHours + 1)} className="w-10 h-10 border border-border text-foreground hover:border-accent hover:text-accent transition-colors flex items-center justify-center cursor-pointer" aria-label="Increase hours">+</button>
               </div>
             </div>
 
             {/* Add-ons */}
             <div>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-2">
-                Add-ons
-              </span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-2">Add-ons</span>
               <div className="flex flex-wrap gap-2">
                 {ADD_ONS.map((ao) => (
                   <button
@@ -221,79 +217,38 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
                     }`}
                   >
                     {ao.label}
-                    <span className="ml-1 text-[10px] opacity-60">
-                      +${ao.min}
-                    </span>
+                    <span className="ml-1 text-[10px] opacity-60">+${ao.min}</span>
                   </button>
                 ))}
               </div>
             </div>
-
-            {/* RAP category sticker */}
-            {projectType === "rap" && (
-              <motion.div
-                initial={reducedMotion ? {} : { opacity: 0, rotate: -12, scale: 0.8 }}
-                animate={{ opacity: 1, rotate: -6, scale: 1 }}
-                className="inline-block self-start px-3 py-1.5 bg-accent text-accent-foreground font-display text-sm uppercase -rotate-6"
-              >
-                Street Certified
-              </motion.div>
-            )}
-
-            {/* CARS category accent */}
-            {projectType === "cars" && (
-              <motion.div
-                initial={reducedMotion ? {} : { opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="inline-block self-start px-3 py-1.5 border border-accent/40 text-accent text-xs uppercase tracking-widest"
-                style={
-                  reducedMotion
-                    ? {}
-                    : { textShadow: "0 0 8px rgba(200,255,0,0.3)" }
-                }
-              >
-                Motion Blur
-              </motion.div>
-            )}
           </div>
 
           {/* Right: Live estimate */}
           <div className="lg:w-1/2 lg:sticky lg:top-24 lg:self-start">
-            <div className="border border-border bg-card p-6 md:p-8">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Estimated Range
-              </span>
+            <div className="border border-border bg-card p-6 md:p-8 neon-box-glow">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Estimated Range</span>
               <motion.div
                 key={`${estimate.min}-${estimate.max}`}
                 initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="font-display text-4xl md:text-5xl text-accent mt-2"
+                className="font-display text-4xl md:text-5xl text-accent mt-2 neon-glow"
               >
                 ${estimate.min.toLocaleString()} &ndash; ${estimate.max.toLocaleString()}
               </motion.div>
               <p className="text-xs text-muted-foreground mt-1">CAD, before tax</p>
 
               <div className="mt-6 pt-6 border-t border-border">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Timeline
-                </span>
-                <p className="font-display text-xl text-foreground mt-1">
-                  {rushTimeline}
-                </p>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Timeline</span>
+                <p className="font-display text-xl text-foreground mt-1">{rushTimeline}</p>
               </div>
 
               <div className="mt-6 pt-6 border-t border-border">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  What You Get
-                </span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">What You Get</span>
                 <ul className="mt-2 flex flex-col gap-1.5">
                   {deliverables.map((d) => (
-                    <li
-                      key={d}
-                      className="text-sm text-muted-foreground flex items-start gap-2"
-                    >
-                      <span className="text-accent mt-0.5">+</span>
-                      {d}
+                    <li key={d} className="text-sm text-muted-foreground flex items-start gap-2">
+                      <span className="text-accent mt-0.5">+</span>{d}
                     </li>
                   ))}
                 </ul>
@@ -314,13 +269,66 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
   );
 }
 
-// Reusable option group
+const DISPLAY_LABELS = { rap: "RAP / TRAP", cars: "CARS", fight: "FIGHT", brand: "BRAND", reels: "REELS" };
+
+// Overlay animations per project type
+function MediaOverlay({ type, reducedMotion }: { type: string; reducedMotion: boolean }) {
+  if (reducedMotion) return null;
+
+  if (type === "graffiti") {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.15 }}
+        className="absolute inset-0 mix-blend-overlay"
+        style={{
+          backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(168,85,247,0.1) 10px, rgba(168,85,247,0.1) 20px)",
+        }}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  if (type === "motion-blur") {
+    return (
+      <motion.div
+        animate={{ x: [0, 4, -2, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0"
+        style={{ backdropFilter: "blur(1px)" }}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  if (type === "impact") {
+    return (
+      <motion.div
+        animate={{ opacity: [0, 0.15, 0] }}
+        transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+        className="absolute inset-0 bg-foreground"
+        aria-hidden="true"
+      />
+    );
+  }
+
+  if (type === "light-sweep") {
+    return (
+      <motion.div
+        animate={{ x: ["-100%", "200%"] }}
+        transition={{ duration: 4, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+        className="absolute inset-0 w-1/3"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)" }}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  return null;
+}
+
 function OptionGroup({
-  label,
-  options,
-  value,
-  onChange,
-  reducedMotion,
+  label, options, value, onChange, reducedMotion,
 }: {
   label: string;
   options: { id: string; label: string }[];
@@ -330,9 +338,7 @@ function OptionGroup({
 }) {
   return (
     <div>
-      <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-2">
-        {label}
-      </span>
+      <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-2">{label}</span>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
           <button
@@ -346,11 +352,7 @@ function OptionGroup({
             }`}
           >
             {value === opt.id && !reducedMotion && (
-              <motion.div
-                layoutId={`option-${label}`}
-                className="absolute inset-0 border border-accent bg-accent/5"
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              />
+              <motion.div layoutId={`option-${label}`} className="absolute inset-0 border border-accent bg-accent/5" transition={{ type: "spring", stiffness: 300, damping: 30 }} />
             )}
             <span className="relative">{opt.label}</span>
           </button>
