@@ -7,11 +7,11 @@ import { motion, AnimatePresence } from "framer-motion";
 const faqs = [
   {
     q: "How much does a project cost?",
-    a: "Starting from $1,500 for a half-day shoot with 1 edit. Pricing depends on scope, location, and deliverables. Reach out for a custom quote.",
+    a: "Starting from $300 for short-form reels. Use the Build Your Shoot calculator above for a custom estimate, or reach out for a quote.",
   },
   {
     q: "What's the typical turnaround time?",
-    a: "Standard is 5-7 business days for editing after the shoot. Rush delivery (48hrs) available for an additional fee.",
+    a: "Standard is 5-7 business days for editing after the shoot. Rush delivery (72h or 24h) available for an additional fee.",
   },
   {
     q: "Do I get the raw footage?",
@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     q: "How many revisions are included?",
-    a: "Depending on your package: 1-2 rounds for Starter/Pro, unlimited for Premium. Additional revisions are billed hourly.",
+    a: "Depends on your edit tier: 1 round for Basic, 2 for Pro, unlimited for Insane. Additional revisions billed hourly.",
   },
   {
     q: "Do you travel outside Toronto?",
@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: "What equipment do you use?",
-    a: "Cinema cameras (RED, Sony FX series), professional lighting, gimbal stabilizers, drones, and premium audio gear. Full kit depends on the project.",
+    a: "Sony FX3, A7S III, BMPCC 6K Pro, DJI RS gimbal, RODE wireless, Aputure lighting. Full cinema kit on every shoot.",
   },
 ];
 
@@ -36,49 +36,53 @@ export function FAQ() {
 
   return (
     <Section>
-      <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-        Questions
-      </span>
-      <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1 mb-12">
-        FAQ
-      </h2>
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-12">
+          <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
+            Questions
+          </span>
+          <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1">
+            FAQ
+          </h2>
+        </div>
 
-      <div className="max-w-2xl">
-        {faqs.map((faq, i) => (
-          <div key={i} className="border-b border-border">
-            <button
-              onClick={() => setOpenIndex(openIndex === i ? null : i)}
-              className="w-full flex items-center justify-between py-5 text-left cursor-pointer group"
-              aria-expanded={openIndex === i}
-            >
-              <span className="text-sm text-foreground group-hover:text-accent transition-colors pr-4">
-                {faq.q}
-              </span>
-              <span
-                className={`text-muted-foreground transition-transform duration-300 shrink-0 ${
-                  openIndex === i ? "rotate-45" : ""
-                }`}
+        <div>
+          {faqs.map((faq, i) => (
+            <div key={i} className="border-b border-border">
+              <button
+                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                className="w-full flex items-center justify-between py-6 text-left cursor-pointer group"
+                aria-expanded={openIndex === i}
               >
-                +
-              </span>
-            </button>
-            <AnimatePresence>
-              {openIndex === i && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
+                <span className="text-sm text-foreground group-hover:text-accent transition-colors pr-4">
+                  {faq.q}
+                </span>
+                <span
+                  className={`text-muted-foreground transition-transform duration-300 shrink-0 text-lg ${
+                    openIndex === i ? "rotate-45" : ""
+                  }`}
                 >
-                  <p className="text-sm text-muted-foreground pb-5 leading-relaxed">
-                    {faq.a}
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ))}
+                  +
+                </span>
+              </button>
+              <AnimatePresence>
+                {openIndex === i && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <p className="text-sm text-muted-foreground pb-6 leading-relaxed">
+                      {faq.a}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
       </div>
     </Section>
   );

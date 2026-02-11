@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Bebas_Neue } from "next/font/google";
+import { GraffitiLoader } from "@/components/graffiti-loader";
 import "./globals.css";
 
 const inter = Inter({
@@ -48,9 +49,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${bebas.variable}`}>
-      <body className="font-sans bg-background text-foreground overflow-x-hidden">
+    <html lang="en" className={`${inter.variable} ${bebas.variable} relative`}>
+      <body className="relative font-sans bg-background text-foreground overflow-x-hidden">
         <div className="noise-overlay" aria-hidden="true" />
+        <GraffitiLoader />
         {children}
       </body>
     </html>
