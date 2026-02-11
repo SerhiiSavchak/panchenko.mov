@@ -49,7 +49,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${bebas.variable}`}>
-      <body className="font-sans bg-background text-foreground overflow-x-hidden">
+      <body className="relative font-sans bg-background text-foreground overflow-x-hidden">
         <div className="noise-overlay" aria-hidden="true" />
         {children}
       </body>
