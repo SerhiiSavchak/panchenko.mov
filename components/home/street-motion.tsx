@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 
 const WORDS = ["RAP", "CARS", "FIGHT", "BRAND", "CINEMA"];
 
 export function StreetMotion() {
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
@@ -33,7 +33,7 @@ export function StreetMotion() {
           Street Motion
         </span>
 
-        <div className="relative">
+        <div className="relative h-[clamp(4rem,15vw,12rem)] w-full flex items-center justify-center">
           {WORDS.map((word, i) => (
             <MorphWord
               key={word}
@@ -47,14 +47,12 @@ export function StreetMotion() {
         </div>
 
         {/* Scroll progress indicator */}
-        <motion.div
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 w-px h-16 bg-border overflow-hidden"
-        >
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-px h-16 bg-border overflow-hidden">
           <motion.div
             className="w-full bg-accent"
             style={{ height: "100%", scaleY: scrollYProgress, transformOrigin: "top" }}
           />
-        </motion.div>
+        </div>
       </motion.div>
     </div>
   );
@@ -69,8 +67,8 @@ function MorphWord({
 }: {
   word: string;
   index: number;
-  progress: ReturnType<typeof useTransform>;
-  chromaShift: ReturnType<typeof useTransform>;
+  progress: MotionValue<number>;
+  chromaShift: MotionValue<number>;
   reducedMotion: boolean;
 }) {
   const opacity = useTransform(
@@ -88,22 +86,19 @@ function MorphWord({
     [index - 0.5, index, index + 0.5],
     [8, 0, 8]
   );
+  const filterVal = useTransform(blur, (b) => `blur(${b}px)`);
+  const negChroma = useTransform(chromaShift, (v) => -v);
 
   return (
     <motion.div
       style={
         reducedMotion
           ? { opacity }
-          : {
-              opacity,
-              scale,
-              filter: useTransform(blur, (b) => `blur(${b}px)`),
-            }
+          : { opacity, scale, filter: filterVal }
       }
       className="absolute inset-0 flex items-center justify-center"
     >
       <div className="relative">
-        {/* Chromatic aberration layers */}
         {!reducedMotion && (
           <>
             <motion.span
@@ -114,7 +109,7 @@ function MorphWord({
               {word}
             </motion.span>
             <motion.span
-              style={{ x: useTransform(chromaShift, (v) => -v) }}
+              style={{ x: negChroma }}
               className="absolute inset-0 font-display text-[clamp(4rem,15vw,12rem)] text-blue-500/20 mix-blend-screen"
               aria-hidden="true"
             >

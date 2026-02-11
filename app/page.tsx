@@ -48,7 +48,7 @@ export default function Home() {
     <>
       <ScrollProgress />
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
-      <main>
+      <main className="relative">
         <Hero onQuoteOpen={() => setQuoteOpen(true)} />
         <ProofStrip />
         <About />

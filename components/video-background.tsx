@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
-import { HERO_FALLBACKS } from "@/lib/media";
+import { REEL_VIDEOS } from "@/lib/media";
 
 interface VideoBackgroundProps {
   src: string;
@@ -21,8 +21,8 @@ export function VideoBackground({
   const [hasError, setHasError] = useState(false);
 
   const handleError = useCallback(() => {
-    if (videoSrc === src && HERO_FALLBACKS.length > 0) {
-      setVideoSrc(HERO_FALLBACKS[Math.floor(Math.random() * HERO_FALLBACKS.length)]);
+    if (videoSrc === src && REEL_VIDEOS.length > 0) {
+      setVideoSrc(REEL_VIDEOS[Math.floor(Math.random() * REEL_VIDEOS.length)]);
     } else {
       setHasError(true);
     }

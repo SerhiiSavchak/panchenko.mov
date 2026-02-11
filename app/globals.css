@@ -22,7 +22,12 @@
   border-color: var(--color-border);
 }
 
+html {
+  position: relative;
+}
+
 body {
+  position: relative;
   background-color: var(--color-background);
   color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;

@@ -49,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${bebas.variable}`}>
+    <html lang="en" className={`${inter.variable} ${bebas.variable} relative`}>
       <body className="relative font-sans bg-background text-foreground overflow-x-hidden">
         <div className="noise-overlay" aria-hidden="true" />
         <GraffitiLoader />
