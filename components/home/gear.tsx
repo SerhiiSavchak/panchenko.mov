@@ -1,8 +1,10 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { motion, useInView } from "framer-motion";
 import { Section } from "@/components/section";
+import Image from "next/image";
+import { GEAR_IMAGES, GEAR_VIDEOS } from "@/lib/media";
+import { useScrollReveal } from "@/lib/scroll-animate";
 
 const gear = [
   {
@@ -48,21 +50,14 @@ const gear = [
 ];
 
 export function Gear() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-  const [reducedMotion, setReducedMotion] = useState(false);
-
-  useEffect(() => {
-    setReducedMotion(
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
-  }, []);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useScrollReveal(ref, { once: true, rootMargin: "-80px 0px" });
 
   return (
     <Section>
-      <div className="md:flex md:gap-16">
-        {/* Sticky heading on desktop */}
-        <div className="md:w-1/3 md:sticky md:top-24 md:self-start mb-10 md:mb-0">
+      <div className={`md:flex md:gap-16 ${inView ? "section-in-view" : ""}`}>
+        {/* Sticky heading */}
+        <div className="md:w-1/3 md:sticky md:top-24 md:self-start mb-10 md:mb-0 gear-heading-reveal">
           <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
             Tools
           </span>
@@ -76,15 +71,16 @@ export function Gear() {
           </p>
         </div>
 
-        {/* Gear cards */}
-        <div ref={ref} className="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Gear cards - video default, image on hover */}
+        <div ref={ref} className="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-6">
           {gear.map((item, i) => (
             <GearCard
               key={item.name}
               item={item}
               index={i}
               inView={inView}
-              reducedMotion={reducedMotion}
+              imageSrc={GEAR_IMAGES[i % GEAR_IMAGES.length]}
+              videoSrc={GEAR_VIDEOS[i % GEAR_VIDEOS.length]}
             />
           ))}
         </div>
@@ -97,48 +93,75 @@ function GearCard({
   item,
   index,
   inView,
-  reducedMotion,
+  imageSrc,
+  videoSrc,
 }: {
   item: (typeof gear)[number];
   index: number;
   inView: boolean;
-  reducedMotion: boolean;
+  imageSrc: string;
+  videoSrc: string;
 }) {
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (reducedMotion) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 8;
-    setTilt({ x: -y, y: x });
-  };
-
-  const resetTilt = () => setTilt({ x: 0, y: 0 });
+  useEffect(() => {
+    const el = cardRef.current;
+    const video = videoRef.current;
+    if (!el || !video) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      },
+      { threshold: 0.2, rootMargin: "-40px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   return (
-    <motion.div
-      initial={reducedMotion ? {} : { opacity: 0, y: 30 }}
-      animate={inView ? { opacity: 1, y: 0 } : undefined}
-      transition={{ delay: index * 0.06, duration: 0.5 }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={resetTilt}
-      style={{
-        transform: `perspective(600px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-        transition: "transform 0.2s ease-out",
+    <div
+      ref={cardRef}
+      className={`group relative bg-card border border-border overflow-hidden hover:border-accent/40 transition-colors gear-card-reveal ${inView ? "gear-card-visible" : ""}`}
+      style={{ animationDelay: `${index * 70}ms` }}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        videoRef.current?.pause();
       }}
-      className="group relative bg-card border border-border p-5 hover:border-accent/40 transition-colors overflow-hidden"
+      onMouseLeave={() => {
+        setIsHovered(false);
+        videoRef.current?.play().catch(() => {});
+      }}
     >
-      {/* Neon glow accent */}
-      <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{
-          boxShadow: "inset 0 0 30px rgba(200,255,0,0.05)",
-        }}
-        aria-hidden="true"
-      />
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <video
+          ref={videoRef}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={imageSrc}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-400 group-hover:scale-105 ${
+            isHovered ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <source src={videoSrc} type="video/mp4" />
+        </video>
+        <Image
+          src={imageSrc}
+          alt={item.name}
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-400 ${
+            isHovered ? "opacity-100" : "opacity-0"
+          }`}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-80" />
+      </div>
 
-      <div className="relative">
+      <div className="p-5 relative">
         <span className="text-[10px] uppercase tracking-wider text-accent">
           {item.role}
         </span>
@@ -149,6 +172,6 @@ function GearCard({
           {item.desc}
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 interface BrandLogoProps {
   className?: string;
   size?: "sm" | "md" | "lg";
@@ -12,9 +10,8 @@ export function BrandLogo({ className = "", size = "md", animate = true }: Brand
   const sizes = { sm: "h-6", md: "h-8", lg: "h-12" };
 
   return (
-    <motion.div
-      className={`inline-flex items-center gap-1.5 group ${className}`}
-      whileHover={animate ? { scale: 1.02 } : undefined}
+    <div
+      className={`inline-flex items-center gap-1.5 group logo-graffiti ${animate ? "logo-hover" : ""} ${className}`}
     >
       {/* Camera/graffiti mark */}
       <svg
@@ -32,21 +29,9 @@ export function BrandLogo({ className = "", size = "md", animate = true }: Brand
         <rect x="8" y="5" width="6" height="3" rx="1" stroke="currentColor" strokeWidth="1" className="text-foreground/60" />
         {/* Rec dot */}
         <circle cx="24" cy="11" r="1.5" fill="var(--color-accent)" className="group-hover:animate-pulse" />
-        {/* Graffiti drip */}
-        <motion.line
-          x1="7" y1="26" x2="7" y2="30"
-          stroke="var(--color-accent)"
-          strokeWidth="1"
-          strokeLinecap="round"
-          className="opacity-40 group-hover:opacity-80 transition-opacity"
-        />
-        <motion.line
-          x1="25" y1="26" x2="25" y2="29"
-          stroke="var(--color-accent)"
-          strokeWidth="1"
-          strokeLinecap="round"
-          className="opacity-30 group-hover:opacity-60 transition-opacity"
-        />
+        {/* Graffiti drip effect */}
+        <line x1="7" y1="26" x2="7" y2="30" stroke="var(--color-accent)" strokeWidth="1" strokeLinecap="round" className="opacity-40 group-hover:opacity-80 transition-opacity" />
+        <line x1="25" y1="26" x2="25" y2="29" stroke="var(--color-accent)" strokeWidth="1" strokeLinecap="round" className="opacity-30 group-hover:opacity-60 transition-opacity" />
       </svg>
 
       {/* Text */}
@@ -58,6 +43,6 @@ export function BrandLogo({ className = "", size = "md", animate = true }: Brand
           .mov
         </span>
       </div>
-    </motion.div>
+    </div>
   );
 }

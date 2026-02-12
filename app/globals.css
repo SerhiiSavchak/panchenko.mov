@@ -5,14 +5,14 @@
   --color-foreground: #f0f0f0;
   --color-muted: #111111;
   --color-muted-foreground: #737373;
-  --color-accent: #a855f7;
+  --color-accent: #0ea5e9;
   --color-accent-foreground: #ffffff;
-  --color-accent-glow: #a855f7;
-  --color-accent-secondary: #3b82f6;
+  --color-accent-glow: #38bdf8;
+  --color-accent-secondary: #06b6d4;
   --color-card: #0a0a0a;
   --color-card-foreground: #f0f0f0;
   --color-border: #1e1e1e;
-  --color-ring: #a855f7;
+  --color-ring: #0ea5e9;
 
   --font-sans: var(--font-inter);
   --font-display: var(--font-bebas);
@@ -50,13 +50,13 @@ body {
   transform-origin: left;
 }
 
-/* Film grain overlay */
+/* Film grain overlay - cinematic street aesthetic */
 .noise-overlay {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 9998;
-  opacity: 0.03;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
 }
@@ -80,13 +80,34 @@ body {
   scrollbar-width: none;
 }
 
-/* Neon glow utility */
+/* Neon glow utility - electric blue */
 .neon-glow {
-  text-shadow: 0 0 7px rgba(168, 85, 247, 0.6), 0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.15);
+  text-shadow: 0 0 7px rgba(14, 165, 233, 0.6), 0 0 20px rgba(56, 189, 248, 0.3), 0 0 40px rgba(14, 165, 233, 0.15);
 }
 
 .neon-box-glow {
-  box-shadow: 0 0 15px rgba(168, 85, 247, 0.15), 0 0 30px rgba(168, 85, 247, 0.08), inset 0 0 15px rgba(168, 85, 247, 0.05);
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.15), 0 0 30px rgba(56, 189, 248, 0.08), inset 0 0 15px rgba(14, 165, 233, 0.05);
+}
+
+.logo-graffiti.logo-hover:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
+.lane-reveal {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
+.lane-reveal.lane-visible {
+  animation: lane-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes lane-reveal {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Scrollbar */
@@ -102,4 +123,225 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-muted-foreground);
+}
+
+/* Scroll reveal - CSS only, no Framer */
+@keyframes scroll-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.work-card-reveal {
+  opacity: 0;
+}
+
+.work-card-reveal.work-card-visible {
+  animation: scroll-reveal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.gear-heading-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.section-in-view .gear-heading-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gear-card-reveal {
+  opacity: 0;
+}
+
+.gear-card-reveal.gear-card-visible {
+  animation: scroll-reveal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.section-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  filter: blur(4px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    filter 0.8s ease;
+}
+
+.section-reveal.section-visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* Graffiti / street art dividers */
+.graffiti-divider {
+  position: relative;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  opacity: 0.4;
+}
+
+.graffiti-divider::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    rgba(14, 165, 233, 0.03) 2px,
+    rgba(14, 165, 233, 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+/* Street art texture overlay */
+.street-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  mix-blend-mode: overlay;
+}
+
+@keyframes about-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.about-photos {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+
+.about-photos.about-visible {
+  animation: about-reveal 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes about-line-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.about-line,
+.about-tags {
+  opacity: 0;
+}
+
+.about-line.about-visible,
+.about-tags.about-visible {
+  animation: about-line-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Graffiti loader */
+.graffiti-loader-exit {
+  animation: loader-fade-out 0.6s ease forwards;
+}
+
+@keyframes loader-fade-out {
+  to {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.graffiti-glow {
+  animation: graffiti-glow-pulse 1.5s ease;
+}
+
+@keyframes graffiti-glow-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+}
+
+.graffiti-logo-box {
+  animation: graffiti-logo-in 0.7s ease-out forwards;
+}
+
+@keyframes graffiti-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.graffiti-text {
+  animation: graffiti-stroke 1.4s ease-in-out 0.3s forwards;
+  stroke-dashoffset: 600;
+}
+
+@keyframes graffiti-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.graffiti-mov {
+  animation: graffiti-mov-in 0.5s ease-out 0.8s forwards;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+@keyframes graffiti-mov-in {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.graffiti-drip {
+  height: 0;
+}
+
+.graffiti-drip-1 {
+  animation: drip-1 0.8s ease 1.2s forwards;
+}
+
+.graffiti-drip-2 {
+  animation: drip-2 0.6s ease 1.4s forwards;
+}
+
+.graffiti-drip-3 {
+  animation: drip-3 0.7s ease 1.6s forwards;
+}
+
+@keyframes drip-1 {
+  to { height: 18px; }
+}
+
+@keyframes drip-2 {
+  to { height: 12px; }
+}
+
+@keyframes drip-3 {
+  to { height: 15px; }
 }

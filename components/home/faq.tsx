@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Section } from "@/components/section";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 
 const faqs = [
   {
@@ -33,37 +33,55 @@ const faqs = [
 
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
     <Section>
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
+      <div ref={ref} className="flex flex-col items-center">
+        <div className="w-full max-w-2xl text-center mb-12">
+          <motion.span
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5 }}
+            className="text-[11px] uppercase tracking-widest text-muted-foreground"
+          >
             Questions
-          </span>
-          <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1">
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="font-display text-5xl md:text-7xl text-foreground mt-1"
+          >
             FAQ
-          </h2>
+          </motion.h2>
         </div>
 
-        <div>
+        <div className="w-full max-w-2xl">
           {faqs.map((faq, i) => (
-            <div key={i} className="border-b border-border">
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 15 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.15 + i * 0.05, duration: 0.4 }}
+              className="border-b border-border"
+            >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="w-full flex items-center justify-between py-6 text-left cursor-pointer group"
+                className="w-full flex items-center justify-between py-6 text-left cursor-pointer group hover:bg-muted/30 transition-colors px-2 -mx-2 rounded"
                 aria-expanded={openIndex === i}
               >
-                <span className="text-sm text-foreground group-hover:text-accent transition-colors pr-4">
+                <span className="text-sm text-foreground group-hover:text-accent transition-colors pr-4 text-left">
                   {faq.q}
                 </span>
-                <span
-                  className={`text-muted-foreground transition-transform duration-300 shrink-0 text-lg ${
-                    openIndex === i ? "rotate-45" : ""
-                  }`}
+                <motion.span
+                  animate={{ rotate: openIndex === i ? 45 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-muted-foreground shrink-0 text-lg"
                 >
                   +
-                </span>
+                </motion.span>
               </button>
               <AnimatePresence>
                 {openIndex === i && (
@@ -71,16 +89,16 @@ export function FAQ() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
                     className="overflow-hidden"
                   >
-                    <p className="text-sm text-muted-foreground pb-6 leading-relaxed">
+                    <p className="text-sm text-muted-foreground pb-6 leading-relaxed pl-2">
                       {faq.a}
                     </p>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

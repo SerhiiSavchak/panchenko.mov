@@ -22,7 +22,6 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
-    layoutEffect: false,
   });
 
   const y = useTransform(scrollYProgress, [0, 1], [0, 150]);
@@ -141,7 +140,7 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="mt-4 text-xs uppercase tracking-widest text-accent neon-glow"
+          className="mt-4 text-xs uppercase tracking-widest text-accent"
         >
           {"Let\u2019s make something timeless."}
         </motion.p>

@@ -176,7 +176,7 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
               key={projectType}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="font-display text-3xl md:text-5xl text-accent neon-glow"
+              className="font-display text-3xl md:text-5xl text-accent"
             >
               {DISPLAY_LABELS[projectType as keyof typeof DISPLAY_LABELS] ?? projectType.toUpperCase()}
             </motion.span>
@@ -232,7 +232,7 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
                 key={`${estimate.min}-${estimate.max}`}
                 initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="font-display text-4xl md:text-5xl text-accent mt-2 neon-glow"
+                className="font-display text-4xl md:text-5xl text-accent mt-2"
               >
                 ${estimate.min.toLocaleString()} &ndash; ${estimate.max.toLocaleString()}
               </motion.div>
