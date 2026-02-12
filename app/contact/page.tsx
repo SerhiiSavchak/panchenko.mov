@@ -1,47 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ScrollProgress } from "@/components/scroll-progress";
 import { QuickQuoteModal } from "@/components/quick-quote-modal";
-
-const projectTypes = [
-  "Music Video",
-  "Brand Content",
-  "Car Shoot",
-  "Fight Coverage",
-  "Short-Form / Reels",
-  "Other",
-];
-
-const budgetRanges = [
-  "Under $1K",
-  "$1K - $3K",
-  "$3K - $5K",
-  "$5K - $10K",
-  "$10K+",
-  "Let's discuss",
-];
-
-const socials = [
-  {
-    label: "Instagram",
-    handle: "@panchenko.mov",
-    href: "https://instagram.com/panchenko.mov",
-  },
-  {
-    label: "Telegram",
-    handle: "@panchenko",
-    href: "https://t.me/panchenko",
-  },
-  {
-    label: "Email",
-    handle: "hello@panchenko.mov",
-    href: "mailto:hello@panchenko.mov",
-  },
-];
+import { FormField, Input, Textarea, Select, Button } from "@/components/ui";
+import { PROJECT_TYPES, BUDGET_RANGES, SOCIALS } from "@/data/shared";
 
 export default function ContactPage() {
   const [quoteOpen, setQuoteOpen] = useState(false);
@@ -58,11 +23,7 @@ export default function ContactPage() {
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
 
       <main className="pt-24 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
+        <div className="page-enter">
           <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
             Get In Touch
           </span>
@@ -72,16 +33,11 @@ export default function ContactPage() {
           <p className="text-sm text-muted-foreground max-w-lg mb-12 leading-relaxed">
             {"Got a project in mind? Let's talk. Fill out the form below or hit me up directly through socials. Based in Toronto, available worldwide."}
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
           {/* Form */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="lg:col-span-2"
-          >
+          <div className="page-enter-delay-1 lg:col-span-2">
             {submitted ? (
               <div className="border border-border p-12 text-center">
                 <h2 className="font-display text-3xl text-accent">
@@ -90,132 +46,78 @@ export default function ContactPage() {
                 <p className="text-muted-foreground mt-3 text-sm">
                   {"I'll get back to you within 24 hours. Check your DMs or inbox."}
                 </p>
-                <button
+                <Button
+                  variant="link"
                   onClick={() => setSubmitted(false)}
-                  className="mt-6 text-xs uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors border-b border-border hover:border-accent pb-1 cursor-pointer"
+                  className="mt-6 !p-0 !tracking-widest"
                 >
                   Send another
-                </button>
+                </Button>
               </div>
             ) : (
               <form
                 onSubmit={handleSubmit}
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
-                <div className="md:col-span-2">
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent transition-colors"
-                    placeholder="Your name"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent transition-colors"
-                    placeholder="your@email.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    IG / Telegram
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent transition-colors"
-                    placeholder="@handle"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Project Type *
-                  </label>
-                  <select
-                    required
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer"
-                  >
+                <FormField label="Name" required className="md:col-span-2">
+                  <Input type="text" required placeholder="Your name" />
+                </FormField>
+                <FormField label="Email" required>
+                  <Input type="email" required placeholder="your@email.com" />
+                </FormField>
+                <FormField label="IG / Telegram">
+                  <Input type="text" placeholder="@handle" />
+                </FormField>
+                <FormField label="Project Type" required>
+                  <Select required>
                     <option value="">Select type</option>
-                    {projectTypes.map((t) => (
+                    {PROJECT_TYPES.map((t) => (
                       <option key={t} value={t}>
                         {t}
                       </option>
                     ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Budget Range
-                  </label>
-                  <select className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer">
+                  </Select>
+                </FormField>
+                <FormField label="Budget Range">
+                  <Select>
                     <option value="">Select range</option>
-                    {budgetRanges.map((b) => (
+                    {BUDGET_RANGES.map((b) => (
                       <option key={b} value={b}>
                         {b}
                       </option>
                     ))}
-                  </select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Deadline
-                  </label>
-                  <input
+                  </Select>
+                </FormField>
+                <FormField label="Deadline" className="md:col-span-2">
+                  <Input
                     type="text"
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent transition-colors"
                     placeholder="e.g. March 2026, ASAP, Flexible"
                   />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Tell me about your project *
-                  </label>
-                  <textarea
+                </FormField>
+                <FormField label="Tell me about your project" required className="md:col-span-2">
+                  <Textarea
                     required
                     rows={5}
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent transition-colors resize-none"
                     placeholder="Describe your vision, references, goals..."
                   />
-                </div>
-
+                </FormField>
                 <div className="md:col-span-2">
-                  <button
-                    type="submit"
-                    className="w-full md:w-auto px-12 py-3 text-sm uppercase tracking-widest font-semibold bg-accent text-accent-foreground hover:bg-accent/90 transition-colors cursor-pointer"
-                  >
+                  <Button type="submit" className="w-full md:w-auto px-12">
                     Send Message
-                  </button>
+                  </Button>
                 </div>
               </form>
             )}
-          </motion.div>
+          </div>
 
           {/* Sidebar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="flex flex-col gap-8"
-          >
+          <div className="page-enter-delay-2 flex flex-col gap-8">
             <div>
               <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground mb-4">
                 Socials
               </h3>
               <div className="flex flex-col gap-3">
-                {socials.map((s) => (
+                {SOCIALS.map((s) => (
                   <a
                     key={s.label}
                     href={s.href}
@@ -253,7 +155,7 @@ export default function ContactPage() {
                 Fastest via Instagram DM
               </p>
             </div>
-          </motion.div>
+          </div>
         </div>
       </main>
 

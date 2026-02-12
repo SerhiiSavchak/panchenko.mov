@@ -1,8 +1,9 @@
 "use client";
 
 import { Section } from "@/components/section";
-import { motion, useInView } from "framer-motion";
+import { SectionHeader } from "@/components/ui";
 import { useRef } from "react";
+import { useScrollReveal } from "@/lib/scroll-animate";
 
 const testimonials = [
   {
@@ -27,25 +28,21 @@ const testimonials = [
 
 export function Testimonials() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useScrollReveal(ref, { once: true, rootMargin: "-80px 0px" });
 
   return (
     <Section>
-      <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-        What They Say
-      </span>
-      <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1 mb-12">
-        Clients
-      </h2>
+      <SectionHeader label="What They Say" title="Clients" />
 
-      <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div
+        ref={ref}
+        className={`grid grid-cols-1 md:grid-cols-3 gap-8 ${inView ? "scroll-reveal-visible" : ""}`}
+      >
         {testimonials.map((t, i) => (
-          <motion.blockquote
+          <blockquote
             key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: i * 0.15, duration: 0.5 }}
-            className="border-l border-border pl-6"
+            className="scroll-reveal-item border-l border-border pl-6"
+            style={{ animationDelay: `${i * 150}ms` }}
           >
             <p className="text-sm text-foreground leading-relaxed italic">
               {`"${t.quote}"`}
@@ -58,7 +55,7 @@ export function Testimonials() {
                 {t.role}
               </span>
             </footer>
-          </motion.blockquote>
+          </blockquote>
         ))}
       </div>
     </Section>

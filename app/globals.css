@@ -5,14 +5,14 @@
   --color-foreground: #f0f0f0;
   --color-muted: #111111;
   --color-muted-foreground: #737373;
-  --color-accent: #a855f7;
+  --color-accent: #0ea5e9;
   --color-accent-foreground: #ffffff;
-  --color-accent-glow: #a855f7;
-  --color-accent-secondary: #3b82f6;
+  --color-accent-glow: #38bdf8;
+  --color-accent-secondary: #06b6d4;
   --color-card: #0a0a0a;
   --color-card-foreground: #f0f0f0;
   --color-border: #1e1e1e;
-  --color-ring: #a855f7;
+  --color-ring: #0ea5e9;
 
   --font-sans: var(--font-inter);
   --font-display: var(--font-bebas);
@@ -39,36 +39,77 @@ body {
   color: var(--color-accent-foreground);
 }
 
-/* Scroll progress bar */
+/* Interactive elements - cursor, no text selection, focus-visible */
+button,
+a,
+select,
+[role="button"] {
+  cursor: pointer;
+}
+
+button,
+[role="button"] {
+  user-select: none;
+}
+
+button:focus,
+a:focus,
+select:focus,
+input:focus,
+textarea:focus,
+[role="button"]:focus {
+  outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Interactive cards - no text selection */
+.interactive-card {
+  cursor: pointer;
+  user-select: none;
+}
+
+.interactive-card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Decorative titles - no text selection */
+.interactive-no-select {
+  user-select: none;
+}
+
+/* Clickable overlay/backdrop (not button/a) */
+.interactive-area {
+  cursor: pointer;
+}
+
+.interactive-area:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Scroll progress bar — синий, сверху */
 .scroll-progress {
   position: fixed;
   top: 0;
   left: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-secondary));
+  right: 0;
+  height: 4px;
+  background: #0ea5e9;
   z-index: 9999;
   transform-origin: left;
-}
-
-/* Film grain overlay */
-.noise-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9998;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-}
-
-/* Glitch effect */
-@keyframes glitch {
-  0%, 100% { clip-path: inset(0 0 0 0); }
-  10% { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 0); }
-  20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, 0); }
-  30% { clip-path: inset(40% 0 40% 0); transform: translate(-1px, 0); }
-  40% { clip-path: inset(80% 0 5% 0); transform: translate(1px, 0); }
-  50% { clip-path: inset(10% 0 80% 0); transform: translate(0, 0); }
 }
 
 /* Hide scrollbar for reel rails */
@@ -80,13 +121,41 @@ body {
   scrollbar-width: none;
 }
 
-/* Neon glow utility */
+/* Neon glow utility - electric blue */
 .neon-glow {
-  text-shadow: 0 0 7px rgba(168, 85, 247, 0.6), 0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.15);
+  text-shadow: 0 0 7px rgba(14, 165, 233, 0.6), 0 0 20px rgba(56, 189, 248, 0.3), 0 0 40px rgba(14, 165, 233, 0.15);
 }
 
 .neon-box-glow {
-  box-shadow: 0 0 15px rgba(168, 85, 247, 0.15), 0 0 30px rgba(168, 85, 247, 0.08), inset 0 0 15px rgba(168, 85, 247, 0.05);
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.15), 0 0 30px rgba(56, 189, 248, 0.08), inset 0 0 15px rgba(14, 165, 233, 0.05);
+}
+
+/* Уголки объектива по углам — неон */
+.viewfinder-corner {
+  background: transparent !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: none;
+}
+
+.logo-graffiti.logo-hover:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
+.lane-reveal {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
+.lane-reveal.lane-visible {
+  animation: lane-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes lane-reveal {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Scrollbar */
@@ -102,4 +171,501 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-muted-foreground);
+}
+
+/* Scroll reveal - CSS only, no Framer */
+@keyframes scroll-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes scroll-reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scroll-reveal-up-lg {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scroll-reveal-up-xl {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger items: parent gets .scroll-reveal-visible when in view */
+.scroll-reveal-item {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.scroll-reveal-visible .scroll-reveal-item {
+  animation: scroll-reveal-up 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.scroll-reveal-item-lg {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.scroll-reveal-visible .scroll-reveal-item-lg {
+  animation: scroll-reveal-up-lg 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.scroll-reveal-item-xl {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.scroll-reveal-visible .scroll-reveal-item-xl {
+  animation: scroll-reveal-up-xl 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Page load animations - runs on first paint */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  opacity: 0;
+  animation: page-enter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.page-enter-delay-1 {
+  opacity: 0;
+  animation: page-enter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s forwards;
+}
+
+.page-enter-delay-2 {
+  opacity: 0;
+  animation: page-enter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s forwards;
+}
+
+/* Activation line - scale from left */
+.activate-line {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.activate-line.visible {
+  animation: scale-x-in 0.8s ease-out forwards;
+}
+
+@keyframes scale-x-in {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.panel-border-top {
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: scale-x-in 0.6s ease-out 0.2s forwards;
+}
+
+.panel-border-right {
+  transform: scaleY(0);
+  transform-origin: top;
+  animation: scale-y-in 0.4s ease-out 0.5s forwards;
+}
+
+.panel-border-bottom {
+  transform: scaleX(0);
+  transform-origin: right;
+  animation: scale-x-in 0.6s ease-out 0.7s forwards;
+}
+
+.panel-border-left {
+  transform: scaleY(0);
+  transform-origin: bottom;
+  animation: scale-y-in 0.4s ease-out 0.9s forwards;
+}
+
+@keyframes scale-y-in {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.label-fade-in {
+  animation: scroll-reveal-up 0.4s ease forwards;
+}
+
+/* Media overlay animations */
+@keyframes overlay-graffiti {
+  to { opacity: 0.15; }
+}
+
+@keyframes overlay-motion-blur {
+  0%, 100% { transform: translateX(0); }
+  33% { transform: translateX(4px); }
+  66% { transform: translateX(-2px); }
+}
+
+@keyframes overlay-impact {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.15; }
+}
+
+@keyframes overlay-light-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.overlay-graffiti {
+  animation: overlay-graffiti 0.5s ease forwards;
+}
+
+.overlay-motion-blur {
+  animation: overlay-motion-blur 3s ease-in-out infinite;
+}
+
+.overlay-impact {
+  animation: overlay-impact 2s ease infinite 1s;
+}
+
+.overlay-light-sweep {
+  animation: overlay-light-sweep 4s ease-in-out infinite 2s;
+}
+
+/* Accordion - CSS grid trick for height: auto */
+.accordion-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.accordion-content.open {
+  grid-template-rows: 1fr;
+}
+
+.accordion-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.work-card-reveal {
+  opacity: 0;
+}
+
+.work-card-reveal.work-card-visible {
+  animation: scroll-reveal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.gear-heading-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.section-in-view .gear-heading-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gear-card-reveal {
+  opacity: 0;
+}
+
+.gear-card-reveal.gear-card-visible {
+  animation: scroll-reveal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.section-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.section-reveal.section-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Graffiti / street art dividers */
+.graffiti-divider {
+  position: relative;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  opacity: 0.4;
+}
+
+.graffiti-divider::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    rgba(14, 165, 233, 0.03) 2px,
+    rgba(14, 165, 233, 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+@keyframes about-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.about-photos {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+
+.about-photos.about-visible {
+  animation: about-reveal 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes about-line-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.about-line,
+.about-tags {
+  opacity: 0;
+}
+
+.about-line.about-visible,
+.about-tags.about-visible {
+  animation: about-line-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Graffiti loader - premium layered, graffiti + camera, 1–2s */
+.graffiti-loader-exit {
+  animation: loader-fade-out 0.5s ease forwards;
+}
+
+@keyframes loader-fade-out {
+  to {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.graffiti-loader-glow {
+  animation: loader-glow 1.2s ease-out forwards;
+}
+
+@keyframes loader-glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+}
+
+/* Reusable logo animation - used in loader, can be reused in header */
+.animated-logo-box {
+  animation: logo-box-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+  transform: scale(0.9);
+  position: relative;
+}
+
+.animated-logo-box::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 35%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-accent) 40%, transparent),
+    transparent
+  );
+  animation: logo-shine 0.7s ease-out 0.95s forwards;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes logo-box-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animated-logo-camera {
+  animation: logo-camera-in 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) 0.05s forwards;
+  opacity: 0;
+  transform: translateX(-12px) scale(0.85);
+  transform-origin: left center;
+}
+
+@keyframes logo-camera-in {
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animated-logo-text {
+  animation: logo-stroke 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.25s forwards;
+  stroke-dashoffset: 600;
+}
+
+@keyframes logo-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes logo-shine {
+  0% {
+    opacity: 0;
+    transform: translateX(-80%);
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(320%);
+  }
+}
+
+.animated-logo-rec {
+  animation: logo-rec-pulse 0.5s ease 0.3s infinite;
+}
+
+@keyframes logo-rec-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+
+@keyframes logo-drip {
+  to {
+    stroke-dasharray: 20 20;
+  }
+}
+
+.animated-logo-drip-1 {
+  stroke-dasharray: 0 16;
+}
+
+.animated-logo-drip-2 {
+  stroke-dasharray: 0 12;
+}
+
+/* Drip fix: use height/opacity since SVG lines don't animate stroke-dasharray well for vertical lines */
+.animated-logo-drip-1 {
+  stroke-dasharray: unset;
+  animation: logo-drip-1 0.3s ease 0.85s forwards;
+  stroke-dashoffset: 0;
+  opacity: 0;
+}
+
+.animated-logo-drip-2 {
+  stroke-dasharray: unset;
+  animation: logo-drip-2 0.25s ease 0.95s forwards;
+  stroke-dashoffset: 0;
+  opacity: 0;
+}
+
+@keyframes logo-drip-1 {
+  to { opacity: 0.6; }
+}
+
+@keyframes logo-drip-2 {
+  to { opacity: 0.4; }
+}
+
+/* prefers-reduced-motion: shorten all animations */
+@media (prefers-reduced-motion: reduce) {
+  .graffiti-loader-exit {
+    animation-duration: 0.2s;
+  }
+
+  .graffiti-loader-glow {
+    animation: none;
+    opacity: 0.15;
+  }
+
+  .animated-logo-box {
+    animation: logo-box-in 0.15s ease forwards;
+  }
+
+  .animated-logo-camera {
+    animation: logo-camera-in 0.1s ease forwards;
+  }
+
+  .animated-logo-text {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .animated-logo-box::after {
+    animation: none;
+    opacity: 0;
+  }
+
+  .animated-logo-rec {
+    animation: none;
+  }
+
+  .animated-logo-drip-1,
+  .animated-logo-drip-2 {
+    animation: none;
+    opacity: 0.4;
+  }
 }

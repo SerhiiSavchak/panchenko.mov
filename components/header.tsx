@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 
 export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
@@ -36,8 +35,8 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
         )}
       >
         <div className="flex items-center justify-between px-4 md:px-8 lg:px-16 h-16">
-          <Link href="/" aria-label="Home">
-            <BrandLogo size="sm" />
+          <Link href="/" aria-label="Home" className="logo-graffiti logo-hover">
+            <BrandLogo variant="header" size="sm" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -49,14 +48,14 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
             </Link>
             <button
               onClick={onQuoteOpen}
-              className="px-5 py-2 text-xs uppercase tracking-widest bg-accent text-accent-foreground hover:bg-accent/90 transition-colors cursor-pointer"
+              className="px-5 py-2 text-xs uppercase tracking-widest bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
             >
               Book a Shoot
             </button>
           </nav>
 
           <button
-            className="md:hidden flex flex-col gap-1.5 p-2 cursor-pointer"
+            className="md:hidden flex flex-col gap-1.5 p-2"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
@@ -67,37 +66,57 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
         </div>
       </header>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-background flex flex-col items-center justify-center gap-8"
-          >
-            {[
-              { href: "/", label: "Home" },
-              { href: "/work", label: "Work" },
-              { href: "/contact", label: "Contact" },
-            ].map((item, i) => (
-              <motion.div key={item.href} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                <Link href={item.href} onClick={() => setMobileOpen(false)} className="font-display text-5xl text-foreground hover:text-accent transition-colors">
-                  {item.label}
-                </Link>
-              </motion.div>
-            ))}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <button onClick={() => { setMobileOpen(false); onQuoteOpen(); }} className="mt-4 px-8 py-3 text-sm uppercase tracking-widest bg-accent text-accent-foreground cursor-pointer">
-                Book a Shoot
-              </button>
-            </motion.div>
-          </motion.div>
+      {/* Mobile menu overlay - CSS transitions */}
+      <div
+        className={cn(
+          "md:hidden fixed inset-0 z-40 bg-background flex flex-col items-center justify-center gap-8 transition-opacity duration-300",
+          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
-      </AnimatePresence>
+        aria-hidden={!mobileOpen}
+      >
+        {[
+          { href: "/", label: "Home" },
+          { href: "/work", label: "Work" },
+          { href: "/contact", label: "Contact" },
+        ].map((item, i) => (
+          <div
+            key={item.href}
+            className={cn(
+              "transition-all duration-300",
+              mobileOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            )}
+            style={{ transitionDelay: mobileOpen ? `${i * 100}ms` : "0ms" }}
+          >
+            <Link
+              href={item.href}
+              onClick={() => setMobileOpen(false)}
+              className="font-display text-5xl text-foreground hover:text-accent transition-colors"
+            >
+              {item.label}
+            </Link>
+          </div>
+        ))}
+        <div
+          className={cn(
+            "transition-all duration-300",
+            mobileOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          )}
+          style={{ transitionDelay: mobileOpen ? "300ms" : "0ms" }}
+        >
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              onQuoteOpen();
+            }}
+            className="mt-4 px-8 py-3 text-sm uppercase tracking-widest bg-accent text-accent-foreground"
+          >
+            Book a Shoot
+          </button>
+        </div>
+      </div>
 
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-background/90 backdrop-blur-md">
-        <button onClick={onQuoteOpen} className="flex-1 py-3 text-xs uppercase tracking-widest font-semibold bg-accent text-accent-foreground cursor-pointer">
+        <button onClick={onQuoteOpen} className="flex-1 py-3 text-xs uppercase tracking-widest font-semibold bg-accent text-accent-foreground">
           Book
         </button>
         <Link href="/work" className="flex-1 py-3 text-xs uppercase tracking-widest font-semibold text-center text-foreground border-l border-border">

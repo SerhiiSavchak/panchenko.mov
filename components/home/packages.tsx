@@ -1,9 +1,10 @@
 "use client";
 
 import { Section } from "@/components/section";
+import { SectionHeader, Button } from "@/components/ui";
 import { MagneticButton } from "@/components/magnetic-button";
-import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { useScrollReveal } from "@/lib/scroll-animate";
 
 const tiers = [
   {
@@ -53,29 +54,25 @@ interface PackagesProps {
 
 export function Packages({ onQuoteOpen }: PackagesProps) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useScrollReveal(ref, { once: true, rootMargin: "-80px 0px" });
 
   return (
     <Section>
-      <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-        Investment
-      </span>
-      <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1 mb-12">
-        Packages
-      </h2>
+      <SectionHeader label="Investment" title="Packages" />
 
-      <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
+      <div
+        ref={ref}
+        className={`grid grid-cols-1 md:grid-cols-3 gap-px bg-border ${inView ? "scroll-reveal-visible" : ""}`}
+      >
         {tiers.map((tier, i) => (
-          <motion.div
+          <div
             key={tier.name}
-            initial={{ opacity: 0, y: 30 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: i * 0.1, duration: 0.5 }}
-            className={`p-6 md:p-8 flex flex-col ${
+            className={`scroll-reveal-item-lg p-6 md:p-8 flex flex-col ${
               tier.highlighted
                 ? "bg-muted border border-accent/20"
                 : "bg-background"
             }`}
+            style={{ animationDelay: `${i * 100}ms` }}
           >
             {tier.highlighted && (
               <span className="text-[10px] uppercase tracking-widest text-accent mb-3">
@@ -108,17 +105,14 @@ export function Packages({ onQuoteOpen }: PackagesProps) {
                 Get Started
               </MagneticButton>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       <div className="text-center mt-8">
-        <button
-          onClick={onQuoteOpen}
-          className="text-xs uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors border-b border-border hover:border-accent pb-1 cursor-pointer"
-        >
+        <Button variant="link" onClick={onQuoteOpen} className="!p-0 !tracking-widest">
           Need something custom? Get a quote
-        </button>
+        </Button>
       </div>
     </Section>
   );

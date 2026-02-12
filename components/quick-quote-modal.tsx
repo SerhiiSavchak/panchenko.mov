@@ -2,29 +2,13 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FormField, Input, Textarea, Select, Button } from "@/components/ui";
+import { PROJECT_TYPES, BUDGET_RANGES } from "@/data/shared";
 
 interface QuickQuoteModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const projectTypes = [
-  "Music Video",
-  "Brand Content",
-  "Car Shoot",
-  "Fight Coverage",
-  "Short-Form / Reels",
-  "Other",
-];
-
-const budgetRanges = [
-  "Under $1K",
-  "$1K - $3K",
-  "$3K - $5K",
-  "$5K - $10K",
-  "$10K+",
-  "Let's discuss",
-];
 
 export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
   const [submitted, setSubmitted] = useState(false);
@@ -46,7 +30,7 @@ export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-sm"
+            className="interactive-area fixed inset-0 z-[60] bg-background/80 backdrop-blur-sm"
             onClick={onClose}
           />
           <motion.div
@@ -62,7 +46,7 @@ export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
               </h2>
               <button
                 onClick={onClose}
-                className="text-muted-foreground hover:text-foreground transition-colors text-2xl leading-none cursor-pointer"
+                className="text-muted-foreground hover:text-foreground transition-colors text-2xl leading-none"
                 aria-label="Close"
               >
                 &times;
@@ -82,92 +66,47 @@ export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent transition-colors"
-                    placeholder="Your name"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Contact (IG / Telegram / Email)
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent transition-colors"
-                    placeholder="@handle or email"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Project Type
-                  </label>
-                  <select
-                    required
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer"
-                  >
+                <FormField label="Name" required>
+                  <Input type="text" required placeholder="Your name" />
+                </FormField>
+                <FormField label="Contact (IG / Telegram / Email)" required>
+                  <Input type="text" required placeholder="@handle or email" />
+                </FormField>
+                <FormField label="Project Type" required>
+                  <Select required>
                     <option value="">Select type</option>
-                    {projectTypes.map((t) => (
+                    {PROJECT_TYPES.map((t) => (
                       <option key={t} value={t}>
                         {t}
                       </option>
                     ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Budget Range
-                  </label>
-                  <select
-                    required
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer"
-                  >
+                  </Select>
+                </FormField>
+                <FormField label="Budget Range" required>
+                  <Select required>
                     <option value="">Select range</option>
-                    {budgetRanges.map((b) => (
+                    {BUDGET_RANGES.map((b) => (
                       <option key={b} value={b}>
                         {b}
                       </option>
                     ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Deadline
-                  </label>
-                  <input
+                  </Select>
+                </FormField>
+                <FormField label="Deadline">
+                  <Input
                     type="text"
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent transition-colors"
                     placeholder="e.g. March 2026, ASAP, Flexible"
                   />
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">
-                    Message
-                  </label>
-                  <textarea
+                </FormField>
+                <FormField label="Message">
+                  <Textarea
                     rows={3}
-                    className="w-full bg-muted border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent transition-colors resize-none"
                     placeholder="Brief description of your project..."
                   />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3 text-sm uppercase tracking-widest font-semibold bg-accent text-accent-foreground hover:bg-accent/90 transition-colors mt-2 cursor-pointer"
-                >
+                </FormField>
+                <Button type="submit" fullWidth className="mt-2">
                   Send Request
-                </button>
+                </Button>
               </form>
             )}
           </motion.div>

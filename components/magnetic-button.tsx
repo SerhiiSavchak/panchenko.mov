@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState, useEffect, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/lib/hooks";
 
 interface MagneticButtonProps {
   children: ReactNode;
@@ -21,15 +22,7 @@ export function MagneticButton({
 }: MagneticButtonProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [reducedMotion, setReducedMotion] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
+  const reducedMotion = useReducedMotion();
 
   const handleMouse = (e: React.MouseEvent) => {
     if (reducedMotion || !ref.current) return;
@@ -57,7 +50,7 @@ export function MagneticButton({
       animate={{ x: position.x, y: position.y }}
       transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
       className={cn(
-        "inline-flex items-center justify-center px-6 py-3 text-sm uppercase tracking-widest transition-colors rounded-none cursor-pointer",
+        "inline-flex items-center justify-center px-6 py-3 text-sm uppercase tracking-widest transition-colors rounded-none",
         baseStyles[variant],
         className
       )}

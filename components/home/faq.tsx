@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Section } from "@/components/section";
-import { motion, AnimatePresence } from "framer-motion";
+import { useScrollReveal } from "@/lib/scroll-animate";
 
 const faqs = [
   {
@@ -33,53 +33,61 @@ const faqs = [
 
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const ref = useRef(null);
+  const inView = useScrollReveal(ref, { once: true, rootMargin: "-80px 0px" });
 
   return (
     <Section>
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
+      <div ref={ref} className="flex flex-col items-center">
+        <div
+          className={`w-full max-w-2xl text-center mb-12 ${inView ? "scroll-reveal-visible" : ""}`}
+        >
+          <span
+            className="scroll-reveal-item text-[11px] uppercase tracking-widest text-muted-foreground block"
+            style={{ animationDelay: "0ms" }}
+          >
             Questions
           </span>
-          <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1">
+          <h2
+            className="scroll-reveal-item font-display text-5xl md:text-7xl text-foreground mt-1"
+            style={{ animationDelay: "100ms" }}
+          >
             FAQ
           </h2>
         </div>
 
-        <div>
+        <div className={`w-full max-w-2xl ${inView ? "scroll-reveal-visible" : ""}`}>
           {faqs.map((faq, i) => (
-            <div key={i} className="border-b border-border">
+            <div
+              key={i}
+              className="scroll-reveal-item border-b border-border"
+              style={{ animationDelay: `${150 + i * 50}ms` }}
+            >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="w-full flex items-center justify-between py-6 text-left cursor-pointer group"
+                className="w-full flex items-center justify-between py-6 text-left group hover:bg-muted/30 transition-colors px-2 -mx-2 rounded"
                 aria-expanded={openIndex === i}
               >
-                <span className="text-sm text-foreground group-hover:text-accent transition-colors pr-4">
+                <span className="text-sm text-foreground group-hover:text-accent transition-colors pr-4 text-left">
                   {faq.q}
                 </span>
                 <span
-                  className={`text-muted-foreground transition-transform duration-300 shrink-0 text-lg ${
+                  className={`text-muted-foreground shrink-0 text-lg transition-transform duration-300 ${
                     openIndex === i ? "rotate-45" : ""
                   }`}
                 >
                   +
                 </span>
               </button>
-              <AnimatePresence>
-                {openIndex === i && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
-                  >
-                    <p className="text-sm text-muted-foreground pb-6 leading-relaxed">
-                      {faq.a}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div
+                className={`accordion-content ${openIndex === i ? "open" : ""}`}
+              >
+                <div className="accordion-inner">
+                  <p className="text-sm text-muted-foreground pb-6 leading-relaxed pl-2">
+                    {faq.a}
+                  </p>
+                </div>
+              </div>
             </div>
           ))}
         </div>

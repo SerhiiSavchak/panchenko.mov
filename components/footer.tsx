@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border px-4 md:px-8 lg:px-16 py-8">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <BrandLogo size="sm" animate={false} />
+        <BrandLogo variant="static" size="sm" animate={false} />
         <nav className="flex items-center gap-6 text-xs uppercase tracking-widest text-muted-foreground">
           <Link href="/work" className="hover:text-accent transition-colors">Work</Link>
           <Link href="/contact" className="hover:text-accent transition-colors">Contact</Link>

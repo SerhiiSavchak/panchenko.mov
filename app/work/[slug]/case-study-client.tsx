@@ -1,19 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ScrollProgress } from "@/components/scroll-progress";
 import { QuickQuoteModal } from "@/components/quick-quote-modal";
 import { MagneticButton } from "@/components/magnetic-button";
-import { VideoInView } from "@/components/video-in-view";
+import { VideoPosterTap } from "@/components/video-poster-tap";
+import { useScrollReveal } from "@/lib/scroll-animate";
 import type { WorkItem } from "@/data/work";
 
 export function CaseStudyClient({ work }: { work: WorkItem }) {
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const detailsRef = useRef(null);
+  const galleryRef = useRef(null);
+  const detailsInView = useScrollReveal(detailsRef, { once: true });
+  const galleryInView = useScrollReveal(galleryRef, { once: true });
 
   return (
     <>
@@ -22,7 +26,7 @@ export function CaseStudyClient({ work }: { work: WorkItem }) {
 
       <main className="pt-24 pb-16 md:pb-24">
         <div className="px-4 md:px-8 lg:px-16">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <div className="page-enter">
             <Link href="/work" className="text-xs uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">
               &larr; Back to Work
             </Link>
@@ -33,53 +37,56 @@ export function CaseStudyClient({ work }: { work: WorkItem }) {
               </div>
               <span className="font-display text-2xl text-muted-foreground">{work.year}</span>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* Preview video */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 0.8 }} className="px-4 md:px-8 lg:px-16 mb-12">
-          <div className="relative aspect-video bg-muted overflow-hidden">
-            <VideoInView src={work.previewVideo} poster={work.thumbnail} className="w-full h-full object-cover" />
-          </div>
-        </motion.div>
+        <div className="page-enter-delay-1 px-4 md:px-8 lg:px-16 mb-12">
+          <VideoPosterTap
+            src={work.previewVideo}
+            poster={work.thumbnail}
+            alt={work.title}
+            aspectRatio="16/9"
+          />
+        </div>
 
         {/* Details */}
-        <div className="px-4 md:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+        <div
+          ref={detailsRef}
+          className={`px-4 md:px-8 lg:px-16 grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 ${detailsInView ? "scroll-reveal-visible" : ""}`}
+        >
+          <div className="scroll-reveal-item" style={{ animationDelay: "0ms" }}>
             <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">About</h3>
             <p className="text-sm text-foreground leading-relaxed">{work.shortDesc}</p>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
+          </div>
+          <div className="scroll-reveal-item" style={{ animationDelay: "100ms" }}>
             <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">Services</h3>
             <ul className="flex flex-col gap-1">
               {work.services.map((s) => (
                 <li key={s} className="text-sm text-foreground flex items-center gap-2"><span className="text-accent">+</span>{s}</li>
               ))}
             </ul>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
+          </div>
+          <div className="scroll-reveal-item" style={{ animationDelay: "200ms" }}>
             <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">Results</h3>
             <p className="text-sm text-accent font-semibold">{work.results}</p>
             <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground mt-6 mb-3">Credits</h3>
             <p className="text-sm text-muted-foreground">{work.credits}</p>
-          </motion.div>
+          </div>
         </div>
 
         {/* Gallery */}
-        <div className="px-4 md:px-8 lg:px-16 mb-16">
+        <div ref={galleryRef} className="px-4 md:px-8 lg:px-16 mb-16">
           <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground mb-6">Gallery</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${galleryInView ? "scroll-reveal-visible" : ""}`}>
             {work.gallery.map((img, i) => (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative aspect-video bg-muted overflow-hidden"
+                className="scroll-reveal-item relative aspect-video bg-muted overflow-hidden"
+                style={{ animationDelay: `${i * 100}ms` }}
               >
-                <Image src={img} alt={`${work.title} gallery ${i + 1}`} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
-              </motion.div>
+                <Image src={img} alt={`${work.title} gallery ${i + 1}`} fill sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" className="object-cover" />
+              </div>
             ))}
           </div>
         </div>
