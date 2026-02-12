@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
+import { useReducedMotion } from "@/lib/hooks";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/magnetic-button";
 import { HERO_THEMES, type HeroThemeKey } from "@/lib/media";
@@ -28,14 +29,10 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const reducedMotion = useReducedMotion();
   const [wordIndex, setWordIndex] = useState(0);
   const currentKey = CYCLING_WORDS[wordIndex];
   const theme = HERO_THEMES[currentKey];
-
-  useEffect(() => {
-    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
 
   // Cycle words every 2.5s
   useEffect(() => {
@@ -76,8 +73,6 @@ export function Hero({ onQuoteOpen }: HeroProps) {
         </AnimatePresence>
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-background/65" aria-hidden="true" />
-        {/* Film grain */}
-        <div className="absolute inset-0 noise-overlay opacity-[0.04]" aria-hidden="true" />
       </motion.div>
 
       <motion.div
@@ -112,9 +107,9 @@ export function Hero({ onQuoteOpen }: HeroProps) {
             <AnimatePresence mode="wait">
               <motion.span
                 key={DISPLAY_WORDS[currentKey]}
-                initial={reducedMotion ? {} : { opacity: 0, y: 20, filter: "blur(8px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={reducedMotion ? {} : { opacity: 0, y: -20, filter: "blur(8px)" }}
+                initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reducedMotion ? {} : { opacity: 0, y: -20 }}
                 transition={{ duration: 0.4 }}
                 className="inline-block neon-glow"
               >
@@ -175,23 +170,44 @@ export function Hero({ onQuoteOpen }: HeroProps) {
 
 function HeroVideo({ src, poster }: { src: string; poster: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleCanPlay = useCallback(() => {
     videoRef.current?.play().catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const el = containerRef.current;
+    const video = videoRef.current;
+    if (!el || !video) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting && e.intersectionRatio > 0.3) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: [0, 0.3, 0.5, 1], rootMargin: "-50px 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   return (
-    <video
-      ref={videoRef}
-      muted
-      loop
-      playsInline
-      preload="auto"
-      poster={poster}
-      onCanPlay={handleCanPlay}
-      className="absolute inset-0 w-full h-full object-cover"
-    >
-      <source src={src} type="video/mp4" />
-    </video>
+    <div ref={containerRef} className="absolute inset-0">
+      <video
+        ref={videoRef}
+        muted
+        loop
+        playsInline
+        preload="auto"
+        poster={poster}
+        onCanPlay={handleCanPlay}
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src={src} type="video/mp4" />
+      </video>
+    </div>
   );
 }

@@ -1,25 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { BrandLogo } from "@/components/brand-logo";
+import { useReducedMotion } from "@/lib/hooks";
 
 export function GraffitiLoader() {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
-
-  useEffect(() => {
-    const hideAt = reducedMotion ? 400 : 2400;
-    const timer = setTimeout(() => setVisible(false), hideAt);
+    const duration = reducedMotion ? 400 : 1800;
+    const timer = setTimeout(() => setVisible(false), duration);
     return () => clearTimeout(timer);
   }, [reducedMotion]);
 
   useEffect(() => {
     if (!visible) {
-      const unmount = setTimeout(() => setMounted(false), 600);
+      const unmount = setTimeout(() => setMounted(false), 500);
       return () => clearTimeout(unmount);
     }
   }, [visible]);
@@ -28,52 +26,25 @@ export function GraffitiLoader() {
 
   return (
     <div
-      className={`graffiti-loader fixed inset-0 z-[100] bg-background flex items-center justify-center ${!visible ? "graffiti-loader-exit" : ""}`}
+      className={`graffiti-loader fixed inset-0 z-[100] flex items-center justify-center overflow-hidden ${!visible ? "graffiti-loader-exit" : ""}`}
     >
-      <div className="relative">
-        <div
-          className="absolute -inset-16 bg-accent/10 blur-3xl rounded-full graffiti-glow"
-          aria-hidden="true"
-        />
-        <div className="relative graffiti-logo-box">
-          <svg
-            viewBox="0 0 500 80"
-            className="w-72 md:w-[28rem] h-auto relative"
-            aria-label="panchenko.mov"
-          >
-            {/* Graffiti drip elements - street art style */}
-            {!reducedMotion && (
-              <>
-                <rect x="78" y="55" width="2" fill="var(--color-accent)" className="graffiti-drip graffiti-drip-1" />
-                <rect x="248" y="55" width="2" fill="var(--color-foreground)" className="graffiti-drip graffiti-drip-2" />
-                <rect x="420" y="55" width="2" fill="var(--color-accent)" className="graffiti-drip graffiti-drip-3" />
-              </>
-            )}
-            <text
-              x="10"
-              y="48"
-              fontSize="52"
-              fill="var(--color-foreground)"
-              style={{ fontFamily: "var(--font-display)" }}
-              className="graffiti-text"
-              strokeDasharray={600}
-              stroke="var(--color-foreground)"
-              strokeWidth="0.5"
-            >
-              panchenko
-            </text>
-            <text
-              x="365"
-              y="48"
-              fontSize="52"
-              fill="var(--color-accent)"
-              style={{ fontFamily: "var(--font-display)" }}
-              className="graffiti-mov"
-            >
-              .mov
-            </text>
-          </svg>
-        </div>
+      {/* Layered background */}
+      <div className="absolute inset-0 bg-background" aria-hidden />
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        }}
+        aria-hidden
+      />
+      <div
+        className="absolute -inset-24 bg-accent/8 blur-[100px] rounded-full graffiti-loader-glow"
+        aria-hidden
+      />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center w-full">
+        <BrandLogo variant="loader" className="mx-auto" />
       </div>
     </div>
   );

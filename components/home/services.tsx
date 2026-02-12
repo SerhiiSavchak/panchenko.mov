@@ -1,8 +1,9 @@
 "use client";
 
 import { Section } from "@/components/section";
-import { motion, useInView } from "framer-motion";
+import { SectionHeader } from "@/components/ui";
 import { useRef } from "react";
+import { useScrollReveal } from "@/lib/scroll-animate";
 
 const services = [
   {
@@ -33,25 +34,21 @@ const services = [
 
 export function Services() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useScrollReveal(ref, { once: true, rootMargin: "-80px 0px" });
 
   return (
     <Section>
-      <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-        What I Do
-      </span>
-      <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1 mb-12">
-        Services
-      </h2>
+      <SectionHeader label="What I Do" title="Services" />
 
-      <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
+      <div
+        ref={ref}
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border ${inView ? "scroll-reveal-visible" : ""}`}
+      >
         {services.map((service, i) => (
-          <motion.div
+          <div
             key={service.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: i * 0.08, duration: 0.5 }}
-            className="bg-background p-6 md:p-8 group hover:bg-muted transition-colors"
+            className="scroll-reveal-item bg-background p-6 md:p-8 group hover:bg-muted transition-colors"
+            style={{ animationDelay: `${i * 80}ms` }}
           >
             <h3 className="font-display text-2xl text-foreground group-hover:text-accent transition-colors">
               {service.title}
@@ -59,7 +56,7 @@ export function Services() {
             <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
               {service.desc}
             </p>
-          </motion.div>
+          </div>
         ))}
       </div>
     </Section>

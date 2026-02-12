@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Section } from "@/components/section";
-import { motion, AnimatePresence, useInView } from "framer-motion";
+import { useScrollReveal } from "@/lib/scroll-animate";
 
 const faqs = [
   {
@@ -34,71 +34,61 @@ const faqs = [
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useScrollReveal(ref, { once: true, rootMargin: "-80px 0px" });
 
   return (
     <Section>
       <div ref={ref} className="flex flex-col items-center">
-        <div className="w-full max-w-2xl text-center mb-12">
-          <motion.span
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-            className="text-[11px] uppercase tracking-widest text-muted-foreground"
+        <div
+          className={`w-full max-w-2xl text-center mb-12 ${inView ? "scroll-reveal-visible" : ""}`}
+        >
+          <span
+            className="scroll-reveal-item text-[11px] uppercase tracking-widest text-muted-foreground block"
+            style={{ animationDelay: "0ms" }}
           >
             Questions
-          </motion.span>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="font-display text-5xl md:text-7xl text-foreground mt-1"
+          </span>
+          <h2
+            className="scroll-reveal-item font-display text-5xl md:text-7xl text-foreground mt-1"
+            style={{ animationDelay: "100ms" }}
           >
             FAQ
-          </motion.h2>
+          </h2>
         </div>
 
-        <div className="w-full max-w-2xl">
+        <div className={`w-full max-w-2xl ${inView ? "scroll-reveal-visible" : ""}`}>
           {faqs.map((faq, i) => (
-            <motion.div
+            <div
               key={i}
-              initial={{ opacity: 0, y: 15 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.15 + i * 0.05, duration: 0.4 }}
-              className="border-b border-border"
+              className="scroll-reveal-item border-b border-border"
+              style={{ animationDelay: `${150 + i * 50}ms` }}
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="w-full flex items-center justify-between py-6 text-left cursor-pointer group hover:bg-muted/30 transition-colors px-2 -mx-2 rounded"
+                className="w-full flex items-center justify-between py-6 text-left group hover:bg-muted/30 transition-colors px-2 -mx-2 rounded"
                 aria-expanded={openIndex === i}
               >
                 <span className="text-sm text-foreground group-hover:text-accent transition-colors pr-4 text-left">
                   {faq.q}
                 </span>
-                <motion.span
-                  animate={{ rotate: openIndex === i ? 45 : 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="text-muted-foreground shrink-0 text-lg"
+                <span
+                  className={`text-muted-foreground shrink-0 text-lg transition-transform duration-300 ${
+                    openIndex === i ? "rotate-45" : ""
+                  }`}
                 >
                   +
-                </motion.span>
+                </span>
               </button>
-              <AnimatePresence>
-                {openIndex === i && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="overflow-hidden"
-                  >
-                    <p className="text-sm text-muted-foreground pb-6 leading-relaxed pl-2">
-                      {faq.a}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+              <div
+                className={`accordion-content ${openIndex === i ? "open" : ""}`}
+              >
+                <div className="accordion-inner">
+                  <p className="text-sm text-muted-foreground pb-6 leading-relaxed pl-2">
+                    {faq.a}
+                  </p>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>

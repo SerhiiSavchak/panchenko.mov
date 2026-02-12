@@ -1,7 +1,8 @@
 "use client";
 
 import { Section } from "@/components/section";
-import { VideoInView } from "@/components/video-in-view";
+import { SectionHeader } from "@/components/ui";
+import { VideoPosterHover } from "@/components/video-poster-hover";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { SIGNATURE_LANE_VIDEOS } from "@/lib/media";
@@ -17,6 +18,7 @@ const lanes = [
 export function SignatureLanes() {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -31,12 +33,7 @@ export function SignatureLanes() {
 
   return (
     <Section>
-      <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-        Signature Lanes
-      </span>
-      <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1 mb-10">
-        What I Shoot
-      </h2>
+      <SectionHeader label="Signature Lanes" title="What I Shoot" className="mb-10" />
 
       <div ref={ref} className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide">
         {lanes.map((lane, i) => (
@@ -45,15 +42,23 @@ export function SignatureLanes() {
             className={`snap-start shrink-0 w-56 md:w-72 lane-reveal ${inView ? "lane-visible" : ""}`}
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            <Link href={`/work?category=${lane.category}`} className="group block">
-              <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-                <VideoInView
-                  src={lane.video}
-                  fallbackIndex={i}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            <Link
+              href={`/work?category=${lane.category}`}
+              className="interactive-card group block"
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              <div className="relative aspect-[3/4] overflow-hidden bg-muted group-hover:scale-105 transition-transform duration-700">
+                <VideoPosterHover
+                  src={lane.video.video}
+                  poster={lane.video.poster}
+                  alt={lane.title}
+                  aspectRatio="3/4"
+                  isActive={hoveredIndex === i}
+                  fill
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                <h3 className="absolute bottom-4 left-4 font-display text-2xl text-foreground group-hover:text-accent transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
+                <h3 className="absolute bottom-4 left-4 font-display text-2xl text-foreground group-hover:text-accent transition-colors z-10">
                   {lane.title}
                 </h3>
               </div>

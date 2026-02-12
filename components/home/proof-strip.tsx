@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { useScrollReveal } from "@/lib/scroll-animate";
 
 const stats = [
   { value: "50+", label: "Projects" },
@@ -12,21 +12,19 @@ const stats = [
 
 export function ProofStrip() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-50px" });
+  const inView = useScrollReveal(ref, { once: true, rootMargin: "-50px 0px" });
 
   return (
     <div
       ref={ref}
-      className="border-y border-border py-8 px-4 md:px-8 lg:px-16"
+      className={`border-y border-border py-8 px-4 md:px-8 lg:px-16 ${inView ? "scroll-reveal-visible" : ""}`}
     >
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
         {stats.map((stat, i) => (
-          <motion.div
+          <div
             key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: i * 0.1, duration: 0.5 }}
-            className="text-center"
+            className="scroll-reveal-item text-center"
+            style={{ animationDelay: `${i * 100}ms` }}
           >
             <div className="font-display text-3xl md:text-4xl text-accent">
               {stat.value}
@@ -34,7 +32,7 @@ export function ProofStrip() {
             <div className="text-[11px] uppercase tracking-widest text-muted-foreground mt-1">
               {stat.label}
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     </div>

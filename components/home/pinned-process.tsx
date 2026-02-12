@@ -1,6 +1,7 @@
 "use client";
 
 import { Section } from "@/components/section";
+import { SectionHeader } from "@/components/ui";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
@@ -41,12 +42,7 @@ export function PinnedProcess() {
 
   return (
     <Section>
-      <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-        How It Works
-      </span>
-      <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1 mb-12">
-        Process
-      </h2>
+      <SectionHeader label="How It Works" title="Process" />
 
       <div ref={containerRef} className="relative">
         {/* Desktop: sticky timeline */}

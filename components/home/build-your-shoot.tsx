@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useRef, useMemo, useEffect } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useState, useRef, useMemo } from "react";
+import { useReducedMotion } from "@/lib/hooks";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Section } from "@/components/section";
+import { SectionHeader } from "@/components/ui";
 import { CONSTRUCTOR_MEDIA } from "@/lib/media";
+import { useScrollReveal } from "@/lib/scroll-animate";
 
 const PROJECT_TYPES = [
   { id: "rap", label: "Rap / Trap", min: 650, max: 950 },
@@ -47,13 +50,9 @@ interface BuildYourShootProps {
 
 export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const inView = useScrollReveal(ref, { once: true, rootMargin: "-60px 0px" });
 
-  const [reducedMotion, setReducedMotion] = useState(false);
-  useEffect(() => {
-    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
-
+  const reducedMotion = useReducedMotion();
   const [projectType, setProjectType] = useState<string>("rap");
   const [editTier, setEditTier] = useState<string>("basic");
   const [team, setTeam] = useState<string>("solo");
@@ -104,15 +103,11 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
     <Section id="build-your-shoot">
       <div ref={ref}>
         {/* Neon activation line */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={inView ? { scaleX: 1 } : undefined}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="h-px bg-gradient-to-r from-accent to-accent-secondary mb-10 origin-left"
+        <div
+          className={`h-px bg-gradient-to-r from-accent to-accent-secondary mb-10 activate-line ${inView ? "visible" : ""}`}
         />
 
-        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">Interactive</span>
-        <h2 className="font-display text-5xl md:text-7xl text-foreground mt-1 mb-6">Build Your Shoot</h2>
+        <SectionHeader label="Interactive" title="Build Your Shoot" className="mb-6" />
 
         {/* Dynamic Media Panel */}
         <div className="relative mb-12 aspect-[21/9] overflow-hidden rounded-sm border border-border neon-box-glow">
@@ -127,11 +122,11 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
             >
               <Image
                 src={media.image}
-                alt={`${projectType} preview`}
+                alt="Behind the scenes — epic film production"
                 fill
                 sizes="(max-width: 768px) 100vw, 80vw"
-                className="object-cover"
-                priority={false}
+                loading="lazy"
+                className="object-cover object-center"
               />
               {/* Overlay per type */}
               <MediaOverlay type={media.overlay} reducedMotion={reducedMotion} />
@@ -143,43 +138,21 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
           {/* Panel power-on animation */}
           {inView && !reducedMotion && (
             <>
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="absolute top-0 left-0 right-0 h-px bg-accent/60 origin-left"
-              />
-              <motion.div
-                initial={{ scaleY: 0 }}
-                animate={{ scaleY: 1 }}
-                transition={{ duration: 0.4, delay: 0.5 }}
-                className="absolute top-0 right-0 bottom-0 w-px bg-accent/40 origin-top"
-              />
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.6, delay: 0.7 }}
-                className="absolute bottom-0 left-0 right-0 h-px bg-accent/60 origin-right"
-              />
-              <motion.div
-                initial={{ scaleY: 0 }}
-                animate={{ scaleY: 1 }}
-                transition={{ duration: 0.4, delay: 0.9 }}
-                className="absolute top-0 left-0 bottom-0 w-px bg-accent/40 origin-bottom"
-              />
+              <div className="absolute top-0 left-0 right-0 h-px bg-accent/60 panel-border-top" />
+              <div className="absolute top-0 right-0 bottom-0 w-px bg-accent/40 panel-border-right" />
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-accent/60 panel-border-bottom" />
+              <div className="absolute top-0 left-0 bottom-0 w-px bg-accent/40 panel-border-left" />
             </>
           )}
 
           {/* Current type label */}
           <div className="absolute bottom-4 left-4 z-10">
-            <motion.span
+            <span
               key={projectType}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="font-display text-3xl md:text-5xl text-accent"
+              className="font-display text-3xl md:text-5xl text-accent label-fade-in block"
             >
               {DISPLAY_LABELS[projectType as keyof typeof DISPLAY_LABELS] ?? projectType.toUpperCase()}
-            </motion.span>
+            </span>
           </div>
         </div>
 
@@ -195,9 +168,9 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
             <div>
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-2">Extra Hours (2h included)</span>
               <div className="flex items-center gap-4">
-                <button type="button" onClick={() => setExtraHours(Math.max(0, extraHours - 1))} className="w-10 h-10 border border-border text-foreground hover:border-accent hover:text-accent transition-colors flex items-center justify-center cursor-pointer" aria-label="Decrease hours">-</button>
+                <button type="button" onClick={() => setExtraHours(Math.max(0, extraHours - 1))} className="w-10 h-10 border border-border text-foreground hover:border-accent hover:text-accent transition-colors flex items-center justify-center" aria-label="Decrease hours">-</button>
                 <span className="font-display text-2xl text-accent w-8 text-center">{extraHours}</span>
-                <button type="button" onClick={() => setExtraHours(extraHours + 1)} className="w-10 h-10 border border-border text-foreground hover:border-accent hover:text-accent transition-colors flex items-center justify-center cursor-pointer" aria-label="Increase hours">+</button>
+                <button type="button" onClick={() => setExtraHours(extraHours + 1)} className="w-10 h-10 border border-border text-foreground hover:border-accent hover:text-accent transition-colors flex items-center justify-center" aria-label="Increase hours">+</button>
               </div>
             </div>
 
@@ -210,7 +183,7 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
                     key={ao.id}
                     type="button"
                     onClick={() => toggleAddOn(ao.id)}
-                    className={`px-4 py-2 text-xs uppercase tracking-wider border transition-colors cursor-pointer ${
+                    className={`px-4 py-2 text-xs uppercase tracking-wider border transition-colors ${
                       addOns.has(ao.id)
                         ? "border-accent bg-accent/10 text-accent"
                         : "border-border text-muted-foreground hover:border-foreground/30"
@@ -228,14 +201,12 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
           <div className="lg:w-1/2 lg:sticky lg:top-24 lg:self-start">
             <div className="border border-border bg-card p-6 md:p-8 neon-box-glow">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Estimated Range</span>
-              <motion.div
+              <div
                 key={`${estimate.min}-${estimate.max}`}
-                initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="font-display text-4xl md:text-5xl text-accent mt-2"
+                className={`font-display text-4xl md:text-5xl text-accent mt-2 ${!reducedMotion ? "label-fade-in" : ""}`}
               >
                 ${estimate.min.toLocaleString()} &ndash; ${estimate.max.toLocaleString()}
-              </motion.div>
+              </div>
               <p className="text-xs text-muted-foreground mt-1">CAD, before tax</p>
 
               <div className="mt-6 pt-6 border-t border-border">
@@ -257,7 +228,7 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
               <button
                 type="button"
                 onClick={onQuoteOpen}
-                className="w-full mt-8 py-3 text-sm uppercase tracking-widest font-semibold bg-accent text-accent-foreground hover:bg-accent/90 transition-colors cursor-pointer"
+                className="w-full mt-8 py-3 text-sm uppercase tracking-widest font-semibold bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
               >
                 Get This Quote
               </button>
@@ -271,16 +242,14 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
 
 const DISPLAY_LABELS = { rap: "RAP / TRAP", cars: "CARS", fight: "FIGHT", brand: "BRAND", reels: "REELS" };
 
-// Overlay animations per project type
+// Overlay animations per project type - CSS only
 function MediaOverlay({ type, reducedMotion }: { type: string; reducedMotion: boolean }) {
   if (reducedMotion) return null;
 
   if (type === "graffiti") {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.15 }}
-        className="absolute inset-0 mix-blend-overlay"
+      <div
+        className="absolute inset-0 mix-blend-overlay overlay-graffiti opacity-0"
         style={{
           backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(168,85,247,0.1) 10px, rgba(168,85,247,0.1) 20px)",
         }}
@@ -290,34 +259,17 @@ function MediaOverlay({ type, reducedMotion }: { type: string; reducedMotion: bo
   }
 
   if (type === "motion-blur") {
-    return (
-      <motion.div
-        animate={{ x: [0, 4, -2, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute inset-0"
-        style={{ backdropFilter: "blur(1px)" }}
-        aria-hidden="true"
-      />
-    );
+    return <div className="absolute inset-0 overlay-motion-blur" aria-hidden="true" />;
   }
 
   if (type === "impact") {
-    return (
-      <motion.div
-        animate={{ opacity: [0, 0.15, 0] }}
-        transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-        className="absolute inset-0 bg-foreground"
-        aria-hidden="true"
-      />
-    );
+    return <div className="absolute inset-0 bg-foreground overlay-impact opacity-0" aria-hidden="true" />;
   }
 
   if (type === "light-sweep") {
     return (
-      <motion.div
-        animate={{ x: ["-100%", "200%"] }}
-        transition={{ duration: 4, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
-        className="absolute inset-0 w-1/3"
+      <div
+        className="absolute inset-0 w-1/3 overlay-light-sweep"
         style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)" }}
         aria-hidden="true"
       />
@@ -345,7 +297,7 @@ function OptionGroup({
             key={opt.id}
             type="button"
             onClick={() => onChange(opt.id)}
-            className={`relative px-4 py-2 text-xs uppercase tracking-wider border transition-colors cursor-pointer ${
+            className={`relative px-4 py-2 text-xs uppercase tracking-wider border transition-colors ${
               value === opt.id
                 ? "border-accent text-accent"
                 : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"

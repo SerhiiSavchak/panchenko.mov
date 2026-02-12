@@ -2,15 +2,11 @@
 
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { WORK_IMAGES } from "@/lib/media";
+import { ABOUT_IMAGES } from "@/lib/media";
+import { Badge } from "@/components/ui";
 import { useScrollReveal } from "@/lib/scroll-animate";
 
-const ABOUT_PHOTOS = [
-  WORK_IMAGES[8],
-  WORK_IMAGES[7],
-  WORK_IMAGES[0],
-  WORK_IMAGES[6],
-];
+const ABOUT_PHOTOS = [ABOUT_IMAGES[0], ABOUT_IMAGES[1], ABOUT_IMAGES[2]];
 
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -39,9 +35,6 @@ export function About() {
         </span>
       </div>
 
-      {/* Grain overlay */}
-      <div className="absolute inset-0 opacity-[0.02] pointer-events-none noise-overlay" aria-hidden="true" />
-
       <div className="relative flex flex-col md:flex-row gap-12 md:gap-16 items-center">
         {/* Photos grid - multiple images */}
         <div
@@ -55,10 +48,11 @@ export function About() {
                 fill
                 sizes="(max-width: 768px) 50vw, 20vw"
                 className="object-cover"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
-              <div className="absolute bottom-2 left-2 px-2 py-1 text-[10px] uppercase tracking-wider bg-background/60 text-foreground backdrop-blur-sm border border-border">
-                BTS
+              <div className="absolute bottom-2 left-2">
+                <Badge>BTS</Badge>
               </div>
             </div>
             <div className="grid grid-rows-2 gap-2">
@@ -69,6 +63,7 @@ export function About() {
                   fill
                   sizes="(max-width: 768px) 50vw, 20vw"
                   className="object-cover"
+                  loading="lazy"
                 />
               </div>
               <div className="relative aspect-[4/3] overflow-hidden">
@@ -78,6 +73,7 @@ export function About() {
                   fill
                   sizes="(max-width: 768px) 50vw, 20vw"
                   className="object-cover"
+                  loading="lazy"
                 />
               </div>
             </div>

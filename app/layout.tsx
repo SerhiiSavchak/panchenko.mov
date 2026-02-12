@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Bebas_Neue } from "next/font/google";
 import { GraffitiLoader } from "@/components/graffiti-loader";
+import { CameraViewfinder } from "@/components/camera-viewfinder";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const inter = Inter({
@@ -50,10 +52,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${bebas.variable} relative`}>
+      <head>
+        <link
+          rel="preload"
+          as="image"
+          href="https://images.pexels.com/photos/7619638/pexels-photo-7619638.jpeg?auto=compress&w=1200"
+        />
+      </head>
       <body className="relative font-sans bg-background text-foreground overflow-x-hidden">
-        <div className="noise-overlay" aria-hidden="true" />
-        <GraffitiLoader />
-        {children}
+        <Providers>
+          <GraffitiLoader />
+          <CameraViewfinder />
+          {children}
+        </Providers>
       </body>
     </html>
   );

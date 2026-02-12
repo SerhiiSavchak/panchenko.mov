@@ -1,19 +1,15 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, useScroll, useTransform, MotionValue, useMotionValueEvent, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue, useMotionValueEvent } from "framer-motion";
 import { STREET_MOTION_VIDEOS } from "@/lib/media";
 
 const WORDS = ["RAP", "CARS", "FIGHT", "BRAND", "CINEMA"] as const;
 type WordKey = (typeof WORDS)[number];
 
-const VIDEO_MAP: Record<WordKey, string> = {
-  RAP: STREET_MOTION_VIDEOS.rap,
-  CARS: STREET_MOTION_VIDEOS.cars,
-  FIGHT: STREET_MOTION_VIDEOS.fight,
-  BRAND: STREET_MOTION_VIDEOS.brand,
-  CINEMA: STREET_MOTION_VIDEOS.cinema,
-};
+const VIDEO_ITEMS = WORDS.map((w) => STREET_MOTION_VIDEOS[w.toLowerCase() as keyof typeof STREET_MOTION_VIDEOS]);
+
+const MAX_PRELOAD = 2; // Only current + next load at once
 
 export function StreetMotion() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,7 +36,18 @@ export function StreetMotion() {
     if (idx >= 0 && idx < WORDS.length) setActiveVideoIndex(idx);
   });
 
-  const activeVideo = VIDEO_MAP[WORDS[activeVideoIndex]];
+  // Preload next video via link (metadata warm-up) - doesn't compete with video fetch
+  useEffect(() => {
+    const nextIdx = Math.min(activeVideoIndex + 1, WORDS.length - 1);
+    if (nextIdx === activeVideoIndex) return;
+    const { video } = VIDEO_ITEMS[nextIdx];
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "video";
+    link.href = video;
+    document.head.appendChild(link);
+    return () => { document.head.removeChild(link); };
+  }, [activeVideoIndex]);
 
   return (
     <div ref={containerRef} className="relative" style={{ height: `${WORDS.length * 100}vh` }}>
@@ -48,20 +55,17 @@ export function StreetMotion() {
         style={reducedMotion ? {} : { opacity: backgroundOpacity }}
         className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden"
       >
-        {/* Dynamic background videos */}
+        {/* Video pool: all in DOM for cache, only current+next preload */}
         <div className="absolute inset-0">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeVideoIndex}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.35 }}
-              className="absolute inset-0"
-            >
-              <StreetMotionVideo src={activeVideo} />
-            </motion.div>
-          </AnimatePresence>
+          {VIDEO_ITEMS.map((item, i) => (
+            <StreetMotionVideoLayer
+              key={i}
+              src={item.video}
+              poster={item.poster}
+              isActive={i === activeVideoIndex}
+              shouldPreload={i === activeVideoIndex || i === activeVideoIndex + 1}
+            />
+          ))}
           <div className="absolute inset-0 bg-background/75" aria-hidden="true" />
         </div>
 
@@ -94,25 +98,70 @@ export function StreetMotion() {
   );
 }
 
-function StreetMotionVideo({ src }: { src: string }) {
+/**
+ * Each video: only set src when shouldPreload.
+
+ * Poster shows instantly. No decoding when offscreen.
+ */
+function StreetMotionVideoLayer({
+  src,
+  poster,
+  isActive,
+  shouldPreload,
+}: {
+  src: string;
+  poster: string;
+  isActive: boolean;
+  shouldPreload: boolean;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleCanPlay = useCallback(() => {
-    videoRef.current?.play().catch(() => {});
-  }, []);
+    if (isActive) videoRef.current?.play().catch(() => {});
+  }, [isActive]);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (shouldPreload && !v.src) {
+      v.src = src;
+      v.preload = "auto";
+    } else if (!shouldPreload && v.src) {
+      v.pause();
+      v.removeAttribute("src");
+      v.load();
+    }
+  }, [shouldPreload, src]);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (isActive) v.play().catch(() => {});
+    else v.pause();
+  }, [isActive]);
 
   return (
-    <video
-      ref={videoRef}
-      muted
-      loop
-      playsInline
-      preload="auto"
-      onCanPlay={handleCanPlay}
-      className="absolute inset-0 w-full h-full object-cover"
+    <div
+      className="absolute inset-0 transition-opacity duration-300 ease-out"
+      style={{ opacity: isActive ? 1 : 0, pointerEvents: isActive ? "auto" : "none", zIndex: isActive ? 1 : 0 }}
     >
-      <source src={src} type="video/mp4" />
-    </video>
+      <div
+        className="absolute inset-0 bg-cover bg-center -z-10"
+        style={{ backgroundImage: `url(${poster})` }}
+        aria-hidden="true"
+      />
+      <video
+        ref={videoRef}
+        muted
+        loop
+        playsInline
+        preload="none"
+        poster={poster}
+        onCanPlay={handleCanPlay}
+        onLoadedData={isActive ? () => videoRef.current?.play().catch(() => {}) : undefined}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+    </div>
   );
 }
 
@@ -139,12 +188,6 @@ function MorphWord({
     [index - 0.5, index, index + 0.5],
     [0.8, 1, 0.8]
   );
-  const blur = useTransform(
-    progress,
-    [index - 0.5, index, index + 0.5],
-    [8, 0, 8]
-  );
-  const filterVal = useTransform(blur, (b) => `blur(${b}px)`);
   const negChroma = useTransform(chromaShift, (v) => -v);
 
   return (
@@ -152,7 +195,7 @@ function MorphWord({
       style={
         reducedMotion
           ? { opacity }
-          : { opacity, scale, filter: filterVal }
+          : { opacity, scale }
       }
       className="absolute inset-0 flex items-center justify-center"
     >
