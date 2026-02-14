@@ -8,6 +8,7 @@ const inter = Inter({
   subsets: ["latin", "cyrillic"],
   variable: "--font-inter",
   adjustFontFallback: true,
+  display: "swap",
 });
 
 const bebas = Bebas_Neue({
@@ -16,6 +17,7 @@ const bebas = Bebas_Neue({
   variable: "--font-bebas",
   adjustFontFallback: true,
   preload: true,
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -55,7 +57,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${bebas.variable} relative`}>
       <head>
-        {/* Hero: no poster preload — uses loading overlay until video ready */}
+        <link rel="preconnect" href="https://assets.mixkit.co" />
+        <link rel="preconnect" href="https://videos.pexels.com" />
+        <link rel="preconnect" href="https://images.pexels.com" />
+        <link rel="preload" as="video" href="https://assets.mixkit.co/videos/13019/13019-720.mp4" />
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `html{background:#050505}body{background:#050505;color:#f0f0f0}`,
+          }}
+        />
       </head>
       <body className="relative font-sans bg-background text-foreground overflow-x-hidden">
         <Providers>

@@ -100,18 +100,6 @@ textarea:focus-visible,
   border-radius: 2px;
 }
 
-/* Scroll progress bar — синий, сверху */
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: #0ea5e9;
-  z-index: 9999;
-  transform-origin: left;
-}
-
 /* Hide scrollbar for reel rails */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
@@ -310,6 +298,80 @@ textarea:focus-visible,
   to {
     transform: scaleY(1);
   }
+}
+
+/* Process section - scroll-driven timeline */
+:root {
+  --process-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --process-duration: 0.6s;
+  --process-step-delay: 80ms;
+}
+
+@keyframes process-step-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px) translateX(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0) scale(1);
+  }
+}
+
+@keyframes process-step-reveal-reduced {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.process-step-item {
+  opacity: 0;
+  transform: translateY(24px) translateX(-8px) scale(0.98);
+}
+
+.process-step-item.process-step-visible,
+.process-step-visible .process-step-item {
+  animation: process-step-reveal var(--process-duration) var(--process-ease) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .process-step-item {
+    opacity: 0;
+    transform: none;
+  }
+
+  .process-step-visible .process-step-item {
+    animation: process-step-reveal-reduced 0.3s ease forwards;
+  }
+}
+
+/* Timeline progress line - fills as user scrolls */
+.process-timeline-track {
+  background: var(--color-border);
+  transform-origin: top;
+}
+
+.process-timeline-fill {
+  background: var(--color-accent);
+  transform-origin: top;
+  transition: transform 0.12s var(--process-ease);
+}
+
+/* Mobile: horizontal progress bar at top */
+.process-progress-bar {
+  height: 3px;
+  background: var(--color-border);
+  transform-origin: left;
+}
+
+.process-progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  transform-origin: left;
+  transition: transform 0.12s var(--process-ease);
 }
 
 .label-fade-in {
@@ -660,5 +722,14 @@ textarea:focus-visible,
   .animated-logo-drip-2 {
     animation: none;
     opacity: 0.4;
+  }
+
+  .process-step-item {
+    opacity: 0;
+  }
+
+  .process-step-item.process-step-visible,
+  .process-step-visible .process-step-item {
+    animation: process-step-reveal-reduced 0.2s ease forwards;
   }
 }

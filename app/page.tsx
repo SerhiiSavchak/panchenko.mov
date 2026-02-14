@@ -3,11 +3,19 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Header } from "@/components/header";
-import { ScrollProgress } from "@/components/scroll-progress";
 import { QuickQuoteModal } from "@/components/quick-quote-modal";
 import { Hero } from "@/components/home/hero";
-import { ProofStrip } from "@/components/home/proof-strip";
 import { Footer } from "@/components/footer";
+
+const ScrollProgress = dynamic(
+  () => import("@/components/scroll-progress").then((m) => ({ default: m.ScrollProgress })),
+  { ssr: false }
+);
+
+const ProofStrip = dynamic(
+  () => import("@/components/home/proof-strip").then((m) => ({ default: m.ProofStrip })),
+  { ssr: true }
+);
 
 // Below-fold sections: lazy load to reduce initial bundle and improve TTI
 const About = dynamic(

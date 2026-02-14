@@ -2,10 +2,11 @@
 
 import { Section } from "@/components/section";
 import { SectionHeader } from "@/components/ui";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useScrollProgress, useScrollReveal } from "@/lib/scroll-animate";
+import { useReducedMotion } from "@/lib/hooks";
 import { useRef } from "react";
 
-const steps = [
+const STEPS = [
   {
     num: "01",
     title: "Brief",
@@ -33,54 +34,68 @@ const steps = [
   },
 ];
 
+const STEP_DELAY_MS = 80;
+
 export function PinnedProcess() {
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
+  const containerRef = useRef<HTMLDivElement>(null);
+  const progress = useScrollProgress(containerRef);
+  const inView = useScrollReveal(containerRef, {
+    once: true,
+    threshold: 0.05,
+    rootMargin: "-60px 0px",
   });
+  const reducedMotion = useReducedMotion();
 
   return (
     <Section>
       <SectionHeader label="How It Works" title="Process" />
 
       <div ref={containerRef} className="relative">
-        {/* Desktop: sticky timeline */}
-        <div className="hidden md:block">
-          <div className="flex gap-0">
-            {steps.map((step, i) => (
+        {/* Mobile: top progress bar */}
+        <div className="md:hidden mb-8 overflow-hidden rounded-full">
+          <div
+            className="process-progress-bar h-1 w-full"
+            role="progressbar"
+            aria-valuenow={Math.round(progress * 100)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div
+              className="process-progress-fill w-full"
+              style={{ transform: `scaleX(${progress})` }}
+            />
+          </div>
+        </div>
+
+        {/* Desktop: full-width vertical timeline + steps */}
+        <div className="hidden md:grid md:grid-cols-[auto_1fr] md:gap-12 lg:gap-16 xl:gap-20 w-full max-w-7xl mx-auto">
+          <ProcessTimeline progress={progress} />
+          <div className="flex flex-col gap-16 lg:gap-20 min-w-0">
+            {STEPS.map((step, i) => (
               <ProcessStep
                 key={step.num}
                 step={step}
                 index={i}
-                total={steps.length}
-                progress={scrollYProgress}
+                total={STEPS.length}
+                inView={inView}
+                reducedMotion={reducedMotion}
               />
             ))}
           </div>
         </div>
 
-        {/* Mobile: stacked */}
-        <div className="md:hidden flex flex-col gap-6">
-          {steps.map((step, i) => (
-            <motion.div
+        {/* Mobile: stacked with left mini-line */}
+        <div className="md:hidden flex flex-col gap-8">
+          {STEPS.map((step, i) => (
+            <ProcessStepMobile
               key={step.num}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="border-l-2 border-border pl-6 hover:border-accent transition-colors"
-            >
-              <span className="font-display text-3xl text-accent">
-                {step.num}
-              </span>
-              <h3 className="font-display text-xl text-foreground mt-1">
-                {step.title}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {step.desc}
-              </p>
-            </motion.div>
+              step={step}
+              index={i}
+              inView={inView}
+              reducedMotion={reducedMotion}
+              progress={progress}
+              total={STEPS.length}
+            />
           ))}
         </div>
       </div>
@@ -88,35 +103,123 @@ export function PinnedProcess() {
   );
 }
 
+function ProcessTimeline({ progress }: { progress: number }) {
+  return (
+    <div className="relative pt-1 pb-1">
+      <div
+        className="process-timeline-track absolute left-0 top-0 bottom-0 w-px"
+        aria-hidden
+      />
+      <div
+        className="process-timeline-fill absolute left-0 top-0 w-px min-h-[20px]"
+        style={{
+          height: `${Math.max(20, progress * 100)}%`,
+        }}
+        aria-hidden
+      />
+    </div>
+  );
+}
+
 function ProcessStep({
   step,
   index,
   total,
-  progress,
+  inView,
+  reducedMotion,
 }: {
-  step: (typeof steps)[number];
+  step: (typeof STEPS)[number];
   index: number;
   total: number;
-  progress: ReturnType<typeof useScroll>["scrollYProgress"];
+  inView: boolean;
+  reducedMotion: boolean;
 }) {
-  const stepProgress = useTransform(
-    progress,
-    [index / total, (index + 1) / total],
-    [0, 1]
-  );
-  const barOpacity = useTransform(stepProgress, [0, 0.5], [0.2, 1]);
+  const stepRef = useRef<HTMLDivElement>(null);
+  const stepInView = useScrollReveal(stepRef, {
+    once: true,
+    threshold: 0.2,
+    rootMargin: "-40px 0px",
+  });
+
+  const visible = inView && stepInView;
 
   return (
-    <div className="flex-1 relative">
-      <motion.div
-        className="h-px bg-accent mb-6"
-        style={{ opacity: barOpacity }}
+    <div
+      ref={stepRef}
+      className={`process-step-item ${visible ? "process-step-visible" : ""}`}
+      style={
+        reducedMotion
+          ? undefined
+          : { animationDelay: `${index * STEP_DELAY_MS}ms` }
+      }
+    >
+      <div className="relative pl-0">
+        <span
+          className="font-display text-4xl lg:text-5xl text-accent block mb-2"
+          style={{ opacity: visible ? 1 : 0.6 }}
+        >
+          {step.num}
+        </span>
+        <h3 className="font-display text-xl lg:text-2xl text-foreground">
+          {step.title}
+        </h3>
+        <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+          {step.desc}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ProcessStepMobile({
+  step,
+  index,
+  inView,
+  reducedMotion,
+  progress,
+  total,
+}: {
+  step: (typeof STEPS)[number];
+  index: number;
+  inView: boolean;
+  reducedMotion: boolean;
+  progress: number;
+  total: number;
+}) {
+  const stepRef = useRef<HTMLDivElement>(null);
+  const stepInView = useScrollReveal(stepRef, {
+    once: true,
+    threshold: 0.15,
+    rootMargin: "-30px 0px",
+  });
+
+  const visible = inView && stepInView;
+  const stepProgress = Math.max(
+    0,
+    Math.min(1, (progress * total - index) / 1)
+  );
+  const lineHeight = visible ? 100 : Math.round(stepProgress * 100);
+
+  return (
+    <div
+      ref={stepRef}
+      className={`relative pl-6 border-l-2 border-border process-step-item ${
+        visible ? "process-step-visible" : ""
+      }`}
+      style={
+        reducedMotion
+          ? undefined
+          : { animationDelay: `${index * STEP_DELAY_MS}ms` }
+      }
+    >
+      <div
+        className="absolute left-0 top-0 bottom-0 w-0.5 -ml-px bg-accent origin-top transition-transform duration-150"
+        style={{ transform: `scaleY(${lineHeight / 100})` }}
+        aria-hidden
       />
-      <span className="font-display text-4xl text-accent">{step.num}</span>
-      <h3 className="font-display text-xl text-foreground mt-2">
-        {step.title}
-      </h3>
-      <p className="text-sm text-muted-foreground mt-2 leading-relaxed pr-4">
+      <span className="font-display text-3xl text-accent">{step.num}</span>
+      <h3 className="font-display text-xl text-foreground mt-1">{step.title}</h3>
+      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
         {step.desc}
       </p>
     </div>

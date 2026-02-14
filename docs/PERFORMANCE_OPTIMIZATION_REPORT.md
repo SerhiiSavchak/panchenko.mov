@@ -101,7 +101,40 @@ For a 3-second loop at 640×360, 15 fps:
 
 ---
 
-## 6. Remaining Opportunities
+## 6. PageSpeed / Lighthouse Optimizations (Feb 2025)
+
+### 6.1 Above-the-Fold Prioritization
+- **Critical inline CSS** — Minimal inline styles in `<head>` for `html`/`body` background and text color to prevent flash of unstyled content.
+- **Hero video preload** — First video (Rap 13019-720.mp4) preloaded via `<link rel="preload" as="video">`.
+- **Deferred Hero videos** — Only the first (Rap) video loads immediately; Cars, Fight, Brand load after 2.5s via `deferLoad` to reduce initial payload and TBT.
+- **ScrollProgress** — Loaded via `dynamic()` with `ssr: false` to avoid blocking first paint.
+- **ProofStrip** — Moved to dynamic import (non-critical for LCP).
+
+### 6.2 Font Optimization
+- **font-display: swap** — Applied to Inter and Bebas Neue to prevent invisible text during font load.
+- **Preconnect** — `assets.mixkit.co`, `videos.pexels.com`, `images.pexels.com` for faster media fetch.
+
+### 6.3 Media Optimization
+- **VideoPosterHover** — `fetchPriority="low"` on poster images; `sizes` tuned for grid layouts (50vw/33vw/25vw).
+- **VideoInView** — Already uses `preload="none"` and loads only when in view.
+- **Hero overlay** — Reduced to 10% (`bg-background/10`) for better visibility.
+
+### 6.4 Files Modified
+| File | Changes |
+|------|---------|
+| `app/layout.tsx` | Preconnect, video preload, critical inline CSS |
+| `app/page.tsx` | Dynamic ScrollProgress, dynamic ProofStrip |
+| `components/home/hero.tsx` | `deferLoad` for non-initial videos, overlay 10% |
+| `components/video-poster-hover.tsx` | `fetchPriority="low"`, `sizes` optimization |
+
+### 6.5 Lighthouse / PageSpeed Testing
+Run audits on mobile 4G:
+- **Chrome DevTools** → Lighthouse → Mobile, Performance
+- **PageSpeed Insights** → https://pagespeed.web.dev/ → Enter URL
+
+---
+
+## 7. Remaining Opportunities
 
 1. **Further compress featured MP4s** — Use ffmpeg to re-encode at lower bitrate (e.g. 800–1200 kbps) for hover previews.
 2. **WebP posters** — Featured posters are JPEG; Next.js serves WebP when supported. Consider pre-generating WebP for faster first paint.
@@ -110,13 +143,16 @@ For a 3-second loop at 640×360, 15 fps:
 
 ---
 
-## 7. Summary
+## 8. Summary
 
 | Metric | Before | After |
 |--------|--------|-------|
 | Unused deps | GSAP (50KB) | Removed |
-| Preloads | 2 images | 1 (hero only) |
+| Preloads | 2 images | 1 video (hero) |
 | Below-fold | Eager load | Dynamic (code split) |
-| Video → GIF | N/A | Not applied (MP4 preferred) |
+| Hero videos | 4 simultaneous | 1 initial, 3 deferred |
+| ScrollProgress | Eager | Dynamic (ssr: false) |
+| Fonts | Default | display: swap |
+| Critical CSS | None | Inline minimal |
 
 **No videos were replaced with GIFs** — the analysis showed MP4 is always more performant and higher quality for the same content.

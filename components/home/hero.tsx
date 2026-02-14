@@ -46,10 +46,11 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   return (
     <section ref={ref} className="relative h-screen overflow-hidden">
       <motion.div style={reducedMotion ? {} : { scale }} className="absolute inset-0">
-        {/* All videos in DOM — load in background, no poster flash when switching */}
-        {CYCLING_WORDS.map((key) => {
+        {/* First video loads immediately; others deferred to reduce initial payload */}
+        {CYCLING_WORDS.map((key, i) => {
           const theme = HERO_THEMES[key];
           const isActive = currentKey === key;
+          const isInitial = i === 0;
           return (
             <motion.div
               key={key}
@@ -65,12 +66,13 @@ export function Hero({ onQuoteOpen }: HeroProps) {
                 isActive={isActive}
                 themeKey={key}
                 fallbackImage={"fallbackImage" in theme ? theme.fallbackImage : undefined}
+                deferLoad={!isInitial}
               />
             </motion.div>
           );
         })}
         {/* Dark overlay */}
-        <div className="absolute inset-0 bg-background/65" aria-hidden="true" />
+        <div className="absolute inset-0 bg-background/10" aria-hidden="true" />
       </motion.div>
 
       <motion.div
@@ -85,7 +87,7 @@ export function Hero({ onQuoteOpen }: HeroProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="px-3 py-1 text-[10px] uppercase tracking-widest border border-border text-muted-foreground bg-background/40 backdrop-blur-sm"
+              className="text-[10px] uppercase tracking-widest text-muted-foreground"
             >
               {badge}
             </motion.span>
@@ -179,30 +181,41 @@ function HeroVideo({
   isActive,
   themeKey,
   fallbackImage,
+  deferLoad,
 }: {
   src: string;
   srcMobile: string;
   isActive: boolean;
   themeKey: HeroThemeKey;
   fallbackImage?: string;
+  deferLoad?: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const [deferReady, setDeferReady] = useState(!deferLoad);
   const [isReady, setIsReady] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-    setVideoSrc(isMobile ? srcMobile : src);
-    const onResize = () => {
-      const m = window.innerWidth < 768;
-      setVideoSrc(m ? srcMobile : src);
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [src, srcMobile]);
+    if (!deferLoad || deferReady) {
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+      setVideoSrc(isMobile ? srcMobile : src);
+      const onResize = () => {
+        const m = window.innerWidth < 768;
+        setVideoSrc(m ? srcMobile : src);
+      };
+      window.addEventListener("resize", onResize);
+      return () => window.removeEventListener("resize", onResize);
+    }
+  }, [deferLoad, deferReady, src, srcMobile]);
+
+  useEffect(() => {
+    if (!deferLoad) return;
+    const id = setTimeout(() => setDeferReady(true), 2500);
+    return () => clearTimeout(id);
+  }, [deferLoad]);
 
   const attemptPlay = useCallback(() => {
     const v = videoRef.current;

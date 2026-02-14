@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 
+const SCROLL_BAR_THRESHOLD = 80;
+
 export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { scrollY } = useScroll();
+  const top = useTransform(scrollY, [0, SCROLL_BAR_THRESHOLD], [0, 24]);
+  const springTop = useSpring(top, { stiffness: 200, damping: 30 });
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -26,13 +32,14 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
 
   return (
     <>
-      <header
+      <motion.header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          "fixed left-0 right-0 z-50 transition-colors duration-300",
           scrolled
             ? "bg-background/80 backdrop-blur-md border-b border-border"
             : "bg-transparent"
         )}
+        style={{ top: springTop }}
       >
         <div className="flex items-center justify-between px-4 md:px-8 lg:px-16 h-16">
           <Link href="/" aria-label="Home" className="logo-graffiti logo-hover">
@@ -64,7 +71,7 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
             <span className={cn("block w-6 h-px bg-foreground transition-transform duration-300", mobileOpen && "-rotate-45 -translate-y-[4px]")} />
           </button>
         </div>
-      </header>
+      </motion.header>
 
       {/* Mobile menu overlay - CSS transitions */}
       <div

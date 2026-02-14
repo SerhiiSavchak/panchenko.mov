@@ -1,18 +1,20 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { works, categories, type WorkCategory } from "@/data/work";
+import { works, categories } from "@/data/work";
 import { WorkCard } from "@/components/work-card";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ScrollProgress } from "@/components/scroll-progress";
 import { QuickQuoteModal } from "@/components/quick-quote-modal";
+import { useWorkFilter } from "@/lib/work-filter-context";
 
 export default function WorkPage() {
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<
-    WorkCategory | "all"
-  >("all");
+  const filter = useWorkFilter();
+
+  const activeCategory = filter?.selectedCategory ?? "all";
+  const setActiveCategory = filter?.setSelectedCategory ?? (() => {});
 
   const filtered = useMemo(
     () =>
