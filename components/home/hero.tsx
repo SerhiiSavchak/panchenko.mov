@@ -63,6 +63,8 @@ export function Hero({ onQuoteOpen }: HeroProps) {
                 src={theme.video}
                 srcMobile={theme.videoMobile}
                 isActive={isActive}
+                themeKey={key}
+                fallbackImage={"fallbackImage" in theme ? theme.fallbackImage : undefined}
               />
             </motion.div>
           );
@@ -175,10 +177,14 @@ function HeroVideo({
   src,
   srcMobile,
   isActive,
+  themeKey,
+  fallbackImage,
 }: {
   src: string;
   srcMobile: string;
   isActive: boolean;
+  themeKey: HeroThemeKey;
+  fallbackImage?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -276,7 +282,15 @@ function HeroVideo({
         aria-hidden
       />
       {hasFailed && (
-        <div className="absolute inset-0 bg-background" aria-hidden />
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={
+            fallbackImage
+              ? { backgroundImage: `url(${fallbackImage})` }
+              : { backgroundColor: "var(--color-background)" }
+          }
+          aria-hidden
+        />
       )}
       {videoSrc && !hasFailed && (
         <video
@@ -291,7 +305,10 @@ function HeroVideo({
           onLoadedData={handleLoadedData}
           onError={handleError}
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-          style={{ opacity: isReady ? 1 : 0 }}
+          style={{
+            opacity: isReady ? 1 : 0,
+            filter: themeKey === "fight" ? "brightness(1.35) contrast(1.05)" : undefined,
+          }}
         >
           <source src={videoSrc} type="video/mp4" />
         </video>

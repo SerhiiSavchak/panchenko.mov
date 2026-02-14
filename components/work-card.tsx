@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { WorkItem } from "@/data/work";
 import { Badge } from "@/components/ui";
 import { VideoPosterHover } from "@/components/video-poster-hover";
-import { useActivePreview } from "@/lib/active-preview-context";
+import { useLongPressPreview } from "@/lib/use-long-press-preview";
 
 interface WorkCardProps {
   work: WorkItem;
@@ -16,10 +16,10 @@ export function WorkCard({ work, index }: WorkCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const preview = useActivePreview();
-  const href = `/work/${work.slug}`;
   const cardId = `work-${work.slug}`;
-  const isActive = preview?.isMobile ? preview.activeId === cardId : isHovered;
+  const longPress = useLongPressPreview(cardId);
+  const href = `/work/${work.slug}`;
+  const isActive = longPress.isActive || isHovered;
 
   useEffect(() => {
     const el = cardRef.current;
@@ -45,7 +45,10 @@ export function WorkCard({ work, index }: WorkCardProps) {
         onMouseLeave={() => setIsHovered(false)}
         onFocus={() => setIsHovered(true)}
         onBlur={() => setIsHovered(false)}
-        onClick={preview ? preview.handleCardTap(cardId, href) : undefined}
+        onTouchStart={longPress.onTouchStart}
+        onTouchEnd={longPress.onTouchEnd}
+        onTouchCancel={longPress.onTouchCancel}
+        onClick={longPress.onClick}
       >
         <div className="relative aspect-[4/5] bg-muted overflow-hidden">
           <VideoPosterHover

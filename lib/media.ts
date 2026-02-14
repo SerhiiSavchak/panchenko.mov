@@ -9,7 +9,8 @@ export const HERO_THEMES = {
   },
   cars: {
     video: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4",
+    videoMobile: "https://assets.mixkit.co/videos/47615/47615-720.mp4",
+    fallbackImage: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=1920",
   },
   fight: {
     video: "https://videos.pexels.com/video-files/9943217/9943217-uhd_2560_1440_24fps.mp4",

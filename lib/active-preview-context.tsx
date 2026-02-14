@@ -15,8 +15,6 @@ interface ActivePreviewContextValue {
   activeId: string | null;
   setActiveId: (id: string | null) => void;
   isMobile: boolean;
-  /** On mobile: first tap activates, second tap navigates. Returns true if navigation was prevented. */
-  handleCardTap: (cardId: string, href: string) => (e: React.MouseEvent) => void;
 }
 
 const ActivePreviewContext = createContext<ActivePreviewContextValue | null>(null);
@@ -33,28 +31,10 @@ export function ActivePreviewProvider({ children }: { children: ReactNode }) {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  const handleCardTap = useCallback(
-    (cardId: string, href: string) => {
-      return (e: React.MouseEvent) => {
-        if (!isMobile) return; // Desktop: let Link handle navigation
-        if (activeId === cardId) {
-          // Second tap: navigate (don't preventDefault)
-          setActiveId(null);
-          return;
-        }
-        // First tap: activate preview, prevent navigation
-        e.preventDefault();
-        setActiveId(cardId);
-      };
-    },
-    [isMobile, activeId]
-  );
-
   const value: ActivePreviewContextValue = {
     activeId,
     setActiveId,
     isMobile,
-    handleCardTap,
   };
 
   return (

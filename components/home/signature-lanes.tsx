@@ -6,7 +6,7 @@ import { VideoPosterHover } from "@/components/video-poster-hover";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { SIGNATURE_LANE_VIDEOS } from "@/lib/media";
-import { useActivePreview } from "@/lib/active-preview-context";
+import { useLongPressPreview } from "@/lib/use-long-press-preview";
 
 const lanes = [
   { title: "Rap Clips", category: "rap", video: SIGNATURE_LANE_VIDEOS[0] },
@@ -16,46 +16,37 @@ const lanes = [
   { title: "Reels", category: "reels", video: SIGNATURE_LANE_VIDEOS[4] },
 ];
 
-export function SignatureLanes() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const preview = useActivePreview();
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => e.isIntersecting && setInView(true),
-      { threshold: 0.2, rootMargin: "-60px" }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+function LaneCard({
+  lane,
+  index,
+  inView,
+}: {
+  lane: (typeof lanes)[number];
+  index: number;
+  inView: boolean;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+  const cardId = `lane-${lane.category}`;
+  const href = `/work?category=${lane.category}`;
+  const longPress = useLongPressPreview(cardId);
+  const isActive = longPress.isActive || isHovered;
+  const v = lane.video as { video: string; videoMobile?: string; poster: string };
 
   return (
-    <Section>
-      <SectionHeader label="Signature Lanes" title="What I Shoot" className="mb-10" />
-
-      <div ref={ref} className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide">
-        {lanes.map((lane, i) => {
-          const cardId = `lane-${lane.category}`;
-          const href = `/work?category=${lane.category}`;
-          const isActive = preview?.isMobile ? preview.activeId === cardId : hoveredIndex === i;
-          const v = lane.video as { video: string; videoMobile?: string; poster: string };
-          return (
-          <div
-            key={lane.title}
-            className={`snap-start shrink-0 w-56 md:w-72 lane-reveal ${inView ? "lane-visible" : ""}`}
-            style={{ animationDelay: `${i * 80}ms` }}
-          >
-            <Link
-              href={href}
-              className="interactive-card group block"
-              onMouseEnter={() => setHoveredIndex(i)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              onClick={preview ? preview.handleCardTap(cardId, href) : undefined}
-            >
+    <div
+      className={`snap-start shrink-0 w-56 md:w-72 lane-reveal ${inView ? "lane-visible" : ""}`}
+      style={{ animationDelay: `${index * 80}ms` }}
+    >
+      <Link
+        href={href}
+        className="interactive-card group block"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onTouchStart={longPress.onTouchStart}
+        onTouchEnd={longPress.onTouchEnd}
+        onTouchCancel={longPress.onTouchCancel}
+        onClick={longPress.onClick}
+      >
               <div className="relative aspect-[3/4] overflow-hidden bg-muted group-hover:scale-105 transition-transform duration-700">
                 <VideoPosterHover
                   src={v.video}
@@ -73,8 +64,32 @@ export function SignatureLanes() {
               </div>
             </Link>
           </div>
-          );
-        })}
+  );
+}
+
+export function SignatureLanes() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => e.isIntersecting && setInView(true),
+      { threshold: 0.2, rootMargin: "-60px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <Section>
+      <SectionHeader label="Signature Lanes" title="What I Shoot" className="mb-10" />
+
+      <div ref={ref} className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide">
+        {lanes.map((lane, i) => (
+          <LaneCard key={lane.title} lane={lane} index={i} inView={inView} />
+        ))}
       </div>
     </Section>
   );
