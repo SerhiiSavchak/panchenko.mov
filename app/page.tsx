@@ -35,13 +35,6 @@ const SignatureLanes = dynamic(
     })),
   { ssr: true }
 );
-const StreetMotion = dynamic(
-  () =>
-    import("@/components/home/street-motion").then((m) => ({
-      default: m.StreetMotion,
-    })),
-  { ssr: true }
-);
 const PinnedProcess = dynamic(
   () =>
     import("@/components/home/pinned-process").then((m) => ({
@@ -100,7 +93,6 @@ export default function Home() {
         <FeaturedWork />
         <Services />
         <SignatureLanes />
-        <StreetMotion />
         <PinnedProcess />
         <ReelRail />
         <Gear />

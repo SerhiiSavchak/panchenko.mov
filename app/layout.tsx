@@ -55,13 +55,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${bebas.variable} relative`}>
       <head>
-        {/* Hero poster only — prevents black flash; avoid preloading below-fold assets */}
-        <link
-          rel="preload"
-          as="image"
-          href="https://assets.mixkit.co/videos/47497/47497-thumb-720-4.jpg"
-          fetchPriority="high"
-        />
+        {/* Hero: no poster preload — uses loading overlay until video ready */}
       </head>
       <body className="relative font-sans bg-background text-foreground overflow-x-hidden">
         <Providers>

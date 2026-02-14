@@ -1,27 +1,23 @@
 // Comprehensive media system - Pexels free stock
 // Cars: street racing, drift, neon night. Rap: studio, mic, urban. Fight: boxing
 
-// Hero: desktop = high-res, mobile = 720p/SD for reliability on iPhone etc.
+// Hero: no poster preview; loading overlay until video ready; HD on mobile for quality
 export const HERO_THEMES = {
   rap: {
-    video: "https://assets.mixkit.co/videos/47497/47497-720.mp4",
-    videoMobile: "https://assets.mixkit.co/videos/47497/47497-720.mp4",
-    poster: "https://assets.mixkit.co/videos/47497/47497-thumb-720-4.jpg",
+    video: "https://assets.mixkit.co/videos/13019/13019-720.mp4",
+    videoMobile: "https://assets.mixkit.co/videos/13019/13019-720.mp4",
   },
   cars: {
     video: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/27974758/12279599-sd_640_360_60fps.mp4",
-    poster: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=1600",
+    videoMobile: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4",
   },
   fight: {
     video: "https://videos.pexels.com/video-files/9943217/9943217-uhd_2560_1440_24fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/9943217/9943217-sd_640_360_24fps.mp4",
-    poster: "https://images.pexels.com/photos/4761671/pexels-photo-4761671.jpeg?auto=compress&w=1200",
+    videoMobile: "https://videos.pexels.com/video-files/9943217/9943217-uhd_2560_1440_24fps.mp4",
   },
   brand: {
     video: "https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/3571264/3571264-sd_640_360_30fps.mp4",
-    poster: "https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&w=1200",
+    videoMobile: "https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4",
   },
 } as const;
 
@@ -56,36 +52,6 @@ export const WORK_IMAGES = [
   "https://images.pexels.com/photos/3721941/pexels-photo-3721941.jpeg?auto=compress&w=800",
   "https://images.pexels.com/photos/1005638/pexels-photo-1005638.jpeg?auto=compress&w=800",
 ];
-
-// Street Motion - video + poster for instant crossfade (no black flash)
-// Mobile = 720p/SD for performance on smaller devices
-export const STREET_MOTION_VIDEOS = {
-  rap: {
-    video: "https://assets.mixkit.co/videos/47497/47497-720.mp4",
-    videoMobile: "https://assets.mixkit.co/videos/47497/47497-720.mp4",
-    poster: "https://assets.mixkit.co/videos/47497/47497-thumb-720-4.jpg",
-  },
-  cars: {
-    video: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/27974758/12279599-sd_640_360_60fps.mp4",
-    poster: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=1200",
-  },
-  fight: {
-    video: "https://videos.pexels.com/video-files/9943217/9943217-uhd_2560_1440_24fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/9943217/9943217-sd_640_360_24fps.mp4",
-    poster: "https://images.pexels.com/photos/4761671/pexels-photo-4761671.jpeg?auto=compress&w=1200",
-  },
-  brand: {
-    video: "https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/3571264/3571264-sd_640_360_30fps.mp4",
-    poster: "https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&w=1200",
-  },
-  cinema: {
-    video: "https://assets.mixkit.co/videos/47497/47497-720.mp4",
-    videoMobile: "https://assets.mixkit.co/videos/47497/47497-720.mp4",
-    poster: "https://assets.mixkit.co/videos/47497/47497-thumb-720-4.jpg",
-  },
-} as const;
 
 // BTS (behind the scenes) — качественные фото съёмочного процесса
 export const ABOUT_IMAGES = [

@@ -62,7 +62,6 @@ export function Hero({ onQuoteOpen }: HeroProps) {
               <HeroVideo
                 src={theme.video}
                 srcMobile={theme.videoMobile}
-                poster={theme.poster}
                 isActive={isActive}
               />
             </motion.div>
@@ -170,23 +169,23 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   );
 }
 
+const LOAD_TIMEOUT_MS = 8000;
+
 function HeroVideo({
   src,
   srcMobile,
-  poster,
   isActive,
 }: {
   src: string;
   srcMobile: string;
-  poster: string;
   isActive: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
-  const [autoplayFailed, setAutoplayFailed] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [hasFailed, setHasFailed] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
@@ -201,33 +200,25 @@ function HeroVideo({
 
   const attemptPlay = useCallback(() => {
     const v = videoRef.current;
-    if (!v) return;
+    if (!v || !isActive) return;
     v.play()
-      .then(() => {
-        setAutoplayFailed(false);
-        setHasLoaded(true);
-      })
-      .catch(() => {
-        setAutoplayFailed(true);
-        v.pause();
-      });
-  }, []);
+      .then(() => setIsReady(true))
+      .catch(() => setHasFailed(true));
+  }, [isActive]);
 
   const handleCanPlay = useCallback(() => {
     if (isActive) attemptPlay();
   }, [attemptPlay, isActive]);
 
   const handleLoadedData = useCallback(() => {
-    setHasLoaded(true);
     if (isActive) attemptPlay();
   }, [attemptPlay, isActive]);
 
   const handleError = useCallback(() => {
     if (videoSrc === srcMobile) {
       setVideoSrc(src);
-      setHasError(false);
     } else {
-      setHasError(true);
+      setHasFailed(true);
     }
   }, [videoSrc, srcMobile, src]);
 
@@ -259,30 +250,35 @@ function HeroVideo({
     return () => obs.disconnect();
   }, [attemptPlay, isActive]);
 
-  if (hasError) {
-    return (
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${poster})` }}
-        aria-hidden
-      />
-    );
-  }
-
-  const showPoster = isActive && (!videoSrc || autoplayFailed || !hasLoaded);
+  useEffect(() => {
+    if (!isActive || hasFailed || isReady) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      return;
+    }
+    timeoutRef.current = setTimeout(() => setHasFailed(true), LOAD_TIMEOUT_MS);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [isActive, hasFailed, isReady]);
 
   return (
     <div ref={containerRef} className="absolute inset-0">
+      {/* Loading overlay: solid dark, no poster/frame — reveal only when video ready */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-opacity duration-300"
+        className="absolute inset-0 bg-background transition-opacity duration-500"
         style={{
-          backgroundImage: `url(${poster})`,
-          opacity: showPoster ? 1 : 0,
+          opacity: isReady && !hasFailed ? 0 : 1,
           pointerEvents: "none",
         }}
         aria-hidden
       />
-      {videoSrc && (
+      {hasFailed && (
+        <div className="absolute inset-0 bg-background" aria-hidden />
+      )}
+      {videoSrc && !hasFailed && (
         <video
           ref={videoRef}
           key={videoSrc}
@@ -291,12 +287,11 @@ function HeroVideo({
           playsInline
           autoPlay
           preload="auto"
-          poster={poster}
           onCanPlay={handleCanPlay}
           onLoadedData={handleLoadedData}
           onError={handleError}
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: autoplayFailed ? 0 : 1 }}
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+          style={{ opacity: isReady ? 1 : 0 }}
         >
           <source src={videoSrc} type="video/mp4" />
         </video>
