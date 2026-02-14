@@ -43,14 +43,19 @@ export function Hero({ onQuoteOpen }: HeroProps) {
     return () => clearInterval(interval);
   }, [reducedMotion]);
 
-  // Preload next video
+  // Preload next video (use mobile URL on small screens)
   useEffect(() => {
     const nextIndex = (wordIndex + 1) % CYCLING_WORDS.length;
     const nextKey = CYCLING_WORDS[nextIndex];
+    const theme = HERO_THEMES[nextKey];
+    const href =
+      typeof window !== "undefined" && window.innerWidth < 768
+        ? theme.videoMobile
+        : theme.video;
     const link = document.createElement("link");
     link.rel = "preload";
     link.as = "video";
-    link.href = HERO_THEMES[nextKey].video;
+    link.href = href;
     document.head.appendChild(link);
     return () => { document.head.removeChild(link); };
   }, [wordIndex]);
@@ -68,7 +73,11 @@ export function Hero({ onQuoteOpen }: HeroProps) {
             transition={{ duration: 1.2 }}
             className="absolute inset-0"
           >
-            <HeroVideo src={theme.video} poster={theme.poster} />
+            <HeroVideo
+              src={theme.video}
+              srcMobile={theme.videoMobile}
+              poster={theme.poster}
+            />
           </motion.div>
         </AnimatePresence>
         {/* Dark overlay */}
@@ -98,24 +107,29 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="font-display text-[clamp(3rem,12vw,10rem)] leading-[0.85] tracking-tight text-foreground text-balance"
+          className="relative isolate font-display text-[clamp(3rem,12vw,10rem)] leading-[0.85] tracking-tight text-foreground text-balance"
         >
-          FROM STREET
+          <span className="relative z-20">FROM STREET</span>
           <br />
-          TO{" "}
-          <span className="text-accent relative inline-block min-w-[4ch]">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={DISPLAY_WORDS[currentKey]}
-                initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reducedMotion ? {} : { opacity: 0, y: -20 }}
-                transition={{ duration: 0.4 }}
-                className="inline-block neon-glow"
-              >
-                {DISPLAY_WORDS[currentKey]}
-              </motion.span>
-            </AnimatePresence>
+          <span className="relative z-20">TO{"\u2009"}</span>
+          <span className="text-accent relative z-10 inline-block min-w-[5.5ch] align-baseline -ml-[0.15em]">
+            <span className="invisible" aria-hidden="true">
+              B
+            </span>
+            <span className="absolute inset-0 flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={DISPLAY_WORDS[currentKey]}
+                  initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={reducedMotion ? {} : { opacity: 0, y: -20 }}
+                  transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="neon-glow"
+                >
+                  {DISPLAY_WORDS[currentKey]}
+                </motion.span>
+              </AnimatePresence>
+            </span>
           </span>
         </motion.h1>
 
@@ -168,13 +182,49 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   );
 }
 
-function HeroVideo({ src, poster }: { src: string; poster: string }) {
+function HeroVideo({
+  src,
+  srcMobile,
+  poster,
+}: {
+  src: string;
+  srcMobile: string;
+  poster: string;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const [autoplayFailed, setAutoplayFailed] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  // Pick source on mount (SSR-safe: avoid loading wrong resolution)
+  useEffect(() => {
+    setVideoSrc(window.innerWidth < 768 ? srcMobile : src);
+  }, [src, srcMobile]);
+
+  const attemptPlay = useCallback(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.play()
+      .then(() => setAutoplayFailed(false))
+      .catch(() => {
+        setAutoplayFailed(true);
+        v.pause();
+      });
+  }, []);
 
   const handleCanPlay = useCallback(() => {
-    videoRef.current?.play().catch(() => {});
-  }, []);
+    attemptPlay();
+  }, [attemptPlay]);
+
+  const handleError = useCallback(() => {
+    if (videoSrc === srcMobile) {
+      setVideoSrc(src);
+      setHasError(false);
+    } else {
+      setHasError(true);
+    }
+  }, [videoSrc, srcMobile, src]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -183,7 +233,7 @@ function HeroVideo({ src, poster }: { src: string; poster: string }) {
     const obs = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting && e.intersectionRatio > 0.3) {
-          video.play().catch(() => {});
+          attemptPlay();
         } else {
           video.pause();
         }
@@ -192,22 +242,48 @@ function HeroVideo({ src, poster }: { src: string; poster: string }) {
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, []);
+  }, [attemptPlay]);
+
+  if (hasError) {
+    return (
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${poster})` }}
+        aria-hidden
+      />
+    );
+  }
 
   return (
     <div ref={containerRef} className="absolute inset-0">
-      <video
-        ref={videoRef}
-        muted
-        loop
-        playsInline
-        preload="auto"
-        poster={poster}
-        onCanPlay={handleCanPlay}
-        className="absolute inset-0 w-full h-full object-cover"
-      >
-        <source src={src} type="video/mp4" />
-      </video>
+      {/* Poster layer: prevents black flash before video loads; stays visible if autoplay fails */}
+      <div
+        className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
+        style={{
+          backgroundImage: `url(${poster})`,
+          opacity: autoplayFailed || !videoSrc ? 1 : 0,
+          pointerEvents: "none",
+        }}
+        aria-hidden
+      />
+      {videoSrc && (
+        <video
+          ref={videoRef}
+          key={videoSrc}
+          muted
+          loop
+          playsInline
+          autoPlay
+          preload="auto"
+          poster={poster}
+          onCanPlay={handleCanPlay}
+          onError={handleError}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: autoplayFailed ? 0 : 1 }}
+        >
+          <source src={videoSrc} type="video/mp4" />
+        </video>
+      )}
     </div>
   );
 }

@@ -36,15 +36,19 @@ export function StreetMotion() {
     if (idx >= 0 && idx < WORDS.length) setActiveVideoIndex(idx);
   });
 
-  // Preload next video via link (metadata warm-up) - doesn't compete with video fetch
+  // Preload next video via link (metadata warm-up) - use mobile src on small screens
   useEffect(() => {
     const nextIdx = Math.min(activeVideoIndex + 1, WORDS.length - 1);
     if (nextIdx === activeVideoIndex) return;
-    const { video } = VIDEO_ITEMS[nextIdx];
+    const item = VIDEO_ITEMS[nextIdx];
+    const href =
+      typeof window !== "undefined" && window.innerWidth < 768
+        ? item.videoMobile
+        : item.video;
     const link = document.createElement("link");
     link.rel = "preload";
     link.as = "video";
-    link.href = video;
+    link.href = href;
     document.head.appendChild(link);
     return () => { document.head.removeChild(link); };
   }, [activeVideoIndex]);
@@ -61,6 +65,7 @@ export function StreetMotion() {
             <StreetMotionVideoLayer
               key={i}
               src={item.video}
+              srcMobile={item.videoMobile}
               poster={item.poster}
               isActive={i === activeVideoIndex}
               shouldPreload={i === activeVideoIndex || i === activeVideoIndex + 1}
@@ -100,21 +105,31 @@ export function StreetMotion() {
 
 /**
  * Each video: only set src when shouldPreload.
-
  * Poster shows instantly. No decoding when offscreen.
+ * Uses mobile-optimized src on viewport < 768px.
  */
 function StreetMotionVideoLayer({
   src,
+  srcMobile,
   poster,
   isActive,
   shouldPreload,
 }: {
   src: string;
+  srcMobile: string;
   poster: string;
   isActive: boolean;
   shouldPreload: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [currentSrc, setCurrentSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrentSrc(window.innerWidth < 768 ? srcMobile : src);
+    const onResize = () => setCurrentSrc(window.innerWidth < 768 ? srcMobile : src);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [src, srcMobile]);
 
   const handleCanPlay = useCallback(() => {
     if (isActive) videoRef.current?.play().catch(() => {});
@@ -122,16 +137,16 @@ function StreetMotionVideoLayer({
 
   useEffect(() => {
     const v = videoRef.current;
-    if (!v) return;
-    if (shouldPreload && !v.src) {
-      v.src = src;
+    if (!v || !currentSrc) return;
+    if (shouldPreload) {
+      v.src = currentSrc;
       v.preload = "auto";
-    } else if (!shouldPreload && v.src) {
+    } else {
       v.pause();
       v.removeAttribute("src");
       v.load();
     }
-  }, [shouldPreload, src]);
+  }, [shouldPreload, currentSrc]);
 
   useEffect(() => {
     const v = videoRef.current;

@@ -35,9 +35,11 @@ export function WorkCard({ work, index }: WorkCardProps) {
     >
       <Link
         href={`/work/${work.slug}`}
-        className="interactive-card group block relative overflow-hidden"
+        className="interactive-card group block relative overflow-hidden cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onFocus={() => setIsHovered(true)}
+        onBlur={() => setIsHovered(false)}
       >
         <div className="relative aspect-[4/5] bg-muted overflow-hidden">
           <VideoPosterHover
@@ -56,7 +58,7 @@ export function WorkCard({ work, index }: WorkCardProps) {
 
         <div className="flex items-start justify-between gap-2 pt-3">
           <div>
-            <h3 className="font-display text-xl leading-none text-foreground group-hover:text-accent transition-colors">
+            <h3 className="font-display text-xl leading-none text-foreground group-hover:text-accent group-focus-visible:text-accent transition-colors">
               {work.title}
             </h3>
             <p className="text-xs text-muted-foreground mt-1">{work.shortDesc}</p>

@@ -10,7 +10,7 @@ interface VideoPosterHoverProps {
   poster: string;
   alt: string;
   className?: string;
-  aspectRatio?: "4/5" | "3/4" | "16/9" | "video";
+  aspectRatio?: "4/5" | "3/4" | "16/9" | "9/16" | "video";
   /** Controlled mode: parent controls active state (e.g. Link hover) */
   isActive?: boolean;
   /** Fill parent container (absolute inset-0) */
@@ -59,6 +59,7 @@ export function VideoPosterHover({
         aspectRatio === "4/5" && "aspect-[4/5]",
         aspectRatio === "3/4" && "aspect-[3/4]",
         aspectRatio === "16/9" && "aspect-video",
+        aspectRatio === "9/16" && "aspect-[9/16]",
         aspectRatio === "video" && "aspect-video",
         fill && "absolute inset-0 w-full h-full",
         className

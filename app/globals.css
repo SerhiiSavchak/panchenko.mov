@@ -130,13 +130,6 @@ textarea:focus-visible,
   box-shadow: 0 0 15px rgba(14, 165, 233, 0.15), 0 0 30px rgba(56, 189, 248, 0.08), inset 0 0 15px rgba(14, 165, 233, 0.05);
 }
 
-/* Уголки объектива по углам — неон */
-.viewfinder-corner {
-  background: transparent !important;
-  border-color: #0ea5e9 !important;
-  box-shadow: none;
-}
-
 .logo-graffiti.logo-hover:hover {
   transform: scale(1.02);
   transition: transform 0.2s ease;

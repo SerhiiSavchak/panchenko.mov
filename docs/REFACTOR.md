@@ -15,7 +15,7 @@ components/
     form-field.tsx
     index.ts
   section.tsx            # Re-export from ui (backward compat)
-  ... (unchanged: brand-logo, camera-viewfinder, footer, header, etc.)
+  ... (unchanged: brand-logo, footer, header, etc.)
 
 lib/
   hooks/

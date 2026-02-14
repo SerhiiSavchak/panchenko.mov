@@ -1,19 +1,21 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Bebas_Neue } from "next/font/google";
 import { GraffitiLoader } from "@/components/graffiti-loader";
-import { CameraViewfinder } from "@/components/camera-viewfinder";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
   variable: "--font-inter",
+  adjustFontFallback: true,
 });
 
 const bebas = Bebas_Neue({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-bebas",
+  adjustFontFallback: true,
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -53,16 +55,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${bebas.variable} relative`}>
       <head>
+        {/* Hero poster only — prevents black flash; avoid preloading below-fold assets */}
         <link
           rel="preload"
           as="image"
-          href="https://images.pexels.com/photos/7619638/pexels-photo-7619638.jpeg?auto=compress&w=1200"
+          href="https://assets.mixkit.co/videos/47497/47497-thumb-720-4.jpg"
+          fetchPriority="high"
         />
       </head>
       <body className="relative font-sans bg-background text-foreground overflow-x-hidden">
         <Providers>
           <GraffitiLoader />
-          <CameraViewfinder />
           {children}
         </Providers>
       </body>

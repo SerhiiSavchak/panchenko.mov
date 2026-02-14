@@ -1,24 +1,28 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { Section } from "@/components/section";
 import { SectionHeader, Badge } from "@/components/ui";
-import { VideoPosterOnly } from "@/components/video-poster-only";
-import { WORK_IMAGES } from "@/lib/media";
-
-const reels = [
-  { src: "/reels/reel-1.mp4", label: "BTS" },
-  { src: "/reels/reel-2.mp4", label: "BTS" },
-  { src: "/reels/reel-3.mp4", label: "RAW" },
-  { src: "/reels/reel-4.mp4", label: "BTS" },
-  { src: "/reels/reel-5.mp4", label: "RAW" },
-  { src: "/reels/reel-6.mp4", label: "BTS" },
-  { src: "/reels/reel-7.mp4", label: "CUT" },
-  { src: "/reels/reel-8.mp4", label: "BTS" },
-  { src: "/reels/reel-9.mp4", label: "RAW" },
-  { src: "/reels/reel-10.mp4", label: "BTS" },
-];
+import { VideoPosterHover } from "@/components/video-poster-hover";
+import { BTS_RAW_CARDS } from "@/lib/media";
 
 export function ReelRail() {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => e.isIntersecting && setInView(true),
+      { threshold: 0.15, rootMargin: "-30px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   return (
     <Section>
       <SectionHeader
@@ -28,21 +32,38 @@ export function ReelRail() {
         className="mb-8"
       />
 
-      <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory">
-        {reels.map((reel, i) => (
-          <div
-            key={i}
-            className="snap-center shrink-0 w-48 md:w-56 aspect-[9/16] bg-muted overflow-hidden relative"
+      <div
+        ref={ref}
+        className={`flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide ${inView ? "lane-visible" : "lane-reveal"}`}
+      >
+        {BTS_RAW_CARDS.map((card, i) => (
+          <Link
+            key={`${card.title}-${i}`}
+            href={card.href}
+            className="interactive-card snap-center shrink-0 w-48 md:w-56 block group"
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            onFocus={() => setHoveredIndex(i)}
+            onBlur={() => setHoveredIndex(null)}
           >
-            <VideoPosterOnly
-              poster={WORK_IMAGES[i % WORK_IMAGES.length]}
-              alt={`Reel ${i + 1} ${reel.label}`}
-              aspectRatio="9/16"
-            />
-            <div className="absolute top-2 left-2 z-10">
-              <Badge size="sm">{reel.label}</Badge>
+            <div className="relative aspect-[9/16] bg-muted overflow-hidden group-hover:scale-[1.02] transition-transform duration-300">
+              <VideoPosterHover
+                src={card.video}
+                poster={card.poster}
+                alt={card.title}
+                aspectRatio="9/16"
+                isActive={hoveredIndex === i}
+                fill
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute top-2 left-2 z-10">
+                <Badge size="sm">{card.badge}</Badge>
+              </div>
             </div>
-          </div>
+            <h3 className="font-display text-lg leading-none text-foreground mt-3 group-hover:text-accent group-focus-visible:text-accent transition-colors">
+              {card.title}
+            </h3>
+          </Link>
         ))}
       </div>
     </Section>

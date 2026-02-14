@@ -17,6 +17,7 @@ export function VideoInView({
   fallbackIndex = 0,
 }: VideoInViewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [videoSrc, setVideoSrc] = useState(src);
   const [triedFallback, setTriedFallback] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -31,21 +32,28 @@ export function VideoInView({
   }, [triedFallback, fallbackIndex]);
 
   useEffect(() => {
+    const container = containerRef.current;
     const video = videoRef.current;
-    if (!video) return;
+    if (!container || !video) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          if (!video.src) {
+            video.src = videoSrc;
+            video.preload = "auto";
+          }
           video.play().catch(() => {});
         } else {
           video.pause();
+          video.removeAttribute("src");
+          video.load();
         }
       },
-      { threshold: 0.25 }
+      { threshold: 0.25, rootMargin: "50px 0px" }
     );
 
-    observer.observe(video);
+    observer.observe(container);
     return () => observer.disconnect();
   }, [videoSrc]);
 
@@ -67,18 +75,25 @@ export function VideoInView({
   }
 
   return (
-    <video
-      ref={videoRef}
-      key={videoSrc}
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      poster={poster}
-      className={className}
-      onError={handleError}
-    >
-      <source src={videoSrc} type="video/mp4" />
-    </video>
+    <div ref={containerRef} className={`relative ${className}`}>
+      {poster && (
+        <div
+          className="absolute inset-0 bg-cover bg-center -z-10"
+          style={{ backgroundImage: `url(${poster})` }}
+          aria-hidden
+        />
+      )}
+      <video
+        ref={videoRef}
+        key={videoSrc}
+        muted
+        loop
+        playsInline
+        preload="none"
+        poster={poster}
+        className="absolute inset-0 w-full h-full object-cover"
+        onError={handleError}
+      />
+    </div>
   );
 }

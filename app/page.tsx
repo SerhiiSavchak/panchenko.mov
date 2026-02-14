@@ -7,38 +7,83 @@ import { ScrollProgress } from "@/components/scroll-progress";
 import { QuickQuoteModal } from "@/components/quick-quote-modal";
 import { Hero } from "@/components/home/hero";
 import { ProofStrip } from "@/components/home/proof-strip";
-import { FeaturedWork } from "@/components/home/featured-work";
-import { Services } from "@/components/home/services";
-import { SignatureLanes } from "@/components/home/signature-lanes";
-import { PinnedProcess } from "@/components/home/pinned-process";
-import { ReelRail } from "@/components/home/reel-rail";
-import { Testimonials } from "@/components/home/testimonials";
-import { FAQ } from "@/components/home/faq";
-import { FinalCTA } from "@/components/home/final-cta";
 import { Footer } from "@/components/footer";
 
-// Dynamic imports for heavy new sections
+// Below-fold sections: lazy load to reduce initial bundle and improve TTI
 const About = dynamic(
   () => import("@/components/home/about").then((m) => ({ default: m.About })),
-  { ssr: false }
+  { ssr: true }
 );
-const Gear = dynamic(
-  () => import("@/components/home/gear").then((m) => ({ default: m.Gear })),
-  { ssr: false }
-);
-const BuildYourShoot = dynamic(
+const Services = dynamic(
   () =>
-    import("@/components/home/build-your-shoot").then((m) => ({
-      default: m.BuildYourShoot,
+    import("@/components/home/services").then((m) => ({
+      default: m.Services,
     })),
-  { ssr: false }
+  { ssr: true }
+);
+const FeaturedWork = dynamic(
+  () =>
+    import("@/components/home/featured-work").then((m) => ({
+      default: m.FeaturedWork,
+    })),
+  { ssr: true }
+);
+const SignatureLanes = dynamic(
+  () =>
+    import("@/components/home/signature-lanes").then((m) => ({
+      default: m.SignatureLanes,
+    })),
+  { ssr: true }
 );
 const StreetMotion = dynamic(
   () =>
     import("@/components/home/street-motion").then((m) => ({
       default: m.StreetMotion,
     })),
-  { ssr: false }
+  { ssr: true }
+);
+const PinnedProcess = dynamic(
+  () =>
+    import("@/components/home/pinned-process").then((m) => ({
+      default: m.PinnedProcess,
+    })),
+  { ssr: true }
+);
+const ReelRail = dynamic(
+  () =>
+    import("@/components/home/reel-rail").then((m) => ({
+      default: m.ReelRail,
+    })),
+  { ssr: true }
+);
+const Gear = dynamic(
+  () => import("@/components/home/gear").then((m) => ({ default: m.Gear })),
+  { ssr: true }
+);
+const BuildYourShoot = dynamic(
+  () =>
+    import("@/components/home/build-your-shoot").then((m) => ({
+      default: m.BuildYourShoot,
+    })),
+  { ssr: true }
+);
+const Testimonials = dynamic(
+  () =>
+    import("@/components/home/testimonials").then((m) => ({
+      default: m.Testimonials,
+    })),
+  { ssr: true }
+);
+const FAQ = dynamic(
+  () => import("@/components/home/faq").then((m) => ({ default: m.FAQ })),
+  { ssr: true }
+);
+const FinalCTA = dynamic(
+  () =>
+    import("@/components/home/final-cta").then((m) => ({
+      default: m.FinalCTA,
+    })),
+  { ssr: true }
 );
 
 export default function Home() {

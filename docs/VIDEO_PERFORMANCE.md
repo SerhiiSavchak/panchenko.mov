@@ -33,9 +33,12 @@ Reduce video-related lag while keeping perceived quality high. Max 1–2 videos 
 | **Case Study (work/[slug])** | VideoInView autoplay | Poster by default; tap to play/pause |
 
 ### 4. Hero Video
+- **Mobile-optimized sources**: 720p/SD on viewport &lt;768px to avoid decoding overload on iPhone
+- **Responsive preload**: next video preloads mobile or desktop URL based on screen size
+- **Error fallback**: if mobile URL 404s, falls back to desktop URL; if both fail, shows poster
+- **Autoplay fallback**: if `play()` fails (e.g. Low Power Mode), poster stays visible
 - IntersectionObserver: pause when section &lt;30% visible
-- `preload="auto"`; poster for instant display
-- One video at a time (cycling)
+- `preload="auto"`, `poster`, `playsInline`, `muted`, `autoPlay` for iOS compatibility
 
 ### 5. StreetMotion
 - `shouldPreload` only for active + next
@@ -59,8 +62,15 @@ Reduce video-related lag while keeping perceived quality high. Max 1–2 videos 
 - No layout shift from video loading
 
 ### 9. VideoInView
-- `VideoInView` is no longer used after these changes
-- Can be removed or kept for future use
+- Unloads video (`removeAttribute("src")`, `load()`) when out of viewport to free memory
+- Loads only when in view (IntersectionObserver, threshold 0.25)
+- `preload="none"` until in view; poster shown until loaded
+
+### 10. GIF vs Video Strategy
+- **Recommendation: use optimized MP4, not GIF**
+- GIFs are typically 5–10× larger than H.264 MP4 for same quality
+- Lightweight looped MP4 with `muted` + `playsInline` + `loop` is the best alternative
+- No GIFs in current codebase; all motion uses video
 
 ## Files Touched
 - `lib/video-manager.tsx` (new)
