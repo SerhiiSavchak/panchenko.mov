@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { WorkItem } from "@/data/work";
 import { Badge } from "@/components/ui";
 import { VideoPosterHover } from "@/components/video-poster-hover";
+import { useActivePreview } from "@/lib/active-preview-context";
 
 interface WorkCardProps {
   work: WorkItem;
@@ -15,6 +16,10 @@ export function WorkCard({ work, index }: WorkCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const preview = useActivePreview();
+  const href = `/work/${work.slug}`;
+  const cardId = `work-${work.slug}`;
+  const isActive = preview?.isMobile ? preview.activeId === cardId : isHovered;
 
   useEffect(() => {
     const el = cardRef.current;
@@ -34,12 +39,13 @@ export function WorkCard({ work, index }: WorkCardProps) {
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <Link
-        href={`/work/${work.slug}`}
+        href={href}
         className="interactive-card group block relative overflow-hidden cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onFocus={() => setIsHovered(true)}
         onBlur={() => setIsHovered(false)}
+        onClick={preview ? preview.handleCardTap(cardId, href) : undefined}
       >
         <div className="relative aspect-[4/5] bg-muted overflow-hidden">
           <VideoPosterHover
@@ -47,7 +53,7 @@ export function WorkCard({ work, index }: WorkCardProps) {
             poster={work.thumbnail}
             alt={work.title}
             aspectRatio="4/5"
-            isActive={isHovered}
+            isActive={isActive}
             fill
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />

@@ -6,6 +6,7 @@ import { VideoPosterHover } from "@/components/video-poster-hover";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { SIGNATURE_LANE_VIDEOS } from "@/lib/media";
+import { useActivePreview } from "@/lib/active-preview-context";
 
 const lanes = [
   { title: "Rap Clips", category: "rap", video: SIGNATURE_LANE_VIDEOS[0] },
@@ -19,6 +20,7 @@ export function SignatureLanes() {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const preview = useActivePreview();
 
   useEffect(() => {
     const el = ref.current;
@@ -36,25 +38,32 @@ export function SignatureLanes() {
       <SectionHeader label="Signature Lanes" title="What I Shoot" className="mb-10" />
 
       <div ref={ref} className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide">
-        {lanes.map((lane, i) => (
+        {lanes.map((lane, i) => {
+          const cardId = `lane-${lane.category}`;
+          const href = `/work?category=${lane.category}`;
+          const isActive = preview?.isMobile ? preview.activeId === cardId : hoveredIndex === i;
+          const v = lane.video as { video: string; videoMobile?: string; poster: string };
+          return (
           <div
             key={lane.title}
             className={`snap-start shrink-0 w-56 md:w-72 lane-reveal ${inView ? "lane-visible" : ""}`}
             style={{ animationDelay: `${i * 80}ms` }}
           >
             <Link
-              href={`/work?category=${lane.category}`}
+              href={href}
               className="interactive-card group block"
               onMouseEnter={() => setHoveredIndex(i)}
               onMouseLeave={() => setHoveredIndex(null)}
+              onClick={preview ? preview.handleCardTap(cardId, href) : undefined}
             >
               <div className="relative aspect-[3/4] overflow-hidden bg-muted group-hover:scale-105 transition-transform duration-700">
                 <VideoPosterHover
-                  src={lane.video.video}
-                  poster={lane.video.poster}
+                  src={v.video}
+                  poster={v.poster}
                   alt={lane.title}
+                  mobileSrc={v.videoMobile}
                   aspectRatio="3/4"
-                  isActive={hoveredIndex === i}
+                  isActive={isActive}
                   fill
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
@@ -64,7 +73,8 @@ export function SignatureLanes() {
               </div>
             </Link>
           </div>
-        ))}
+          );
+        })}
       </div>
     </Section>
   );

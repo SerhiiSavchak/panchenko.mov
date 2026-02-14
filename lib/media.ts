@@ -123,12 +123,13 @@ export const CONSTRUCTOR_MEDIA = {
 } as const;
 
 // Signature Lanes - rap, cars (Tokyo Drift), fight, brand
+// Mobile: SD/720p for reliable decode on iPhone; desktop can use higher res
 export const SIGNATURE_LANE_VIDEOS = [
-  { video: "https://assets.mixkit.co/videos/47497/47497-720.mp4", poster: "https://assets.mixkit.co/videos/47497/47497-thumb-720-4.jpg" },
-  { video: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4", poster: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=400" },
-  { video: "https://videos.pexels.com/video-files/9943217/9943217-sd_640_360_24fps.mp4", poster: "https://images.pexels.com/photos/4761671/pexels-photo-4761671.jpeg?auto=compress&w=400" },
-  { video: "https://videos.pexels.com/video-files/3571264/3571264-sd_640_360_30fps.mp4", poster: "https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&w=400" },
-  { video: "https://videos.pexels.com/video-files/5752729/5752729-sd_640_360_30fps.mp4", poster: "https://images.pexels.com/photos/7619638/pexels-photo-7619638.jpeg?auto=compress&w=400" },
+  { video: "https://assets.mixkit.co/videos/47497/47497-720.mp4", videoMobile: "https://assets.mixkit.co/videos/47497/47497-720.mp4", poster: "https://assets.mixkit.co/videos/47497/47497-thumb-720-4.jpg" },
+  { video: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4", videoMobile: "https://videos.pexels.com/video-files/27974758/12279599-sd_640_360_60fps.mp4", poster: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=400" },
+  { video: "https://videos.pexels.com/video-files/9943217/9943217-sd_640_360_24fps.mp4", videoMobile: "https://videos.pexels.com/video-files/9943217/9943217-sd_640_360_24fps.mp4", poster: "https://images.pexels.com/photos/4761671/pexels-photo-4761671.jpeg?auto=compress&w=400" },
+  { video: "https://videos.pexels.com/video-files/3571264/3571264-sd_640_360_30fps.mp4", videoMobile: "https://videos.pexels.com/video-files/3571264/3571264-sd_640_360_30fps.mp4", poster: "https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&w=400" },
+  { video: "https://videos.pexels.com/video-files/5752729/5752729-sd_640_360_30fps.mp4", videoMobile: "https://videos.pexels.com/video-files/5752729/5752729-sd_640_360_30fps.mp4", poster: "https://images.pexels.com/photos/7619638/pexels-photo-7619638.jpeg?auto=compress&w=400" },
 ] as const;
 
 export function pickFallback(arr: string[], index = 0): string {

@@ -43,43 +43,31 @@ export function Hero({ onQuoteOpen }: HeroProps) {
     return () => clearInterval(interval);
   }, [reducedMotion]);
 
-  // Preload next video (use mobile URL on small screens)
-  useEffect(() => {
-    const nextIndex = (wordIndex + 1) % CYCLING_WORDS.length;
-    const nextKey = CYCLING_WORDS[nextIndex];
-    const theme = HERO_THEMES[nextKey];
-    const href =
-      typeof window !== "undefined" && window.innerWidth < 768
-        ? theme.videoMobile
-        : theme.video;
-    const link = document.createElement("link");
-    link.rel = "preload";
-    link.as = "video";
-    link.href = href;
-    document.head.appendChild(link);
-    return () => { document.head.removeChild(link); };
-  }, [wordIndex]);
-
   return (
     <section ref={ref} className="relative h-screen overflow-hidden">
       <motion.div style={reducedMotion ? {} : { scale }} className="absolute inset-0">
-        {/* Video crossfade */}
-        <AnimatePresence mode="sync">
-          <motion.div
-            key={currentKey}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2 }}
-            className="absolute inset-0"
-          >
-            <HeroVideo
-              src={theme.video}
-              srcMobile={theme.videoMobile}
-              poster={theme.poster}
-            />
-          </motion.div>
-        </AnimatePresence>
+        {/* All videos in DOM — load in background, no poster flash when switching */}
+        {CYCLING_WORDS.map((key) => {
+          const theme = HERO_THEMES[key];
+          const isActive = currentKey === key;
+          return (
+            <motion.div
+              key={key}
+              initial={false}
+              animate={{ opacity: isActive ? 1 : 0 }}
+              transition={{ duration: 1.2 }}
+              className="absolute inset-0"
+              style={{ pointerEvents: isActive ? "auto" : "none" }}
+            >
+              <HeroVideo
+                src={theme.video}
+                srcMobile={theme.videoMobile}
+                poster={theme.poster}
+                isActive={isActive}
+              />
+            </motion.div>
+          );
+        })}
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-background/65" aria-hidden="true" />
       </motion.div>
@@ -186,27 +174,39 @@ function HeroVideo({
   src,
   srcMobile,
   poster,
+  isActive,
 }: {
   src: string;
   srcMobile: string;
   poster: string;
+  isActive: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [autoplayFailed, setAutoplayFailed] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-  // Pick source on mount (SSR-safe: avoid loading wrong resolution)
   useEffect(() => {
-    setVideoSrc(window.innerWidth < 768 ? srcMobile : src);
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    setVideoSrc(isMobile ? srcMobile : src);
+    const onResize = () => {
+      const m = window.innerWidth < 768;
+      setVideoSrc(m ? srcMobile : src);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, [src, srcMobile]);
 
   const attemptPlay = useCallback(() => {
     const v = videoRef.current;
     if (!v) return;
     v.play()
-      .then(() => setAutoplayFailed(false))
+      .then(() => {
+        setAutoplayFailed(false);
+        setHasLoaded(true);
+      })
       .catch(() => {
         setAutoplayFailed(true);
         v.pause();
@@ -214,8 +214,13 @@ function HeroVideo({
   }, []);
 
   const handleCanPlay = useCallback(() => {
-    attemptPlay();
-  }, [attemptPlay]);
+    if (isActive) attemptPlay();
+  }, [attemptPlay, isActive]);
+
+  const handleLoadedData = useCallback(() => {
+    setHasLoaded(true);
+    if (isActive) attemptPlay();
+  }, [attemptPlay, isActive]);
 
   const handleError = useCallback(() => {
     if (videoSrc === srcMobile) {
@@ -227,14 +232,24 @@ function HeroVideo({
   }, [videoSrc, srcMobile, src]);
 
   useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (isActive) {
+      attemptPlay();
+    } else {
+      v.pause();
+    }
+  }, [isActive, attemptPlay]);
+
+  useEffect(() => {
     const el = containerRef.current;
     const video = videoRef.current;
     if (!el || !video) return;
     const obs = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting && e.intersectionRatio > 0.3) {
+        if (e.isIntersecting && e.intersectionRatio > 0.3 && isActive) {
           attemptPlay();
-        } else {
+        } else if (!isActive) {
           video.pause();
         }
       },
@@ -242,7 +257,7 @@ function HeroVideo({
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [attemptPlay]);
+  }, [attemptPlay, isActive]);
 
   if (hasError) {
     return (
@@ -254,14 +269,15 @@ function HeroVideo({
     );
   }
 
+  const showPoster = isActive && (!videoSrc || autoplayFailed || !hasLoaded);
+
   return (
     <div ref={containerRef} className="absolute inset-0">
-      {/* Poster layer: prevents black flash before video loads; stays visible if autoplay fails */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
+        className="absolute inset-0 bg-cover bg-center transition-opacity duration-300"
         style={{
           backgroundImage: `url(${poster})`,
-          opacity: autoplayFailed || !videoSrc ? 1 : 0,
+          opacity: showPoster ? 1 : 0,
           pointerEvents: "none",
         }}
         aria-hidden
@@ -277,6 +293,7 @@ function HeroVideo({
           preload="auto"
           poster={poster}
           onCanPlay={handleCanPlay}
+          onLoadedData={handleLoadedData}
           onError={handleError}
           className="absolute inset-0 w-full h-full object-cover"
           style={{ opacity: autoplayFailed ? 0 : 1 }}

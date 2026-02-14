@@ -1,14 +1,18 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+
+const MOBILE_BREAKPOINT = 768;
 
 /** Poster by default. Loads and plays video ONLY on hover (desktop) or tap (mobile). */
 interface VideoPosterHoverProps {
   src: string;
   poster: string;
   alt: string;
+  /** Mobile-optimized URL (SD/720p) for reliable decode on iPhone. Falls back to src if not provided. */
+  mobileSrc?: string;
   className?: string;
   aspectRatio?: "4/5" | "3/4" | "16/9" | "9/16" | "video";
   /** Controlled mode: parent controls active state (e.g. Link hover) */
@@ -21,6 +25,7 @@ export function VideoPosterHover({
   src,
   poster,
   alt,
+  mobileSrc,
   className,
   aspectRatio = "4/5",
   isActive: isActiveProp,
@@ -29,8 +34,20 @@ export function VideoPosterHover({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isActiveInternal, setIsActiveInternal] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [videoSrc, setVideoSrc] = useState(src);
 
   const isActive = isActiveProp !== undefined ? isActiveProp : isActiveInternal;
+
+  useEffect(() => {
+    const pickSrc = () =>
+      typeof window !== "undefined" && window.innerWidth < MOBILE_BREAKPOINT && mobileSrc
+        ? mobileSrc
+        : src;
+    setVideoSrc(pickSrc());
+    const onResize = () => setVideoSrc(pickSrc());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [src, mobileSrc]);
 
   const handleActivate = useCallback(() => {
     if (isActiveProp === undefined) setIsActiveInternal(true);
@@ -94,7 +111,7 @@ export function VideoPosterHover({
           )}
           style={{ opacity: hasLoaded ? 1 : 0 }}
         >
-          <source src={src} type="video/mp4" />
+          <source src={videoSrc} type="video/mp4" />
         </video>
       )}
     </div>
