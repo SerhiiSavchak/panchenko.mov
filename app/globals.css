@@ -120,6 +120,38 @@ textarea:focus-visible,
   scrollbar-width: none;
 }
 
+/* Modal scroll - smooth touch scrolling on iOS */
+.modal-scroll-touch {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Quick Quote modal - mobile safe-area + viewport fit */
+.quick-quote-modal-mobile {
+  inset: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  max-height: min(90dvh, calc(100dvh - 2rem));
+}
+
+/* Card image skeleton - premium shimmer placeholder */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 0%,
+    color-mix(in srgb, var(--color-muted) 80%, var(--color-border)) 50%,
+    var(--color-muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
 /* Neon glow utility - electric blue */
 .neon-glow {
   text-shadow: 0 0 7px rgba(14, 165, 233, 0.6), 0 0 20px rgba(56, 189, 248, 0.3), 0 0 40px rgba(14, 165, 233, 0.15);
@@ -859,6 +891,10 @@ textarea:focus-visible,
   .animated-logo-drip-2 {
     animation: none;
     opacity: 0.4;
+  }
+
+  .skeleton-shimmer {
+    animation: none;
   }
 
   .process-step-item {

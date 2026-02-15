@@ -38,9 +38,9 @@ export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-[61] bg-card border border-border p-6 md:p-8 md:w-full md:max-w-lg max-h-[90vh] overflow-y-auto"
+            className="fixed z-[61] bg-card border border-border flex flex-col quick-quote-modal-mobile md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg md:max-h-[90vh]"
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between shrink-0 p-6 md:p-8 pb-4">
               <h2 className="font-display text-3xl text-foreground">
                 Quick Quote
               </h2>
@@ -53,6 +53,7 @@ export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
               </button>
             </div>
 
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain px-6 md:px-8 pb-6 md:pb-8 modal-scroll-touch">
             {submitted ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -65,7 +66,7 @@ export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
                 </p>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4 min-w-0">
                 <FormField label="Name" required>
                   <Input type="text" required placeholder="Your name" />
                 </FormField>
@@ -109,6 +110,7 @@ export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
                 </Button>
               </form>
             )}
+            </div>
           </motion.div>
         </>
       )}

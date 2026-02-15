@@ -12,10 +12,12 @@ function ReelCard({
   card,
   index,
   inView,
+  priority,
 }: {
   card: (typeof BTS_RAW_CARDS)[number];
   index: number;
   inView: boolean;
+  priority?: boolean;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const cardId = `reel-${card.title}-${index}`;
@@ -43,6 +45,7 @@ function ReelCard({
                 aspectRatio="9/16"
                 isActive={isActive}
                 fill
+                priority={priority}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
               <div className="absolute top-2 left-2 z-10">
@@ -85,7 +88,7 @@ export function ReelRail() {
         className={`flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide min-w-0 w-full ${inView ? "lane-visible" : "lane-reveal"}`}
       >
         {BTS_RAW_CARDS.map((card, i) => (
-          <ReelCard key={`${card.title}-${i}`} card={card} index={i} inView={inView} />
+          <ReelCard key={`${card.title}-${i}`} card={card} index={i} inView={inView} priority={i < 3} />
         ))}
       </div>
     </Section>

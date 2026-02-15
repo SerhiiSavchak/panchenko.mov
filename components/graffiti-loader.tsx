@@ -3,17 +3,25 @@
 import { useState, useEffect } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { useReducedMotion } from "@/lib/hooks";
+import { useHeroReady } from "@/lib/hero-ready-context";
+
+const MAX_WAIT_MS = 4000; // Max 4s for slow connections
 
 export function GraffitiLoader() {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
   const reducedMotion = useReducedMotion();
+  const heroReady = useHeroReady();
 
   useEffect(() => {
-    const duration = reducedMotion ? 400 : 1800;
-    const timer = setTimeout(() => setVisible(false), duration);
-    return () => clearTimeout(timer);
-  }, [reducedMotion]);
+    if (reducedMotion) {
+      const t = setTimeout(() => setVisible(false), 400);
+      return () => clearTimeout(t);
+    }
+    if (heroReady?.isReady) setVisible(false);
+    const maxTimer = setTimeout(() => setVisible(false), MAX_WAIT_MS);
+    return () => clearTimeout(maxTimer);
+  }, [reducedMotion, heroReady?.isReady]);
 
   useEffect(() => {
     if (!visible) {

@@ -19,6 +19,8 @@ interface VideoPosterHoverProps {
   isActive?: boolean;
   /** Fill parent container (absolute inset-0) */
   fill?: boolean;
+  /** Above-the-fold: use priority loading, no lazy (first 6 cards) */
+  priority?: boolean;
 }
 
 export function VideoPosterHover({
@@ -30,10 +32,12 @@ export function VideoPosterHover({
   aspectRatio = "4/5",
   isActive: isActiveProp,
   fill,
+  priority = false,
 }: VideoPosterHoverProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isActiveInternal, setIsActiveInternal] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [videoSrc, setVideoSrc] = useState(src);
 
   const isActive = isActiveProp !== undefined ? isActiveProp : isActiveInternal;
@@ -85,13 +89,23 @@ export function VideoPosterHover({
       onMouseLeave={isActiveProp === undefined ? handleDeactivate : undefined}
       onClick={isActiveProp === undefined ? handleActivate : undefined}
     >
+      {/* Skeleton placeholder - no layout shift (aspect ratio reserved) */}
+      <div
+        className={cn(
+          "absolute inset-0 skeleton-shimmer transition-opacity duration-300",
+          imageLoaded ? "opacity-0 pointer-events-none" : "opacity-100"
+        )}
+        aria-hidden
+      />
       <Image
         src={poster}
         alt={alt}
         fill
-        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-        loading="lazy"
-        fetchPriority="low"
+        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "low"}
+        quality={85}
+        onLoad={() => setImageLoaded(true)}
         className={cn(
           "object-cover transition-opacity duration-300",
           isActive && hasLoaded ? "opacity-0" : "opacity-100"

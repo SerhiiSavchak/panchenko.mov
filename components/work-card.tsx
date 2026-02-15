@@ -10,9 +10,11 @@ import { useLongPressPreview } from "@/lib/use-long-press-preview";
 interface WorkCardProps {
   work: WorkItem;
   index: number;
+  /** First 6 cards are above-the-fold: priority image loading */
+  priority?: boolean;
 }
 
-export function WorkCard({ work, index }: WorkCardProps) {
+export function WorkCard({ work, index, priority = false }: WorkCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -58,6 +60,7 @@ export function WorkCard({ work, index }: WorkCardProps) {
             aspectRatio="4/5"
             isActive={isActive}
             fill
+            priority={priority}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
           <span className="absolute top-3 left-3">

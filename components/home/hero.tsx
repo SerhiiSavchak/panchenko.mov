@@ -5,6 +5,7 @@ import { useReducedMotion } from "@/lib/hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/magnetic-button";
 import { HERO_THEMES, type HeroThemeKey } from "@/lib/media";
+import { useHeroReady } from "@/lib/hero-ready-context";
 
 const CYCLING_WORDS: HeroThemeKey[] = ["rap", "cars", "fight", "brand"];
 const DISPLAY_WORDS: Record<HeroThemeKey, string> = {
@@ -19,6 +20,8 @@ interface HeroProps {
 }
 
 export function Hero({ onQuoteOpen }: HeroProps) {
+  const heroReady = useHeroReady();
+  const onVideoReady = useCallback(() => heroReady?.setReady(), [heroReady]);
   const ref = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
   const [wordIndex, setWordIndex] = useState(0);
@@ -61,6 +64,7 @@ export function Hero({ onQuoteOpen }: HeroProps) {
                 themeKey={key}
                 fallbackImage={"fallbackImage" in theme ? theme.fallbackImage : undefined}
                 deferLoad={!isInitial}
+                onReady={isInitial ? onVideoReady : undefined}
               />
             </motion.div>
           );
@@ -173,6 +177,7 @@ function HeroVideo({
   themeKey,
   fallbackImage,
   deferLoad,
+  onReady,
 }: {
   src: string;
   srcMobile: string;
@@ -180,10 +185,12 @@ function HeroVideo({
   themeKey: HeroThemeKey;
   fallbackImage?: string;
   deferLoad?: boolean;
+  onReady?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  // Above-the-fold priority: initial video loads immediately (no null delay)
+  const [videoSrc, setVideoSrc] = useState<string | null>(() => (deferLoad ? null : src));
   const [deferReady, setDeferReady] = useState(!deferLoad);
   const [isReady, setIsReady] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
@@ -202,11 +209,10 @@ function HeroVideo({
     }
   }, [deferLoad, deferReady, src, srcMobile]);
 
-  // Defer non-initial: load only when this video is about to become active (next in cycle)
-  // Previously all 4 loaded at 2.5s — now we load next ~500ms before switch
+  // Defer non-initial: load next video early so it's ready before switch (2.5s)
   useEffect(() => {
     if (!deferLoad) return;
-    const id = setTimeout(() => setDeferReady(true), 2000);
+    const id = setTimeout(() => setDeferReady(true), 1000);
     return () => clearTimeout(id);
   }, [deferLoad]);
 
@@ -214,9 +220,12 @@ function HeroVideo({
     const v = videoRef.current;
     if (!v || !isActive) return;
     v.play()
-      .then(() => setIsReady(true))
+      .then(() => {
+        setIsReady(true);
+        onReady?.();
+      })
       .catch(() => setHasFailed(true));
-  }, [isActive]);
+  }, [isActive, onReady]);
 
   const handleCanPlay = useCallback(() => {
     if (isActive) attemptPlay();
@@ -244,19 +253,20 @@ function HeroVideo({
     }
   }, [isActive, attemptPlay]);
 
+  // Hero is above-the-fold: use permissive threshold (0.1) for mobile address bar / dynamic viewport
   useEffect(() => {
     const el = containerRef.current;
     const video = videoRef.current;
     if (!el || !video) return;
     const obs = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting && e.intersectionRatio > 0.3 && isActive) {
+        if (e.isIntersecting && e.intersectionRatio > 0.1 && isActive) {
           attemptPlay();
         } else if (!isActive) {
           video.pause();
         }
       },
-      { threshold: [0, 0.3, 0.5, 1], rootMargin: "-50px 0px" }
+      { threshold: [0, 0.1, 0.3, 0.5, 1], rootMargin: "0px 0px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -278,15 +288,6 @@ function HeroVideo({
 
   return (
     <div ref={containerRef} className="absolute inset-0">
-      {/* Loading overlay: solid dark, no poster/frame — reveal only when video ready */}
-      <div
-        className="absolute inset-0 bg-background transition-opacity duration-500"
-        style={{
-          opacity: isReady && !hasFailed ? 0 : 1,
-          pointerEvents: "none",
-        }}
-        aria-hidden
-      />
       {hasFailed && (
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -310,9 +311,8 @@ function HeroVideo({
           onCanPlay={handleCanPlay}
           onLoadedData={handleLoadedData}
           onError={handleError}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+          className="absolute inset-0 w-full h-full object-cover"
           style={{
-            opacity: isReady ? 1 : 0,
             filter: themeKey === "fight" ? "brightness(1.35) contrast(1.05)" : undefined,
           }}
         >

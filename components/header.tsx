@@ -66,10 +66,11 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
         </div>
       </header>
 
-      {/* Mobile menu overlay - CSS transitions */}
+      {/* Mobile menu overlay - scrollable, safe-area aware */}
       <div
         className={cn(
-          "md:hidden fixed inset-0 z-40 bg-background flex flex-col items-center justify-center gap-8 transition-opacity duration-300",
+          "md:hidden fixed inset-0 z-40 bg-background flex flex-col items-center justify-center gap-8 overflow-y-auto overflow-x-hidden overscroll-contain transition-opacity duration-300",
+          "pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]",
           mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
         aria-hidden={!mobileOpen}

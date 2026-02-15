@@ -17,7 +17,7 @@ export function FeaturedWork() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {featured.map((work, i) => (
-          <WorkCard key={work.slug} work={work} index={i} />
+          <WorkCard key={work.slug} work={work} index={i} priority={i < 6} />
         ))}
       </div>
     </Section>
