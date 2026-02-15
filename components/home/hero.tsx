@@ -62,7 +62,6 @@ export function Hero({ onQuoteOpen }: HeroProps) {
                 srcMobile={theme.videoMobile}
                 isActive={isActive}
                 themeKey={key}
-                fallbackImage={"fallbackImage" in theme ? theme.fallbackImage : undefined}
                 deferLoad={!isInitial}
                 onReady={isInitial ? onVideoReady : undefined}
               />
@@ -168,14 +167,14 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   );
 }
 
-const LOAD_TIMEOUT_MS = 8000;
+const LOAD_TIMEOUT_MS = 15000;
+const RETRY_DELAY_MS = 1500;
 
 function HeroVideo({
   src,
   srcMobile,
   isActive,
   themeKey,
-  fallbackImage,
   deferLoad,
   onReady,
 }: {
@@ -183,17 +182,16 @@ function HeroVideo({
   srcMobile: string;
   isActive: boolean;
   themeKey: HeroThemeKey;
-  fallbackImage?: string;
   deferLoad?: boolean;
   onReady?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  // Above-the-fold priority: initial video loads immediately (no null delay)
   const [videoSrc, setVideoSrc] = useState<string | null>(() => (deferLoad ? null : src));
   const [deferReady, setDeferReady] = useState(!deferLoad);
   const [isReady, setIsReady] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -219,12 +217,25 @@ function HeroVideo({
   const attemptPlay = useCallback(() => {
     const v = videoRef.current;
     if (!v || !isActive) return;
-    v.play()
-      .then(() => {
-        setIsReady(true);
-        onReady?.();
-      })
-      .catch(() => setHasFailed(true));
+    const tryPlay = () => {
+      v.play()
+        .then(() => {
+          setIsReady(true);
+          setHasFailed(false);
+          onReady?.();
+        })
+        .catch(() => {
+          setRetryCount((c) => {
+            if (c < 2) {
+              setTimeout(tryPlay, RETRY_DELAY_MS);
+              return c + 1;
+            }
+            setHasFailed(true);
+            return c;
+          });
+        });
+    };
+    tryPlay();
   }, [isActive, onReady]);
 
   const handleCanPlay = useCallback(() => {
@@ -238,10 +249,15 @@ function HeroVideo({
   const handleError = useCallback(() => {
     if (videoSrc === srcMobile) {
       setVideoSrc(src);
+    } else if (retryCount < 3) {
+      setRetryCount((c) => c + 1);
+      setTimeout(() => {
+        setVideoSrc((prev) => (prev === srcMobile ? src : srcMobile));
+      }, RETRY_DELAY_MS);
     } else {
       setHasFailed(true);
     }
-  }, [videoSrc, srcMobile, src]);
+  }, [videoSrc, srcMobile, src, retryCount]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -290,14 +306,11 @@ function HeroVideo({
     <div ref={containerRef} className="absolute inset-0">
       {hasFailed && (
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={
-            fallbackImage
-              ? { backgroundImage: `url(${fallbackImage})` }
-              : { backgroundColor: "var(--color-background)" }
-          }
+          className="absolute inset-0 flex items-center justify-center bg-background"
           aria-hidden
-        />
+        >
+          <span className="text-muted-foreground text-xs uppercase">Video unavailable</span>
+        </div>
       )}
       {videoSrc && !hasFailed && (
         <video
