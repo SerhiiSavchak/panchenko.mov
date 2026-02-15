@@ -3,9 +3,13 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Header } from "@/components/header";
-import { QuickQuoteModal } from "@/components/quick-quote-modal";
 import { Hero } from "@/components/home/hero";
 import { Footer } from "@/components/footer";
+
+const QuickQuoteModal = dynamic(
+  () => import("@/components/quick-quote-modal").then((m) => ({ default: m.QuickQuoteModal })),
+  { ssr: false }
+);
 
 const ScrollProgress = dynamic(
   () => import("@/components/scroll-progress").then((m) => ({ default: m.ScrollProgress })),

@@ -5,21 +5,17 @@ Reduce video-related lag while keeping perceived quality high. Max 1–2 videos 
 
 ## Changes
 
-### 1. VideoManager (lib/video-manager.tsx)
-- Context + hook for max 2 concurrent active videos
-- `register(id, priority, { play, pause, unload })` — components register
-- `requestPlay(id)` — request slot; evicts lowest-priority if full
-- `release(id)` — release slot
-- Dev-only logs: `[VideoManager] Playing:`, `Released:`
+### 1. Video Policy (2025 update)
+- **Hero**: Max 2 videos in DOM (current + next in cycle); deferred load for non-initial; mobile SD sources.
+- **VideoManager removed** — was unused; cards use VideoPosterHover (poster-first, load on hover/long-press).
 
-### 2. New Components
+### 2. Components
 
 | Component | Use |
 |-----------|-----|
-| **VideoPosterHover** | Poster by default; loads and plays video only on hover (desktop) or tap (mobile). Supports controlled `isActive` from parent. |
+| **VideoPosterHover** | Poster by default; loads and plays video only on hover (desktop) or long-press (mobile). `preload="metadata"` when active. |
 | **VideoPosterOnly** | Static poster only; no video. |
 | **VideoPosterTap** | Poster by default; tap to play/pause. Loads video on first tap. |
-| **VideoManaged** | Uses VideoManager; loads when in viewport (data-src); respects concurrency. |
 
 ### 3. Section-by-Section
 
@@ -73,13 +69,10 @@ Reduce video-related lag while keeping perceived quality high. Max 1–2 videos 
 - No GIFs in current codebase; all motion uses video
 
 ## Files Touched
-- `lib/video-manager.tsx` (new)
-- `components/video-poster-hover.tsx` (new)
-- `components/video-poster-only.tsx` (new)
-- `components/video-poster-tap.tsx` (new)
-- `components/video-managed.tsx` (new)
-- `components/providers.tsx` (new)
-- `app/layout.tsx` — VideoManagerProvider
+- `components/video-poster-hover.tsx`
+- `components/video-poster-only.tsx`
+- `components/video-poster-tap.tsx`
+- `components/providers.tsx` — ActivePreviewProvider, WorkFilterProvider (VideoManager removed)
 - `components/work-card.tsx` — VideoPosterHover
 - `components/home/signature-lanes.tsx` — VideoPosterHover
 - `components/home/reel-rail.tsx` — VideoPosterOnly

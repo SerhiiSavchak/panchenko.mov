@@ -9,16 +9,16 @@ export const HERO_THEMES = {
   },
   cars: {
     video: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4",
-    videoMobile: "https://assets.mixkit.co/videos/47615/47615-720.mp4",
+    videoMobile: "https://assets.mixkit.co/videos/46422/46422-720.mp4",
     fallbackImage: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=1920",
   },
   fight: {
     video: "https://videos.pexels.com/video-files/9943217/9943217-uhd_2560_1440_24fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/9943217/9943217-uhd_2560_1440_24fps.mp4",
+    videoMobile: "https://videos.pexels.com/video-files/9943217/9943217-sd_640_360_24fps.mp4",
   },
   brand: {
     video: "https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4",
+    videoMobile: "https://assets.mixkit.co/videos/100946/100946-720.mp4",
   },
 } as const;
 

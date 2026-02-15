@@ -61,7 +61,7 @@
 - **Next.js Image** — WebP/AVIF via `formats` in next.config.
 - **Featured cards** — Local MP4 assets (600KB–5MB); load only on hover.
 - **Lazy loading** — `loading="lazy"` on all offscreen images.
-- **VideoManager** — Max 2 concurrent videos; evicts lowest priority when full.
+- **Hero** — Max 2 videos in DOM (current + next); poster-first, deferred load for non-initial.
 
 ### 3.4 Animation
 - **CSS-only** — All scroll reveals use `transform` and `opacity` (GPU-friendly).

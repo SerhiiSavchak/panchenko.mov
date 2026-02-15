@@ -103,7 +103,7 @@ export function VideoPosterHover({
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
           poster={poster}
           onLoadedData={handleLoadedData}
           className={cn(

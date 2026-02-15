@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useReducedMotion } from "@/lib/hooks";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/magnetic-button";
 import { HERO_THEMES, type HeroThemeKey } from "@/lib/media";
 
@@ -19,20 +19,11 @@ interface HeroProps {
 }
 
 export function Hero({ onQuoteOpen }: HeroProps) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
-
+  const ref = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
   const [wordIndex, setWordIndex] = useState(0);
   const currentKey = CYCLING_WORDS[wordIndex];
-  const theme = HERO_THEMES[currentKey];
+  const nextKey = CYCLING_WORDS[(wordIndex + 1) % CYCLING_WORDS.length];
 
   // Cycle words every 2.5s
   useEffect(() => {
@@ -43,14 +34,17 @@ export function Hero({ onQuoteOpen }: HeroProps) {
     return () => clearInterval(interval);
   }, [reducedMotion]);
 
+  // Only render current + next video (max 2 in DOM) — reduces decode/memory on mobile
+  const videosToRender = [currentKey, nextKey];
+  const uniqueVideos = Array.from(new Set(videosToRender));
+
   return (
     <section ref={ref} className="relative h-screen overflow-hidden">
-      <motion.div style={reducedMotion ? {} : { scale }} className="absolute inset-0">
-        {/* First video loads immediately; others deferred to reduce initial payload */}
-        {CYCLING_WORDS.map((key, i) => {
+      <div className="absolute inset-0">
+        {uniqueVideos.map((key) => {
           const theme = HERO_THEMES[key];
           const isActive = currentKey === key;
-          const isInitial = i === 0;
+          const isInitial = key === CYCLING_WORDS[0];
           return (
             <motion.div
               key={key}
@@ -73,12 +67,9 @@ export function Hero({ onQuoteOpen }: HeroProps) {
         })}
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-background/10" aria-hidden="true" />
-      </motion.div>
+      </div>
 
-      <motion.div
-        style={reducedMotion ? {} : { y, opacity }}
-        className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center"
-      >
+      <div className="hero-content relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
         {/* Floating badges */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
           {["In-house @hutsyfinancial", "Toronto", "Cinematic short-form"].map((badge) => (
@@ -154,7 +145,7 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           <MagneticButton variant="primary" onClick={onQuoteOpen}>Book a Shoot</MagneticButton>
           <MagneticButton variant="secondary" href="#featured">Watch Work</MagneticButton>
         </motion.div>
-      </motion.div>
+      </div>
 
       {/* Scroll indicator */}
       <motion.div
@@ -211,9 +202,11 @@ function HeroVideo({
     }
   }, [deferLoad, deferReady, src, srcMobile]);
 
+  // Defer non-initial: load only when this video is about to become active (next in cycle)
+  // Previously all 4 loaded at 2.5s — now we load next ~500ms before switch
   useEffect(() => {
     if (!deferLoad) return;
-    const id = setTimeout(() => setDeferReady(true), 2500);
+    const id = setTimeout(() => setDeferReady(true), 2000);
     return () => clearTimeout(id);
   }, [deferLoad]);
 
