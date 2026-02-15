@@ -82,7 +82,7 @@ export function ReelRail() {
 
       <div
         ref={ref}
-        className={`flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide ${inView ? "lane-visible" : "lane-reveal"}`}
+        className={`flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide min-w-0 w-full ${inView ? "lane-visible" : "lane-reveal"}`}
       >
         {BTS_RAW_CARDS.map((card, i) => (
           <ReelCard key={`${card.title}-${i}`} card={card} index={i} inView={inView} />

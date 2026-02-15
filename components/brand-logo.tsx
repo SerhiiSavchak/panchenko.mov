@@ -47,7 +47,10 @@ export function BrandLogo({
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
+          preserveAspectRatio="xMidYMid meet"
         >
+          {/* Content group: centered in viewBox (camera+text are left-aligned, shift right to balance) */}
+          <g transform="translate(67, 0)">
           {/* Cinema camera — detailed body + lens */}
           <g className={doAnimate ? "animated-logo-camera" : ""} transform="translate(0, 10)">
             {/* Body */}
@@ -141,6 +144,7 @@ export function BrandLogo({
             <tspan x="88">panchenko</tspan>
             <tspan fill="var(--color-accent)" className="neon-glow">.mov</tspan>
           </text>
+          </g>
         </svg>
       </div>
     );

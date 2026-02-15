@@ -28,7 +28,7 @@ export default function WorkPage() {
     <>
       <ScrollProgress />
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
-      <main className="pt-24 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen">
+      <main className="pt-24 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen overflow-x-clip">
         <div className="page-enter">
           <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
             Portfolio

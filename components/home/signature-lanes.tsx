@@ -86,7 +86,7 @@ export function SignatureLanes() {
     <Section>
       <SectionHeader label="Signature Lanes" title="What I Shoot" className="mb-10" />
 
-      <div ref={ref} className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide">
+      <div ref={ref} className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide min-w-0 w-full">
         {lanes.map((lane, i) => (
           <LaneCard key={lane.title} lane={lane} index={i} inView={inView} />
         ))}

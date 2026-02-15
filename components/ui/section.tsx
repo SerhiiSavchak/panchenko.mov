@@ -16,13 +16,14 @@ export function Section({
   children,
   className,
   id,
-  rootMargin = "-80px 0px",
+  rootMargin = "-60px 0px",
 }: SectionProps) {
   const ref = useRef<HTMLElement>(null);
   const isInView = useScrollReveal(ref, {
     once: true,
-    threshold: 0.08,
+    threshold: 0.05,
     rootMargin,
+    rootMarginMobile: "100px 0px -60px 0px",
   });
 
   return (
@@ -30,7 +31,7 @@ export function Section({
       ref={ref as React.RefObject<HTMLElement>}
       id={id}
       className={cn(
-        "px-4 md:px-8 lg:px-16 py-16 md:py-24 section-reveal",
+        "px-4 md:px-8 lg:px-16 py-16 md:py-24 section-reveal overflow-x-clip",
         isInView && "section-visible",
         className
       )}

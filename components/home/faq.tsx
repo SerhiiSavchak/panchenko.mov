@@ -34,7 +34,11 @@ const faqs = [
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const ref = useRef(null);
-  const inView = useScrollReveal(ref, { once: true, rootMargin: "-80px 0px" });
+  const inView = useScrollReveal(ref, {
+    once: true,
+    rootMargin: "-60px 0px",
+    rootMarginMobile: "100px 0px -40px 0px",
+  });
 
   return (
     <Section>

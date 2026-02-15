@@ -12,7 +12,11 @@ const stats = [
 
 export function ProofStrip() {
   const ref = useRef(null);
-  const inView = useScrollReveal(ref, { once: true, rootMargin: "-50px 0px" });
+  const inView = useScrollReveal(ref, {
+    once: true,
+    rootMargin: "-50px 0px",
+    rootMarginMobile: "80px 0px -30px 0px",
+  });
 
   return (
     <div

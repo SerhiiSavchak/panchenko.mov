@@ -24,6 +24,8 @@
 
 html {
   position: relative;
+  /* Prevent horizontal scroll on mobile (defense in depth with flex min-w-0 fix) */
+  overflow-x: clip;
 }
 
 body {
@@ -98,6 +100,15 @@ textarea:focus-visible,
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+/* Mobile bottom bar (Book/Portfolio) - stable in Telegram WebView & in-app browsers */
+.mobile-bottom-bar {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
 }
 
 /* Hide scrollbar for reel rails */
@@ -533,9 +544,15 @@ textarea:focus-visible,
   animation: about-line-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* Graffiti loader - premium layered, graffiti + camera, 1–2s */
+/* Graffiti loader - layered animation, mathematically centered */
+.graffiti-loader {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
 .graffiti-loader-exit {
-  animation: loader-fade-out 0.5s ease forwards;
+  animation: loader-fade-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes loader-fade-out {
@@ -545,21 +562,118 @@ textarea:focus-visible,
   }
 }
 
+/* Layer 1: Noise texture - staggered fade */
+.graffiti-loader-noise {
+  opacity: 0;
+  animation: loader-noise-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s forwards;
+}
+
+@keyframes loader-noise-in {
+  to { opacity: 0.035; }
+}
+
+/* Layer 2: Vignette - dark edges converge (centered at 50% 50%) */
+.graffiti-loader-vignette {
+  background: radial-gradient(
+    ellipse 80% 70% at 50% 50%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  opacity: 0;
+  animation: loader-vignette-in 1s cubic-bezier(0.34, 1.2, 0.64, 1) 0.2s forwards;
+}
+
+@keyframes loader-vignette-in {
+  from {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Layer 3: Glow - expand from center (no parallax drift to avoid visual shift) */
 .graffiti-loader-glow {
-  animation: loader-glow 1.2s ease-out forwards;
+  opacity: 0;
+  animation: loader-glow 1.4s cubic-bezier(0.34, 1.2, 0.64, 1) 0.1s forwards;
+  transform: translate(-50%, -50%) scale(0.3);
 }
 
 @keyframes loader-glow {
   0% {
     opacity: 0;
-    transform: scale(0.6);
+    transform: translate(-50%, -50%) scale(0.3);
   }
   50% {
-    opacity: 0.6;
+    opacity: 0.4;
   }
   100% {
-    opacity: 0.25;
-    transform: scale(1);
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* Layer 4: Sweep line - cinematic reveal */
+.graffiti-loader-sweep {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(14, 165, 233, 0.08) 48%,
+    rgba(14, 165, 233, 0.15) 50%,
+    rgba(14, 165, 233, 0.08) 52%,
+    transparent 100%
+  );
+  background-size: 30% 100%;
+  background-repeat: no-repeat;
+  opacity: 0;
+  animation: loader-sweep 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+}
+
+@keyframes loader-sweep {
+  0% {
+    opacity: 0;
+    background-position: -30% 0;
+  }
+  40% {
+    opacity: 1;
+    background-position: 40% 0;
+  }
+  70% {
+    opacity: 0.8;
+    background-position: 100% 0;
+  }
+  100% {
+    opacity: 0;
+    background-position: 130% 0;
+  }
+}
+
+/* Content - mathematically centered via grid (no magic numbers) */
+.graffiti-loader-content {
+  display: grid;
+  place-items: center;
+}
+
+.graffiti-loader-logo {
+  opacity: 0;
+  transform: translateY(20px) scale(0.92);
+  animation: loader-logo-reveal 1s cubic-bezier(0.34, 1.2, 0.64, 1) 0.25s forwards;
+}
+
+@keyframes loader-logo-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.9);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-4px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -691,9 +805,32 @@ textarea:focus-visible,
     animation-duration: 0.2s;
   }
 
+  .graffiti-loader-noise {
+    animation: none;
+    opacity: 0.035;
+  }
+
+  .graffiti-loader-vignette {
+    animation: none;
+    opacity: 1;
+    transform: scale(1);
+  }
+
   .graffiti-loader-glow {
     animation: none;
     opacity: 0.15;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .graffiti-loader-sweep {
+    animation: none;
+    opacity: 0;
+  }
+
+  .graffiti-loader-logo {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 
   .animated-logo-box {

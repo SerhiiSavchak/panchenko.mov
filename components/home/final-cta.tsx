@@ -11,7 +11,11 @@ interface FinalCTAProps {
 
 export function FinalCTA({ onQuoteOpen }: FinalCTAProps) {
   const ref = useRef(null);
-  const inView = useScrollReveal(ref, { once: true, rootMargin: "-80px 0px" });
+  const inView = useScrollReveal(ref, {
+    once: true,
+    rootMargin: "-60px 0px",
+    rootMarginMobile: "100px 0px -40px 0px",
+  });
 
   return (
     <section className="px-4 md:px-8 lg:px-16 py-24 md:py-32" ref={ref}>

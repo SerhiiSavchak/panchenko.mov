@@ -94,7 +94,7 @@ export default function Home() {
     <>
       <ScrollProgress />
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
-      <main className="relative">
+      <main className="relative overflow-x-clip">
         <Hero onQuoteOpen={() => setQuoteOpen(true)} />
         <ProofStrip />
         <About />

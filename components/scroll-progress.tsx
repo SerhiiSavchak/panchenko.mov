@@ -13,28 +13,41 @@ export function ScrollProgress() {
   });
 
   const opacity = useTransform(scrollY, [0, SCROLL_THRESHOLD], [0, 1]);
-  const y = useTransform(scrollY, [0, SCROLL_THRESHOLD], [-12, 0]);
   const springOpacity = useSpring(opacity, { stiffness: 200, damping: 30 });
-  const springY = useSpring(y, { stiffness: 200, damping: 30 });
-  const pointerEvents = useTransform(opacity, (v) => (v < 0.01 ? "none" : "auto"));
+
+  const yBottom = useTransform(scrollY, [0, SCROLL_THRESHOLD], [12, 0]);
+  const yTop = useTransform(scrollY, [0, SCROLL_THRESHOLD], [-12, 0]);
+  const springYBottom = useSpring(yBottom, { stiffness: 200, damping: 30 });
+  const springYTop = useSpring(yTop, { stiffness: 200, damping: 30 });
 
   return (
-    <motion.div
-      className="fixed top-0 left-0 right-0 z-[9999] flex items-center gap-2 px-3 md:px-6 py-1.5 bg-background/90 backdrop-blur-sm border-b border-border"
-      style={{ opacity: springOpacity, y: springY, pointerEvents }}
-      role="progressbar"
-      aria-label="Scroll progress"
-    >
-      <span className="text-[8px] md:text-[9px] uppercase tracking-[0.15em] text-muted-foreground shrink-0">
-        Scroll
-      </span>
-      <div className="flex-1 h-1 rounded-full bg-border overflow-hidden">
+    <>
+      {/* Mobile: below header */}
+      <motion.div
+        className="fixed top-16 left-0 right-0 z-[9999] h-[3px] w-full overflow-hidden pointer-events-none md:hidden"
+        style={{ opacity: springOpacity, y: springYTop }}
+        role="progressbar"
+        aria-label="Scroll progress"
+      >
         <motion.div
-          className="h-full min-w-[2px] rounded-full bg-accent origin-left"
+          className="h-full w-full min-w-[2px] bg-accent origin-left"
           style={{ scaleX }}
           aria-hidden
         />
-      </div>
-    </motion.div>
+      </motion.div>
+      {/* Desktop: footer bottom border */}
+      <motion.div
+        className="fixed bottom-0 left-0 right-0 z-[9999] h-[2px] w-full overflow-hidden pointer-events-none hidden md:block"
+        style={{ opacity: springOpacity, y: springYBottom }}
+        role="progressbar"
+        aria-label="Scroll progress"
+      >
+        <motion.div
+          className="h-full w-full min-w-[2px] bg-accent origin-left"
+          style={{ scaleX }}
+          aria-hidden
+        />
+      </motion.div>
+    </>
   );
 }

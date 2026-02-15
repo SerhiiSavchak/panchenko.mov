@@ -10,7 +10,11 @@ const ABOUT_PHOTOS = [ABOUT_IMAGES[0], ABOUT_IMAGES[1], ABOUT_IMAGES[2]];
 
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
-  const inView = useScrollReveal(sectionRef, { once: true, rootMargin: "-80px 0px" });
+  const inView = useScrollReveal(sectionRef, {
+    once: true,
+    rootMargin: "-60px 0px",
+    rootMarginMobile: "100px 0px -40px 0px",
+  });
 
   const lines = [
     "Started on the streets of Toronto shooting rap videos with no budget and too much ambition.",
