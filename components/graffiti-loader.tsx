@@ -5,7 +5,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { useReducedMotion } from "@/lib/hooks";
 import { useHeroReady } from "@/lib/hero-ready-context";
 
-const FALLBACK_MS = 15000; // Show content after 15s even if video not ready
+const MAX_WAIT_MS = 4000; // Max 4s for slow connections
 
 export function GraffitiLoader() {
   const [visible, setVisible] = useState(true);
@@ -19,12 +19,9 @@ export function GraffitiLoader() {
       return () => clearTimeout(t);
     }
     if (heroReady?.isReady) setVisible(false);
-    const fallback = setTimeout(() => {
-      heroReady?.setForceShow();
-      setVisible(false);
-    }, FALLBACK_MS);
-    return () => clearTimeout(fallback);
-  }, [reducedMotion, heroReady]);
+    const maxTimer = setTimeout(() => setVisible(false), MAX_WAIT_MS);
+    return () => clearTimeout(maxTimer);
+  }, [reducedMotion, heroReady?.isReady]);
 
   useEffect(() => {
     if (!visible) {

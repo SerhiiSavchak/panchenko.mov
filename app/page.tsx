@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { Header } from "@/components/header";
 import { Hero } from "@/components/home/hero";
 import { Footer } from "@/components/footer";
-import { useHeroReady } from "@/lib/hero-ready-context";
 
 const QuickQuoteModal = dynamic(
   () => import("@/components/quick-quote-modal").then((m) => ({ default: m.QuickQuoteModal })),
@@ -94,19 +93,12 @@ const FinalCTA = dynamic(
 
 export default function Home() {
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const heroReady = useHeroReady();
 
   return (
     <>
       <ScrollProgress />
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
-      <main
-        className="relative overflow-x-clip"
-        style={{
-          visibility: heroReady?.isReady ? "visible" : "hidden",
-          minHeight: "100vh",
-        }}
-      >
+      <main className="relative overflow-x-clip">
         <Hero onQuoteOpen={() => setQuoteOpen(true)} />
         <ProofStrip />
         <About />
