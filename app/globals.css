@@ -128,7 +128,17 @@ textarea:focus-visible,
 /* Quick Quote modal - mobile safe-area + viewport fit */
 .quick-quote-modal-mobile {
   inset: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
-  max-height: min(90dvh, calc(100dvh - 2rem));
+  max-height: min(85dvh, calc(100dvh - 2rem));
+}
+
+/* Body scroll lock - prevents scroll jump when modal opens */
+body.modal-scroll-lock {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  left: 0;
+  right: 0;
+  top: 0;
 }
 
 /* Card image skeleton - premium shimmer placeholder */
@@ -212,7 +222,7 @@ textarea:focus-visible,
 @keyframes scroll-reveal-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(36px);
   }
   to {
     opacity: 1;
@@ -223,7 +233,7 @@ textarea:focus-visible,
 @keyframes scroll-reveal-up-lg {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(44px);
   }
   to {
     opacity: 1;
@@ -234,7 +244,7 @@ textarea:focus-visible,
 @keyframes scroll-reveal-up-xl {
   from {
     opacity: 0;
-    transform: translateY(40px);
+    transform: translateY(56px);
   }
   to {
     opacity: 1;
@@ -245,29 +255,29 @@ textarea:focus-visible,
 /* Stagger items: parent gets .scroll-reveal-visible when in view */
 .scroll-reveal-item {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(36px);
 }
 
 .scroll-reveal-visible .scroll-reveal-item {
-  animation: scroll-reveal-up 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: scroll-reveal-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .scroll-reveal-item-lg {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(44px);
 }
 
 .scroll-reveal-visible .scroll-reveal-item-lg {
-  animation: scroll-reveal-up-lg 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: scroll-reveal-up-lg 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .scroll-reveal-item-xl {
   opacity: 0;
-  transform: translateY(40px);
+  transform: translateY(56px);
 }
 
 .scroll-reveal-visible .scroll-reveal-item-xl {
-  animation: scroll-reveal-up-xl 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: scroll-reveal-up-xl 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* Page load animations - runs on first paint */
@@ -479,25 +489,6 @@ textarea:focus-visible,
 }
 
 .work-card-reveal.work-card-visible {
-  animation: scroll-reveal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.gear-heading-reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.section-in-view .gear-heading-reveal {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.gear-card-reveal {
-  opacity: 0;
-}
-
-.gear-card-reveal.gear-card-visible {
   animation: scroll-reveal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 

@@ -27,8 +27,12 @@ export function CaseStudyClient({ work }: { work: WorkItem }) {
       <main className="pt-24 pb-16 md:pb-24 overflow-x-clip">
         <div className="px-4 md:px-8 lg:px-16">
           <div className="page-enter">
-            <Link href="/work" className="text-xs uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">
-              &larr; Back to Work
+            <Link
+              href="/work"
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-widest border border-border text-muted-foreground hover:border-accent hover:text-accent transition-colors mb-4"
+            >
+              <span aria-hidden>&larr;</span>
+              Back to Portfolio
             </Link>
             <div className="flex flex-wrap items-end justify-between gap-4 mt-4 mb-8">
               <div>

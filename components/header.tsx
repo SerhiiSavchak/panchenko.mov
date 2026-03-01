@@ -34,34 +34,34 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
             : "bg-transparent"
         )}
       >
-        <div className="flex items-center justify-between px-4 md:px-8 lg:px-16 h-16">
+        <div className="flex items-center justify-between px-4 md:px-8 lg:px-16 h-20">
           <Link href="/" aria-label="Home" className="logo-graffiti logo-hover">
-            <BrandLogo variant="header" size="sm" />
+            <BrandLogo variant="header" size="md" />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/work" className="text-sm uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">
+          <nav className="hidden md:flex items-center gap-10">
+            <Link href="/work" className="text-base uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">
               Work
             </Link>
-            <Link href="/contact" className="text-sm uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">
+            <Link href="/contact" className="text-base uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">
               Contact
             </Link>
             <button
               onClick={onQuoteOpen}
-              className="px-5 py-2 text-xs uppercase tracking-widest bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
+              className="px-6 py-3 text-sm uppercase tracking-widest bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
             >
               Book a Shoot
             </button>
           </nav>
 
           <button
-            className="md:hidden flex flex-col gap-1.5 p-2"
+            className="md:hidden flex flex-col gap-2 p-3"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
-            <span className={cn("block w-6 h-px bg-foreground transition-transform duration-300", mobileOpen && "rotate-45 translate-y-[4px]")} />
-            <span className={cn("block w-6 h-px bg-foreground transition-opacity duration-300", mobileOpen && "opacity-0")} />
-            <span className={cn("block w-6 h-px bg-foreground transition-transform duration-300", mobileOpen && "-rotate-45 -translate-y-[4px]")} />
+            <span className={cn("block w-7 h-px bg-foreground transition-transform duration-300", mobileOpen && "rotate-45 translate-y-[5px]")} />
+            <span className={cn("block w-7 h-px bg-foreground transition-opacity duration-300", mobileOpen && "opacity-0")} />
+            <span className={cn("block w-7 h-px bg-foreground transition-transform duration-300", mobileOpen && "-rotate-45 -translate-y-[5px]")} />
           </button>
         </div>
       </header>

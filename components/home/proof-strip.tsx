@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { motion } from "framer-motion";
 import { useScrollReveal } from "@/lib/scroll-animate";
 
 const stats = [
@@ -19,11 +20,14 @@ export function ProofStrip() {
   });
 
   return (
-    <div
-      ref={ref}
-      className={`border-y border-border py-8 px-4 md:px-8 lg:px-16 ${inView ? "scroll-reveal-visible" : ""}`}
+    <motion.div
+      initial={{ opacity: 0, y: 56 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      className="border-y border-border py-8 px-4 md:px-8 lg:px-16"
     >
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+      <div ref={ref} className={`grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 ${inView ? "scroll-reveal-visible" : ""}`}>
         {stats.map((stat, i) => (
           <div
             key={stat.label}
@@ -39,6 +43,6 @@ export function ProofStrip() {
           </div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

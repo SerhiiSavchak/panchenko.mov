@@ -61,21 +61,10 @@ const ReelRail = dynamic(
     })),
   { ssr: true }
 );
-const Gear = dynamic(
-  () => import("@/components/home/gear").then((m) => ({ default: m.Gear })),
-  { ssr: true }
-);
 const BuildYourShoot = dynamic(
   () =>
     import("@/components/home/build-your-shoot").then((m) => ({
       default: m.BuildYourShoot,
-    })),
-  { ssr: true }
-);
-const Testimonials = dynamic(
-  () =>
-    import("@/components/home/testimonials").then((m) => ({
-      default: m.Testimonials,
     })),
   { ssr: true }
 );
@@ -107,9 +96,7 @@ export default function Home() {
         <SignatureLanes />
         <PinnedProcess />
         <ReelRail />
-        <Gear />
         <BuildYourShoot onQuoteOpen={() => setQuoteOpen(true)} />
-        <Testimonials />
         <FAQ />
         <FinalCTA onQuoteOpen={() => setQuoteOpen(true)} />
       </main>

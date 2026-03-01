@@ -43,24 +43,16 @@ export function FAQ() {
   return (
     <Section>
       <div ref={ref} className="flex flex-col items-center">
-        <div
-          className={`w-full max-w-2xl text-center mb-12 ${inView ? "scroll-reveal-visible" : ""}`}
-        >
-          <span
-            className="scroll-reveal-item text-[11px] uppercase tracking-widest text-muted-foreground block"
-            style={{ animationDelay: "0ms" }}
-          >
+        <div className="w-full max-w-3xl text-center mb-16">
+          <span className="text-xs uppercase tracking-widest text-muted-foreground block">
             Questions
           </span>
-          <h2
-            className="scroll-reveal-item font-display text-5xl md:text-7xl text-foreground mt-1"
-            style={{ animationDelay: "100ms" }}
-          >
+          <h2 className="font-display text-6xl md:text-8xl text-foreground mt-2">
             FAQ
           </h2>
         </div>
 
-        <div className={`w-full max-w-2xl ${inView ? "scroll-reveal-visible" : ""}`}>
+        <div className={`w-full max-w-3xl ${inView ? "scroll-reveal-visible" : ""}`}>
           {faqs.map((faq, i) => (
             <div
               key={i}
@@ -69,14 +61,14 @@ export function FAQ() {
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="w-full flex items-center justify-between py-6 text-left group hover:bg-muted/30 transition-colors px-2 -mx-2 rounded"
+                className="w-full flex items-center justify-between py-7 md:py-8 text-left group hover:bg-muted/30 transition-colors px-4 -mx-4 rounded"
                 aria-expanded={openIndex === i}
               >
-                <span className="text-sm text-foreground group-hover:text-accent transition-colors pr-4 text-left">
+                <span className="text-base md:text-lg text-foreground group-hover:text-accent transition-colors pr-6 text-left leading-snug">
                   {faq.q}
                 </span>
                 <span
-                  className={`text-muted-foreground shrink-0 text-lg transition-transform duration-300 ${
+                  className={`text-muted-foreground shrink-0 text-xl md:text-2xl transition-transform duration-300 ${
                     openIndex === i ? "rotate-45" : ""
                   }`}
                 >
@@ -87,7 +79,7 @@ export function FAQ() {
                 className={`accordion-content ${openIndex === i ? "open" : ""}`}
               >
                 <div className="accordion-inner">
-                  <p className="text-sm text-muted-foreground pb-6 leading-relaxed pl-2">
+                  <p className="text-base md:text-lg text-muted-foreground pb-7 md:pb-8 leading-relaxed pl-4">
                     {faq.a}
                   </p>
                 </div>

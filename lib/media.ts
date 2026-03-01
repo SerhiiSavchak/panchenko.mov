@@ -1,28 +1,11 @@
 // Comprehensive media system - Pexels free stock
-// Cars: street racing, drift, neon night. Rap: studio, mic, urban. Fight: boxing
 
-// Hero: no poster preview; loading overlay until video ready; HD on mobile for quality
-export const HERO_THEMES = {
-  rap: {
-    video: "https://assets.mixkit.co/videos/13019/13019-720.mp4",
-    videoMobile: "https://assets.mixkit.co/videos/13019/13019-720.mp4",
-  },
-  cars: {
-    video: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4",
-    videoMobile: "https://assets.mixkit.co/videos/46422/46422-720.mp4",
-    fallbackImage: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=1920",
-  },
-  fight: {
-    video: "https://videos.pexels.com/video-files/9943217/9943217-uhd_2560_1440_24fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/9943217/9943217-sd_640_360_24fps.mp4",
-  },
-  brand: {
-    video: "https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4",
-    videoMobile: "https://assets.mixkit.co/videos/100946/100946-720.mp4",
-  },
+// Hero: single video — same on desktop and mobile (cinematic background)
+export const HERO_VIDEO = {
+  video: "https://assets.mixkit.co/videos/46422/46422-720.mp4",
+  poster: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=1920",
+  fallbackImage: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=1920",
 } as const;
-
-export type HeroThemeKey = keyof typeof HERO_THEMES;
 
 // Rap: Mixkit реперский клип. Cars: Pexels drift (Tokyo Drift style). Fight: boxing
 export const REEL_VIDEOS = [
