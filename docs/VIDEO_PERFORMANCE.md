@@ -24,7 +24,7 @@ Reduce video-related lag while keeping perceived quality high. Max 1–2 videos 
 | **Hero** | Video always playing | Pause when scrolled out (IntersectionObserver, &lt;30% visible) |
 | **Featured Work (WorkCard)** | 9 cards with autoplay video in view | Poster by default; video only on hover |
 | **Signature Lanes (What I Shoot)** | 5 cards with autoplay VideoInView | Poster by default; video only on hover |
-| **ReelRail (BTS / Raw Cuts)** | 10 videos autoplay in view | Posters only; no video |
+| **ReelRail (BTS)** | 5 videos autoplay in view | Posters only; no video |
 | **StreetMotion** | 5 videos in DOM, all with src | Load `src` only when active or next (max 2); unload when off |
 | **Case Study (work/[slug])** | VideoInView autoplay | Poster by default; tap to play/pause |
 

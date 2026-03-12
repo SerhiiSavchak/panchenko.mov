@@ -8,7 +8,6 @@ const stats = [
   { value: "50+", label: "Projects" },
   { value: "48h", label: "Avg Turnaround" },
   { value: "4+", label: "Years" },
-  { value: "Rap / Cars / Brand", label: "Clients" },
 ];
 
 export function ProofStrip() {
@@ -27,7 +26,7 @@ export function ProofStrip() {
       transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
       className="border-y border-border py-8 px-4 md:px-8 lg:px-16"
     >
-      <div ref={ref} className={`grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 ${inView ? "scroll-reveal-visible" : ""}`}>
+      <div ref={ref} className={`grid grid-cols-3 gap-6 md:gap-8 ${inView ? "scroll-reveal-visible" : ""}`}>
         {stats.map((stat, i) => (
           <div
             key={stat.label}

@@ -22,13 +22,11 @@ const bebas = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "PANchenko | Cinematic Short-Form | Toronto",
+  title: "PANchenko | Cinematic Short-Form | Worldwide",
   description:
-    "Cinematic short-form, music videos, brand storytelling. In-house @hutsyfinancial. Toronto-based videographer & editor. Let's make something timeless.",
+    "Cinematic short-form, music videos, brand storytelling. Based worldwide. Brand & product storytelling. Let's create something that hits different.",
   keywords: [
     "videographer",
-    "Toronto",
-    "music video",
     "cinematic",
     "short-form",
     "editor",
@@ -38,8 +36,8 @@ export const metadata: Metadata = {
     "brand storytelling",
   ],
   openGraph: {
-    title: "PANchenko | Cinematic Short-Form | Toronto",
-    description: "Let's make something timeless.",
+    title: "PANchenko | Cinematic Short-Form | Worldwide",
+    description: "Brand & product storytelling. Cinematic short-form.",
     type: "website",
   },
 };
@@ -63,7 +61,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://assets.mixkit.co" />
         <link rel="preconnect" href="https://videos.pexels.com" />
         <link rel="preconnect" href="https://images.pexels.com" />
-        <link rel="preload" as="video" href="https://assets.mixkit.co/videos/13019/13019-720.mp4" />
+        <link rel="preload" as="video" href="https://assets.mixkit.co/videos/46422/46422-720.mp4" />
         <style
           dangerouslySetInnerHTML={{
             __html: `html{background:#050505}body{background:#050505;color:#f0f0f0}`,

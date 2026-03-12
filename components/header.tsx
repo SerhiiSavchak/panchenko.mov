@@ -35,7 +35,7 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
         )}
       >
         <div className="flex items-center justify-between px-4 md:px-8 lg:px-16 h-20">
-          <Link href="/" aria-label="Home" className="logo-graffiti logo-hover">
+          <Link href="/" aria-label="Home" className="logo-graffiti shrink-0 inline-flex">
             <BrandLogo variant="header" size="md" />
           </Link>
 

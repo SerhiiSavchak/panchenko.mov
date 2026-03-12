@@ -1,12 +1,21 @@
 "use client";
 
 import { useState, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { ScrollProgress } from "@/components/scroll-progress";
-import { QuickQuoteModal } from "@/components/quick-quote-modal";
 import { FormField, Input, Textarea, Select, Button } from "@/components/ui";
 import { PROJECT_TYPES, BUDGET_RANGES, SOCIALS } from "@/data/shared";
+
+const ScrollProgress = dynamic(
+  () => import("@/components/scroll-progress").then((m) => ({ default: m.ScrollProgress })),
+  { ssr: false }
+);
+
+const QuickQuoteModal = dynamic(
+  () => import("@/components/quick-quote-modal").then((m) => ({ default: m.QuickQuoteModal })),
+  { ssr: false }
+);
 
 interface FormErrors {
   name?: string;
@@ -64,7 +73,7 @@ export default function ContactPage() {
       <ScrollProgress />
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
 
-      <main className="pt-24 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen overflow-x-clip">
+      <main className="pt-20 md:pt-28 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen overflow-x-clip">
         <div className="page-enter">
           <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
             Get In Touch

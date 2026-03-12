@@ -26,38 +26,10 @@ const About = dynamic(
   () => import("@/components/home/about").then((m) => ({ default: m.About })),
   { ssr: true }
 );
-const Services = dynamic(
-  () =>
-    import("@/components/home/services").then((m) => ({
-      default: m.Services,
-    })),
-  { ssr: true }
-);
 const FeaturedWork = dynamic(
   () =>
     import("@/components/home/featured-work").then((m) => ({
       default: m.FeaturedWork,
-    })),
-  { ssr: true }
-);
-const SignatureLanes = dynamic(
-  () =>
-    import("@/components/home/signature-lanes").then((m) => ({
-      default: m.SignatureLanes,
-    })),
-  { ssr: true }
-);
-const PinnedProcess = dynamic(
-  () =>
-    import("@/components/home/pinned-process").then((m) => ({
-      default: m.PinnedProcess,
-    })),
-  { ssr: true }
-);
-const ReelRail = dynamic(
-  () =>
-    import("@/components/home/reel-rail").then((m) => ({
-      default: m.ReelRail,
     })),
   { ssr: true }
 );
@@ -92,10 +64,6 @@ export default function Home() {
         <ProofStrip />
         <About />
         <FeaturedWork />
-        <Services />
-        <SignatureLanes />
-        <PinnedProcess />
-        <ReelRail />
         <BuildYourShoot onQuoteOpen={() => setQuoteOpen(true)} />
         <FAQ />
         <FinalCTA onQuoteOpen={() => setQuoteOpen(true)} />

@@ -113,13 +113,18 @@ export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
             className="interactive-area fixed inset-0 z-[60] bg-background/85 backdrop-blur-md"
             onClick={onClose}
           />
-          <div className="fixed z-[61] inset-0 pointer-events-none flex items-center justify-center quick-quote-modal-mobile p-0 md:p-4 md:inset-0">
+          <div
+            className="fixed z-[61] inset-0 flex items-center justify-center overflow-y-auto overscroll-contain"
+            style={{
+              padding: "max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left))",
+            }}
+          >
             <motion.div
-              initial={{ opacity: 0, y: 24, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 24, scale: 0.96 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="pointer-events-auto w-full max-w-lg max-h-full md:max-h-[85vh] md:rounded-sm bg-card border border-border flex flex-col shadow-xl"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 16 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full max-w-lg max-h-[min(85dvh,calc(100dvh-2rem))] md:max-h-[85vh] flex-shrink-0 md:rounded-sm bg-card border border-border flex flex-col shadow-xl my-auto"
             >
             <div className="flex items-center justify-between shrink-0 p-6 md:p-8 pb-4 border-b border-border">
               <h2 className="font-display text-3xl text-foreground">

@@ -1,27 +1,62 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { useReducedMotion } from "@/lib/hooks";
 import { useHeroReady } from "@/lib/hero-ready-context";
 
-const MAX_WAIT_MS = 4000; // Max 4s for slow connections
+const MIN_DISPLAY_MS = 800;
+const MAX_WAIT_MS = 5000;
+const LOADER_DISMISSED_KEY = "graffiti-loader-dismissed";
+
+// React Strict Mode в dev монтирует компонент дважды — пропускаем второй mount
+let mountCount = 0;
 
 export function GraffitiLoader() {
+  mountCount++;
+  const isStrictModeRemount = mountCount > 1;
+
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
+  const [minTimePassed, setMinTimePassed] = useState(false);
+  const dismissedRef = useRef(false);
   const reducedMotion = useReducedMotion();
   const heroReady = useHeroReady();
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem(LOADER_DISMISSED_KEY)) {
+      setVisible(false);
+      dismissedRef.current = true;
+      return;
+    }
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => setMinTimePassed(true), MIN_DISPLAY_MS);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (dismissedRef.current) return;
     if (reducedMotion) {
-      const t = setTimeout(() => setVisible(false), 400);
+      const t = setTimeout(() => {
+        setVisible(false);
+        sessionStorage.setItem(LOADER_DISMISSED_KEY, "1");
+      }, 400);
       return () => clearTimeout(t);
     }
-    if (heroReady?.isReady) setVisible(false);
-    const maxTimer = setTimeout(() => setVisible(false), MAX_WAIT_MS);
+    if (minTimePassed && heroReady?.isReady) {
+      setVisible(false);
+      sessionStorage.setItem(LOADER_DISMISSED_KEY, "1");
+      return;
+    }
+    const maxTimer = setTimeout(() => {
+      setVisible(false);
+      sessionStorage.setItem(LOADER_DISMISSED_KEY, "1");
+    }, MAX_WAIT_MS);
     return () => clearTimeout(maxTimer);
-  }, [reducedMotion, heroReady?.isReady]);
+  }, [reducedMotion, heroReady?.isReady, minTimePassed]);
 
   useEffect(() => {
     if (!visible) {
@@ -30,34 +65,24 @@ export function GraffitiLoader() {
     }
   }, [visible]);
 
-  if (!mounted) return null;
+  if (!mounted || isStrictModeRemount) return null;
 
   return (
     <div
-      className={`graffiti-loader fixed inset-0 z-[100] overflow-hidden ${!visible ? "graffiti-loader-exit" : ""}`}
+      className={`spray-loader fixed inset-0 z-[100] overflow-hidden ${!visible ? "spray-loader-exit" : ""}`}
     >
-      {/* Layered background */}
-      <div className="absolute inset-0 bg-background" aria-hidden />
-      <div
-        className="graffiti-loader-noise absolute inset-0"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-        }}
-        aria-hidden
-      />
-      <div className="graffiti-loader-vignette absolute inset-0" aria-hidden />
-      <div
-        className="graffiti-loader-glow absolute left-1/2 top-1/2 h-[240px] w-[min(85vw,400px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/15 blur-[70px]"
-        aria-hidden
-      />
-      <div className="graffiti-loader-sweep absolute inset-0" aria-hidden />
+      {/* Чёрная стена */}
+      <div className="spray-loader-wall absolute inset-0 bg-black" aria-hidden />
 
-      {/* Content - centered via grid place-items */}
-      <div className="graffiti-loader-content absolute inset-0 flex items-center justify-center">
-        <div className="graffiti-loader-logo">
-          <BrandLogo variant="loader" />
+      {/* Логотип — появляется как нарисованный баллончиком */}
+      <div className="spray-loader-content absolute inset-0 flex items-center justify-center">
+        <div className="spray-loader-logo spray-can-reveal">
+          <BrandLogo variant="loader" animate={false} />
         </div>
       </div>
+
+      {/* Лёгкий туман от баллончика во время рисования */}
+      <div className="spray-loader-mist absolute inset-0 pointer-events-none" aria-hidden />
     </div>
   );
 }

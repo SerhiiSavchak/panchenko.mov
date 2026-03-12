@@ -29,7 +29,7 @@ export default function WorkPage() {
     <>
       <ScrollProgress />
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
-      <main className="pt-24 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen overflow-x-clip">
+      <main className="pt-20 md:pt-28 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen overflow-x-clip">
         <div className="page-enter">
           <Link
             href="/"

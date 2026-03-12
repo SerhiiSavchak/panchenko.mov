@@ -24,7 +24,7 @@ export function CaseStudyClient({ work }: { work: WorkItem }) {
       <ScrollProgress />
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
 
-      <main className="pt-24 pb-16 md:pb-24 overflow-x-clip">
+      <main className="pt-20 md:pt-28 pb-16 md:pb-24 overflow-x-clip">
         <div className="px-4 md:px-8 lg:px-16">
           <div className="page-enter">
             <Link

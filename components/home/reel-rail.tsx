@@ -78,7 +78,7 @@ export function ReelRail() {
     <Section>
       <SectionHeader
         label="Behind the Scenes"
-        title="BTS / Raw Cuts"
+        title="BTS"
         subtitle="Camcorder energy. Uncut moments from set. The raw footage that never makes the final edit but tells the real story."
         className="mb-8"
       />
