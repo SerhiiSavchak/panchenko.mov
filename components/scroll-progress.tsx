@@ -24,7 +24,7 @@ export function ScrollProgress() {
     <>
       {/* Mobile: below header */}
       <motion.div
-        className="fixed top-16 left-0 right-0 z-[9999] h-[3px] w-full overflow-hidden pointer-events-none md:hidden"
+        className="fixed top-20 md:top-28 left-0 right-0 z-[9999] h-[3px] w-full overflow-hidden pointer-events-none md:hidden"
         style={{ opacity: springOpacity, y: springYTop }}
         role="progressbar"
         aria-label="Scroll progress"

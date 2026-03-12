@@ -128,7 +128,17 @@ textarea:focus-visible,
 /* Quick Quote modal - mobile safe-area + viewport fit */
 .quick-quote-modal-mobile {
   inset: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
-  max-height: min(90dvh, calc(100dvh - 2rem));
+  max-height: min(85dvh, calc(100dvh - 2rem));
+}
+
+/* Body scroll lock - prevents scroll jump when modal opens */
+body.modal-scroll-lock {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  left: 0;
+  right: 0;
+  top: 0;
 }
 
 /* Card image skeleton - premium shimmer placeholder */
@@ -161,10 +171,6 @@ textarea:focus-visible,
   box-shadow: 0 0 15px rgba(14, 165, 233, 0.15), 0 0 30px rgba(56, 189, 248, 0.08), inset 0 0 15px rgba(14, 165, 233, 0.05);
 }
 
-.logo-graffiti.logo-hover:hover {
-  transform: scale(1.02);
-  transition: transform 0.2s ease;
-}
 
 .lane-reveal {
   opacity: 0;
@@ -212,7 +218,7 @@ textarea:focus-visible,
 @keyframes scroll-reveal-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(36px);
   }
   to {
     opacity: 1;
@@ -223,7 +229,7 @@ textarea:focus-visible,
 @keyframes scroll-reveal-up-lg {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(44px);
   }
   to {
     opacity: 1;
@@ -234,7 +240,7 @@ textarea:focus-visible,
 @keyframes scroll-reveal-up-xl {
   from {
     opacity: 0;
-    transform: translateY(40px);
+    transform: translateY(56px);
   }
   to {
     opacity: 1;
@@ -245,29 +251,29 @@ textarea:focus-visible,
 /* Stagger items: parent gets .scroll-reveal-visible when in view */
 .scroll-reveal-item {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(36px);
 }
 
 .scroll-reveal-visible .scroll-reveal-item {
-  animation: scroll-reveal-up 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: scroll-reveal-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .scroll-reveal-item-lg {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(44px);
 }
 
 .scroll-reveal-visible .scroll-reveal-item-lg {
-  animation: scroll-reveal-up-lg 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: scroll-reveal-up-lg 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .scroll-reveal-item-xl {
   opacity: 0;
-  transform: translateY(40px);
+  transform: translateY(56px);
 }
 
 .scroll-reveal-visible .scroll-reveal-item-xl {
-  animation: scroll-reveal-up-xl 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: scroll-reveal-up-xl 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* Page load animations - runs on first paint */
@@ -482,25 +488,6 @@ textarea:focus-visible,
   animation: scroll-reveal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-.gear-heading-reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.section-in-view .gear-heading-reveal {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.gear-card-reveal {
-  opacity: 0;
-}
-
-.gear-card-reveal.gear-card-visible {
-  animation: scroll-reveal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
 .section-reveal {
   opacity: 0;
   transform: translateY(32px);
@@ -576,144 +563,101 @@ textarea:focus-visible,
   animation: about-line-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* Graffiti loader - layered animation, mathematically centered */
-.graffiti-loader {
+/* Spray loader — чёрная стена, лого рисуется баллончиком */
+.spray-loader {
   min-height: 100vh;
   min-height: 100dvh;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-.graffiti-loader-exit {
-  animation: loader-fade-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+.spray-loader-exit {
+  animation: spray-loader-fade-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes loader-fade-out {
+@keyframes spray-loader-fade-out {
   to {
     opacity: 0;
     pointer-events: none;
   }
 }
 
-/* Layer 1: Noise texture - staggered fade */
-.graffiti-loader-noise {
-  opacity: 0;
-  animation: loader-noise-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s forwards;
+/* Чёрная стена */
+.spray-loader-wall {
+  background-color: #000000;
 }
 
-@keyframes loader-noise-in {
-  to { opacity: 0.035; }
-}
-
-/* Layer 2: Vignette - dark edges converge (centered at 50% 50%) */
-.graffiti-loader-vignette {
-  background: radial-gradient(
-    ellipse 80% 70% at 50% 50%,
-    transparent 40%,
-    rgba(0, 0, 0, 0.4) 100%
-  );
-  opacity: 0;
-  animation: loader-vignette-in 1s cubic-bezier(0.34, 1.2, 0.64, 1) 0.2s forwards;
-}
-
-@keyframes loader-vignette-in {
-  from {
-    opacity: 0;
-    transform: scale(1.3);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Layer 3: Glow - expand from center (no parallax drift to avoid visual shift) */
-.graffiti-loader-glow {
-  opacity: 0;
-  animation: loader-glow 1.4s cubic-bezier(0.34, 1.2, 0.64, 1) 0.1s forwards;
-  transform: translate(-50%, -50%) scale(0.3);
-}
-
-@keyframes loader-glow {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.3);
-  }
-  50% {
-    opacity: 0.4;
-  }
-  100% {
-    opacity: 0.2;
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-}
-
-/* Layer 4: Sweep line - cinematic reveal */
-.graffiti-loader-sweep {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(14, 165, 233, 0.08) 48%,
-    rgba(14, 165, 233, 0.15) 50%,
-    rgba(14, 165, 233, 0.08) 52%,
-    transparent 100%
-  );
-  background-size: 30% 100%;
-  background-repeat: no-repeat;
-  opacity: 0;
-  animation: loader-sweep 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-}
-
-@keyframes loader-sweep {
-  0% {
-    opacity: 0;
-    background-position: -30% 0;
-  }
-  40% {
-    opacity: 1;
-    background-position: 40% 0;
-  }
-  70% {
-    opacity: 0.8;
-    background-position: 100% 0;
-  }
-  100% {
-    opacity: 0;
-    background-position: 130% 0;
-  }
-}
-
-/* Content - mathematically centered via grid (no magic numbers) */
-.graffiti-loader-content {
+/* Контент по центру */
+.spray-loader-content {
   display: grid;
   place-items: center;
 }
 
-.graffiti-loader-logo {
-  opacity: 0;
-  transform: translateY(20px) scale(0.92);
-  animation: loader-logo-reveal 1s cubic-bezier(0.34, 1.2, 0.64, 1) 0.25s forwards;
+/* Логотип — маска «рисуется» слева направо как баллончиком */
+.spray-loader-logo {
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes loader-logo-reveal {
+.spray-can-reveal {
+  mask-image: linear-gradient(to right, black 0%, black 0%);
+  mask-size: 0% 100%;
+  mask-repeat: no-repeat;
+  mask-position: left center;
+  -webkit-mask-image: linear-gradient(to right, black 0%, black 0%);
+  -webkit-mask-size: 0% 100%;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: left center;
+  animation: spray-can-draw 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s forwards;
+}
+
+@keyframes spray-can-draw {
   0% {
-    opacity: 0;
-    transform: translateY(24px) scale(0.9);
-  }
-  50% {
-    opacity: 0.7;
-    transform: translateY(-4px) scale(1.02);
+    mask-size: 0% 100%;
+    -webkit-mask-size: 0% 100%;
   }
   100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
+  }
+}
+
+/* Туман от баллончика во время рисования */
+.spray-loader-mist {
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 50%,
+    rgba(14, 165, 233, 0.12) 0%,
+    rgba(14, 165, 233, 0.04) 40%,
+    transparent 70%
+  );
+  opacity: 0;
+  animation: spray-mist-puff 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+  pointer-events: none;
+}
+
+@keyframes spray-mist-puff {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  25% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+  60% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
   }
 }
 
 /* Reusable logo animation - used in loader, can be reused in header */
 .animated-logo-box {
-  animation: logo-box-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  opacity: 0;
-  transform: scale(0.9);
+  animation: logo-box-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0.3;
+  transform: scale(0.95);
   position: relative;
 }
 
@@ -743,21 +687,24 @@ textarea:focus-visible,
 }
 
 .animated-logo-camera {
-  animation: logo-camera-in 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) 0.05s forwards;
-  opacity: 0;
-  transform: translateX(-12px) scale(0.85);
+  /* Stroke draw handles visibility; subtle spray-in motion */
+  animation: logo-camera-in 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) 0.05s forwards;
   transform-origin: left center;
 }
 
 @keyframes logo-camera-in {
+  from {
+    opacity: 0.5;
+    filter: blur(2px);
+  }
   to {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    filter: blur(0);
   }
 }
 
 .animated-logo-text {
-  animation: logo-stroke 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.25s forwards;
+  animation: logo-stroke 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
   stroke-dashoffset: 600;
 }
 
@@ -833,36 +780,19 @@ textarea:focus-visible,
 
 /* prefers-reduced-motion: shorten all animations */
 @media (prefers-reduced-motion: reduce) {
-  .graffiti-loader-exit {
+  .spray-loader-exit {
     animation-duration: 0.2s;
   }
 
-  .graffiti-loader-noise {
+  .spray-can-reveal {
     animation: none;
-    opacity: 0.035;
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
   }
 
-  .graffiti-loader-vignette {
-    animation: none;
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .graffiti-loader-glow {
-    animation: none;
-    opacity: 0.15;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  .graffiti-loader-sweep {
+  .spray-loader-mist {
     animation: none;
     opacity: 0;
-  }
-
-  .graffiti-loader-logo {
-    animation: none;
-    opacity: 1;
-    transform: none;
   }
 
   .animated-logo-box {

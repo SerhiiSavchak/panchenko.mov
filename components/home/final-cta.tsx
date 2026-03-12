@@ -2,6 +2,7 @@
 
 import { MagneticButton } from "@/components/magnetic-button";
 import { useRef } from "react";
+import { motion } from "framer-motion";
 import { useScrollReveal } from "@/lib/scroll-animate";
 import { SOCIALS } from "@/data/shared";
 
@@ -18,7 +19,14 @@ export function FinalCTA({ onQuoteOpen }: FinalCTAProps) {
   });
 
   return (
-    <section className="px-4 md:px-8 lg:px-16 py-24 md:py-32" ref={ref}>
+    <motion.section
+      ref={ref}
+      initial={{ opacity: 0, y: 72 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+      className="px-4 md:px-8 lg:px-16 py-24 md:py-32"
+    >
       <div
         className={`text-center ${inView ? "scroll-reveal-visible" : ""}`}
       >
@@ -51,6 +59,6 @@ export function FinalCTA({ onQuoteOpen }: FinalCTAProps) {
           </div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

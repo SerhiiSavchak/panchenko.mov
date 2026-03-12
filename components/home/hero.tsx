@@ -1,19 +1,13 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
-import { useReducedMotion } from "@/lib/hooks";
+import { useRef, useEffect, useState, useCallback, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/magnetic-button";
-import { HERO_THEMES, type HeroThemeKey } from "@/lib/media";
+import { HERO_VIDEO } from "@/lib/media";
 import { useHeroReady } from "@/lib/hero-ready-context";
+import { useReducedMotion } from "@/lib/hooks";
 
-const CYCLING_WORDS: HeroThemeKey[] = ["rap", "cars", "fight", "brand"];
-const DISPLAY_WORDS: Record<HeroThemeKey, string> = {
-  rap: "RAP",
-  cars: "CARS",
-  fight: "FIGHT",
-  brand: "BRAND",
-};
+const CYCLING_WORDS = ["RAP", "CARS", "FIGHT", "BRAND"] as const;
 
 interface HeroProps {
   onQuoteOpen: () => void;
@@ -22,13 +16,12 @@ interface HeroProps {
 export function Hero({ onQuoteOpen }: HeroProps) {
   const heroReady = useHeroReady();
   const onVideoReady = useCallback(() => heroReady?.setReady(), [heroReady]);
-  const ref = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
   const [wordIndex, setWordIndex] = useState(0);
-  const currentKey = CYCLING_WORDS[wordIndex];
-  const nextKey = CYCLING_WORDS[(wordIndex + 1) % CYCLING_WORDS.length];
+  const currentWord = CYCLING_WORDS[wordIndex];
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const [wordWidth, setWordWidth] = useState(0);
 
-  // Cycle words every 2.5s
   useEffect(() => {
     if (reducedMotion) return;
     const interval = setInterval(() => {
@@ -37,113 +30,105 @@ export function Hero({ onQuoteOpen }: HeroProps) {
     return () => clearInterval(interval);
   }, [reducedMotion]);
 
-  // Only render current + next video (max 2 in DOM) — reduces decode/memory on mobile
-  const videosToRender = [currentKey, nextKey];
-  const uniqueVideos = Array.from(new Set(videosToRender));
+  useLayoutEffect(() => {
+    if (measureRef.current) {
+      setWordWidth(measureRef.current.offsetWidth);
+    }
+  }, [currentWord]);
 
   return (
-    <section ref={ref} className="relative h-screen overflow-hidden">
-      <div className="absolute inset-0">
-        {uniqueVideos.map((key) => {
-          const theme = HERO_THEMES[key];
-          const isActive = currentKey === key;
-          const isInitial = key === CYCLING_WORDS[0];
-          return (
-            <motion.div
-              key={key}
-              initial={false}
-              animate={{ opacity: isActive ? 1 : 0 }}
-              transition={{ duration: 1.2 }}
-              className="absolute inset-0"
-              style={{ pointerEvents: isActive ? "auto" : "none" }}
-            >
-              <HeroVideo
-                src={theme.video}
-                srcMobile={theme.videoMobile}
-                isActive={isActive}
-                themeKey={key}
-                fallbackImage={"fallbackImage" in theme ? theme.fallbackImage : undefined}
-                deferLoad={!isInitial}
-                onReady={isInitial ? onVideoReady : undefined}
-              />
-            </motion.div>
-          );
-        })}
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-background/10" aria-hidden="true" />
+    <section className="relative h-screen overflow-hidden">
+      {/* Video layer — pointer-events: none so CTA clicks pass through */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <HeroVideo onReady={onVideoReady} />
+        {/* Dark overlay — improves text contrast on video */}
+        <div className="absolute inset-0 bg-background/25" aria-hidden="true" />
       </div>
 
-      <div className="hero-content relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
-        {/* Floating badges */}
+      <div className="hero-content relative z-10 flex flex-col items-center justify-center h-full px-4 text-center pointer-events-auto">
+        {/* Badge — based in worldwide */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
-          {["In-house @hutsyfinancial", "Toronto", "Cinematic short-form"].map((badge) => (
-            <motion.span
-              key={badge}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="text-[10px] uppercase tracking-widest text-muted-foreground"
-            >
-              {badge}
-            </motion.span>
-          ))}
+          <motion.span
+            initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{
+              duration: 1.4,
+              delay: 0.5,
+              ease: [0.19, 1, 0.22, 1],
+            }}
+            className="text-[10px] uppercase tracking-widest text-foreground/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+          >
+            based in worldwide
+          </motion.span>
         </div>
 
+        {/* Headline — FROM STREET TO [word] — единая анимация появления */}
         <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative isolate font-display text-[clamp(3rem,12vw,10rem)] leading-[0.85] tracking-tight text-foreground text-balance"
+          className="relative font-display text-[clamp(3rem,12vw,10rem)] leading-[0.85] tracking-tight text-foreground text-balance overflow-hidden"
+          initial={{ opacity: 0, y: "-0.3em", filter: "blur(12px)", scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
+          transition={{
+            duration: 1.6,
+            delay: 0.9,
+            ease: [0.16, 1, 0.3, 1],
+          }}
         >
-          <span className="relative z-20">FROM STREET</span>
-          <br />
-          <span className="relative z-20">TO{"\u2009"}</span>
-          <span className="text-accent relative z-10 inline-block min-w-[5.5ch] align-baseline -ml-[0.15em]">
-            <span className="invisible" aria-hidden="true">
-              B
-            </span>
-            <span className="absolute inset-0 flex items-center justify-center">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={DISPLAY_WORDS[currentKey]}
-                  initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={reducedMotion ? {} : { opacity: 0, y: -20 }}
-                  transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  className="neon-glow"
-                >
-                  {DISPLAY_WORDS[currentKey]}
-                </motion.span>
-              </AnimatePresence>
+          <span className="relative z-20 block">FROM STREET</span>
+          <span className="relative z-20 block flex justify-center">
+            <span className="inline-flex items-baseline gap-[0.12em] relative">
+              <span
+                ref={measureRef}
+                className="absolute left-0 top-0 opacity-0 pointer-events-none select-none whitespace-nowrap"
+                aria-hidden
+              >
+                {currentWord}
+              </span>
+              <span className="whitespace-nowrap">TO</span>
+              <motion.span
+                animate={{ width: wordWidth || "auto" }}
+                transition={{ duration: 1.2, ease: [0.32, 0.72, 0, 1] }}
+                className="text-accent relative z-10 inline-block align-baseline min-h-[1.2em] overflow-hidden"
+              >
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={currentWord}
+                    initial={reducedMotion ? {} : { opacity: 0, y: 16, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={reducedMotion ? {} : { opacity: 0, y: -16, filter: "blur(4px)" }}
+                    transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="neon-glow inline-block"
+                  >
+                    {currentWord}
+                  </motion.span>
+                </AnimatePresence>
+              </motion.span>
             </span>
           </span>
         </motion.h1>
 
+        {/* Subtext — minimal */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="mt-6 flex flex-col items-center gap-1 text-sm md:text-base text-muted-foreground max-w-xl"
+          initial={{ opacity: 0, y: 24, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{
+            duration: 1.1,
+            delay: 1.7,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="mt-6 text-sm md:text-base text-foreground/90 max-w-xl drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
         >
-          <span>Toronto-based filmmaker.</span>
-          <span>{"In-house @hutsyfinancial."}</span>
-          <span>{"Brand & product storytelling."}</span>
-          <span>Cinematic short-form.</span>
+          Brand & product storytelling. Cinematic short-form.
         </motion.div>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="mt-4 text-xs uppercase tracking-widest text-accent"
-        >
-          {"Let\u2019s make something timeless."}
-        </motion.p>
-
+        {/* Buttons — scale + fade with subtle bounce */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9 }}
+          initial={{ opacity: 0, y: 32, scale: 0.88 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{
+            duration: 1.2,
+            delay: 2.2,
+            ease: [0.34, 1.4, 0.64, 1],
+          }}
           className="flex flex-wrap items-center justify-center gap-4 mt-10"
         >
           <MagneticButton variant="primary" onClick={onQuoteOpen}>Book a Shoot</MagneticButton>
@@ -151,11 +136,15 @@ export function Hero({ onQuoteOpen }: HeroProps) {
         </motion.div>
       </div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator — final reveal */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
+        initial={{ opacity: 0, y: 16, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{
+          duration: 1,
+          delay: 2.8,
+          ease: [0.22, 1, 0.36, 1],
+        }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
       >
         <motion.div
@@ -170,110 +159,47 @@ export function Hero({ onQuoteOpen }: HeroProps) {
 
 const LOAD_TIMEOUT_MS = 8000;
 
-function HeroVideo({
-  src,
-  srcMobile,
-  isActive,
-  themeKey,
-  fallbackImage,
-  deferLoad,
-  onReady,
-}: {
-  src: string;
-  srcMobile: string;
-  isActive: boolean;
-  themeKey: HeroThemeKey;
-  fallbackImage?: string;
-  deferLoad?: boolean;
-  onReady?: () => void;
-}) {
+function HeroVideo({ onReady }: { onReady?: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  // Above-the-fold priority: initial video loads immediately (no null delay)
-  const [videoSrc, setVideoSrc] = useState<string | null>(() => (deferLoad ? null : src));
-  const [deferReady, setDeferReady] = useState(!deferLoad);
   const [isReady, setIsReady] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    if (!deferLoad || deferReady) {
-      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-      setVideoSrc(isMobile ? srcMobile : src);
-      const onResize = () => {
-        const m = window.innerWidth < 768;
-        setVideoSrc(m ? srcMobile : src);
-      };
-      window.addEventListener("resize", onResize);
-      return () => window.removeEventListener("resize", onResize);
-    }
-  }, [deferLoad, deferReady, src, srcMobile]);
-
-  // Defer non-initial: load next video early so it's ready before switch (2.5s)
-  useEffect(() => {
-    if (!deferLoad) return;
-    const id = setTimeout(() => setDeferReady(true), 1000);
-    return () => clearTimeout(id);
-  }, [deferLoad]);
-
   const attemptPlay = useCallback(() => {
     const v = videoRef.current;
-    if (!v || !isActive) return;
+    if (!v) return;
     v.play()
       .then(() => {
         setIsReady(true);
         onReady?.();
       })
       .catch(() => setHasFailed(true));
-  }, [isActive, onReady]);
+  }, [onReady]);
 
-  const handleCanPlay = useCallback(() => {
-    if (isActive) attemptPlay();
-  }, [attemptPlay, isActive]);
+  const handleCanPlay = useCallback(() => attemptPlay(), [attemptPlay]);
+  const handleLoadedData = useCallback(() => attemptPlay(), [attemptPlay]);
 
-  const handleLoadedData = useCallback(() => {
-    if (isActive) attemptPlay();
-  }, [attemptPlay, isActive]);
+  const handleError = useCallback(() => setHasFailed(true), []);
 
-  const handleError = useCallback(() => {
-    if (videoSrc === srcMobile) {
-      setVideoSrc(src);
-    } else {
-      setHasFailed(true);
-    }
-  }, [videoSrc, srcMobile, src]);
-
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (isActive) {
-      attemptPlay();
-    } else {
-      v.pause();
-    }
-  }, [isActive, attemptPlay]);
-
-  // Hero is above-the-fold: use permissive threshold (0.1) for mobile address bar / dynamic viewport
   useEffect(() => {
     const el = containerRef.current;
     const video = videoRef.current;
     if (!el || !video) return;
     const obs = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting && e.intersectionRatio > 0.1 && isActive) {
+        if (e.isIntersecting && e.intersectionRatio > 0.1) {
           attemptPlay();
-        } else if (!isActive) {
-          video.pause();
         }
       },
       { threshold: [0, 0.1, 0.3, 0.5, 1], rootMargin: "0px 0px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [attemptPlay, isActive]);
+  }, [attemptPlay]);
 
   useEffect(() => {
-    if (!isActive || hasFailed || isReady) {
+    if (hasFailed || isReady) {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
@@ -284,39 +210,41 @@ function HeroVideo({
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [isActive, hasFailed, isReady]);
+  }, [hasFailed, isReady]);
 
   return (
     <div ref={containerRef} className="absolute inset-0">
-      {hasFailed && (
+      {/* Градиент — пока грузится видео и при ошибке (если нет fallbackImage) */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, #050505 0%, #0a0f14 35%, #050505 100%)",
+        }}
+        aria-hidden
+      />
+      {hasFailed && HERO_VIDEO.fallbackImage && (
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={
-            fallbackImage
-              ? { backgroundImage: `url(${fallbackImage})` }
-              : { backgroundColor: "var(--color-background)" }
-          }
+          style={{ backgroundImage: `url(${HERO_VIDEO.fallbackImage})` }}
           aria-hidden
         />
       )}
-      {videoSrc && !hasFailed && (
+      {!hasFailed && (
         <video
           ref={videoRef}
-          key={videoSrc}
           muted
           loop
           playsInline
           autoPlay
           preload="auto"
+          poster={HERO_VIDEO.poster || undefined}
           onCanPlay={handleCanPlay}
           onLoadedData={handleLoadedData}
           onError={handleError}
           className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            filter: themeKey === "fight" ? "brightness(1.35) contrast(1.05)" : undefined,
-          }}
         >
-          <source src={videoSrc} type="video/mp4" />
+          <source src={HERO_VIDEO.video} type="video/mp4" />
         </video>
       )}
     </div>

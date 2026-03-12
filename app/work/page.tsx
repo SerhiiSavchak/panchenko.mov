@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { works, categories } from "@/data/work";
 import { WorkCard } from "@/components/work-card";
 import { Header } from "@/components/header";
@@ -28,9 +29,16 @@ export default function WorkPage() {
     <>
       <ScrollProgress />
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
-      <main className="pt-24 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen overflow-x-clip">
+      <main className="pt-20 md:pt-28 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen overflow-x-clip">
         <div className="page-enter">
-          <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors mb-4"
+          >
+            <span aria-hidden>&larr;</span>
+            Back to Home
+          </Link>
+          <span className="block text-[11px] uppercase tracking-widest text-muted-foreground">
             Portfolio
           </span>
           <h1 className="font-display text-6xl md:text-8xl text-foreground mt-1 mb-8">

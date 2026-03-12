@@ -1,28 +1,12 @@
 // Comprehensive media system - Pexels free stock
-// Cars: street racing, drift, neon night. Rap: studio, mic, urban. Fight: boxing
 
-// Hero: no poster preview; loading overlay until video ready; HD on mobile for quality
-export const HERO_THEMES = {
-  rap: {
-    video: "https://assets.mixkit.co/videos/13019/13019-720.mp4",
-    videoMobile: "https://assets.mixkit.co/videos/13019/13019-720.mp4",
-  },
-  cars: {
-    video: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4",
-    videoMobile: "https://assets.mixkit.co/videos/46422/46422-720.mp4",
-    fallbackImage: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=1920",
-  },
-  fight: {
-    video: "https://videos.pexels.com/video-files/9943217/9943217-uhd_2560_1440_24fps.mp4",
-    videoMobile: "https://videos.pexels.com/video-files/9943217/9943217-sd_640_360_24fps.mp4",
-  },
-  brand: {
-    video: "https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4",
-    videoMobile: "https://assets.mixkit.co/videos/100946/100946-720.mp4",
-  },
+// Hero: single video — same on desktop and mobile (cinematic background)
+// fallbackImage: null = показываем градиент при ошибке (надёжно, без загрузки картинки)
+export const HERO_VIDEO = {
+  video: "https://assets.mixkit.co/videos/46422/46422-720.mp4",
+  poster: "", // пусто = градиент пока грузится
+  fallbackImage: null as string | null,
 } as const;
-
-export type HeroThemeKey = keyof typeof HERO_THEMES;
 
 // Rap: Mixkit реперский клип. Cars: Pexels drift (Tokyo Drift style). Fight: boxing
 export const REEL_VIDEOS = [
@@ -103,12 +87,11 @@ export function pickFallback(arr: string[], index = 0): string {
   return arr[index % arr.length];
 }
 
-// BTS and Raw Cuts cards — local assets for ReelRail
+// BTS cards — local assets for ReelRail (link to work)
 export const BTS_RAW_CARDS = [
-  { title: "BTS", href: "/bts", badge: "BTS", video: "/assets/featured/hutsy-financial-brand/preview.mp4", poster: "/assets/featured/hutsy-financial-brand/poster.jpg" },
-  { title: "Raw Cuts", href: "/raw-cuts", badge: "Raw", video: "/assets/featured/drift-session/preview.mp4", poster: "/assets/featured/drift-session/poster.jpg" },
-  { title: "BTS: On Set", href: "/bts", badge: "BTS", video: "/assets/featured/midnight-run-mv/preview.mp4", poster: "/assets/featured/midnight-run-mv/poster.jpg" },
-  { title: "Raw: Drift", href: "/raw-cuts", badge: "Raw", video: "/assets/featured/drift-session/preview.mp4", poster: "/assets/featured/drift-session/poster.jpg" },
-  { title: "BTS: Fight", href: "/bts", badge: "BTS", video: "/assets/featured/fight-night/preview.mp4", poster: "/assets/featured/fight-night/poster.jpg" },
-  { title: "Raw: Street", href: "/raw-cuts", badge: "Raw", video: "/assets/featured/streetwear-lookbook/preview.mp4", poster: "/assets/featured/streetwear-lookbook/poster.jpg" },
+  { title: "BTS", href: "/work", badge: "BTS", video: "/assets/featured/hutsy-financial-brand/preview.mp4", poster: "/assets/featured/hutsy-financial-brand/poster.jpg" },
+  { title: "BTS: Drift", href: "/work", badge: "BTS", video: "/assets/featured/drift-session/preview.mp4", poster: "/assets/featured/drift-session/poster.jpg" },
+  { title: "BTS: On Set", href: "/work", badge: "BTS", video: "/assets/featured/midnight-run-mv/preview.mp4", poster: "/assets/featured/midnight-run-mv/poster.jpg" },
+  { title: "BTS: Fight", href: "/work", badge: "BTS", video: "/assets/featured/fight-night/preview.mp4", poster: "/assets/featured/fight-night/poster.jpg" },
+  { title: "BTS: Street", href: "/work", badge: "BTS", video: "/assets/featured/streetwear-lookbook/preview.mp4", poster: "/assets/featured/streetwear-lookbook/poster.jpg" },
 ] as const;

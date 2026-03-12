@@ -1,19 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { ScrollProgress } from "@/components/scroll-progress";
-import { QuickQuoteModal } from "@/components/quick-quote-modal";
 import { FormField, Input, Textarea, Select, Button } from "@/components/ui";
 import { PROJECT_TYPES, BUDGET_RANGES, SOCIALS } from "@/data/shared";
+
+const ScrollProgress = dynamic(
+  () => import("@/components/scroll-progress").then((m) => ({ default: m.ScrollProgress })),
+  { ssr: false }
+);
+
+const QuickQuoteModal = dynamic(
+  () => import("@/components/quick-quote-modal").then((m) => ({ default: m.QuickQuoteModal })),
+  { ssr: false }
+);
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  projectType?: string;
+  message?: string;
+}
+
+const EMAIL_REGEX = /^[\w.-]+@[\w.-]+\.\w+$/;
 
 export default function ContactPage() {
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validate = (formData: FormData): FormErrors => {
+    const err: FormErrors = {};
+    const name = (formData.get("name") as string)?.trim();
+    const email = (formData.get("email") as string)?.trim();
+    const projectType = formData.get("projectType") as string;
+    const message = (formData.get("message") as string)?.trim();
+
+    if (!name || name.length < 2) err.name = "Enter your name (min 2 characters)";
+    if (!email) err.email = "Email is required";
+    else if (!EMAIL_REGEX.test(email)) err.email = "Enter a valid email address";
+    if (!projectType) err.projectType = "Select a project type";
+    if (!message || message.length < 10) err.message = "Describe your project (min 10 characters)";
+
+    return err;
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrors({});
+
+    const formData = new FormData(e.currentTarget);
+    const formErrors = validate(formData);
+
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
+      requestAnimationFrame(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
     setSubmitted(true);
   };
 
@@ -22,7 +73,7 @@ export default function ContactPage() {
       <ScrollProgress />
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
 
-      <main className="pt-24 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen overflow-x-clip">
+      <main className="pt-20 md:pt-28 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen overflow-x-clip">
         <div className="page-enter">
           <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
             Get In Touch
@@ -48,7 +99,10 @@ export default function ContactPage() {
                 </p>
                 <Button
                   variant="link"
-                  onClick={() => setSubmitted(false)}
+                  onClick={() => {
+                    setSubmitted(false);
+                    setIsSubmitting(false);
+                  }}
                   className="mt-6 !p-0 !tracking-widest"
                 >
                   Send another
@@ -56,20 +110,22 @@ export default function ContactPage() {
               </div>
             ) : (
               <form
+                ref={formRef}
                 onSubmit={handleSubmit}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-24 md:pb-8"
+                noValidate
               >
-                <FormField label="Name" required className="md:col-span-2">
-                  <Input type="text" required placeholder="Your name" />
+                <FormField label="Name" required error={errors.name} className="md:col-span-2">
+                  <Input name="name" type="text" required placeholder="Your name" minLength={2} className={errors.name ? "border-red-500/70" : ""} />
                 </FormField>
-                <FormField label="Email" required>
-                  <Input type="email" required placeholder="your@email.com" />
+                <FormField label="Email" required error={errors.email}>
+                  <Input name="email" type="email" required placeholder="your@email.com" className={errors.email ? "border-red-500/70" : ""} />
                 </FormField>
                 <FormField label="IG / Telegram">
-                  <Input type="text" placeholder="@handle" />
+                  <Input name="social" type="text" placeholder="@handle" />
                 </FormField>
-                <FormField label="Project Type" required>
-                  <Select required>
+                <FormField label="Project Type" required error={errors.projectType}>
+                  <Select name="projectType" required className={errors.projectType ? "border-red-500/70" : ""}>
                     <option value="">Select type</option>
                     {PROJECT_TYPES.map((t) => (
                       <option key={t} value={t}>
@@ -79,7 +135,7 @@ export default function ContactPage() {
                   </Select>
                 </FormField>
                 <FormField label="Budget Range">
-                  <Select>
+                  <Select name="budget">
                     <option value="">Select range</option>
                     {BUDGET_RANGES.map((b) => (
                       <option key={b} value={b}>
@@ -89,21 +145,18 @@ export default function ContactPage() {
                   </Select>
                 </FormField>
                 <FormField label="Deadline" className="md:col-span-2">
-                  <Input
-                    type="text"
-                    placeholder="e.g. March 2026, ASAP, Flexible"
-                  />
+                  <Input name="deadline" type="text" placeholder="e.g. March 2026, ASAP, Flexible" />
                 </FormField>
-                <FormField label="Tell me about your project" required className="md:col-span-2">
-                  <Textarea
-                    required
-                    rows={5}
-                    placeholder="Describe your vision, references, goals..."
-                  />
+                <FormField label="Tell me about your project" required error={errors.message} className="md:col-span-2">
+                  <Textarea name="message" required rows={5} placeholder="Describe your vision, references, goals..." minLength={10} className={errors.message ? "border-red-500/70" : ""} />
                 </FormField>
-                <div className="md:col-span-2">
-                  <Button type="submit" className="w-full md:w-auto px-12">
-                    Send Message
+                <div className="md:col-span-2 flex flex-wrap gap-4">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full md:w-auto px-12 scroll-mt-24 scroll-mb-24"
+                  >
+                    {isSubmitting ? "Sending…" : "Send Message"}
                   </Button>
                 </div>
               </form>

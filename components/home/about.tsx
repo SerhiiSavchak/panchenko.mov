@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { ABOUT_IMAGES } from "@/lib/media";
 import { Badge } from "@/components/ui";
 import { useScrollReveal } from "@/lib/scroll-animate";
@@ -25,8 +26,12 @@ export function About() {
   ];
 
   return (
-    <section
+    <motion.section
       ref={sectionRef}
+      initial={{ opacity: 0, y: 64 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
       className="relative px-4 md:px-8 lg:px-16 py-20 md:py-32 overflow-hidden"
     >
       {/* Background oversized text */}
@@ -122,6 +127,6 @@ export function About() {
           </div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

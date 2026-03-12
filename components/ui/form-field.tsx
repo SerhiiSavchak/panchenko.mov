@@ -8,6 +8,7 @@ interface FormFieldProps {
   children: ReactNode;
   className?: string;
   required?: boolean;
+  error?: string;
 }
 
 export function FormField({
@@ -15,6 +16,7 @@ export function FormField({
   children,
   className,
   required,
+  error,
 }: FormFieldProps) {
   return (
     <div className={cn("flex flex-col gap-1", className)}>
@@ -23,6 +25,9 @@ export function FormField({
         {required && " *"}
       </label>
       {children}
+      {error && (
+        <span className="text-xs text-red-500 mt-0.5">{error}</span>
+      )}
     </div>
   );
 }
