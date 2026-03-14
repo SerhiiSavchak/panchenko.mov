@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 export type BrandLogoVariant = "static" | "header" | "loader";
 export type BrandLogoSize = "sm" | "md" | "lg";
@@ -64,18 +64,20 @@ export function BrandLogo({
     >
       <div
         className={`${sizes[size]} w-full bg-foreground pointer-events-none ${variant === "header" ? "translate-y-[3px]" : ""}`}
-        style={{
-          maskImage: `url(${LOGO_SRC})`,
-          WebkitMaskImage: `url(${LOGO_SRC})`,
-          maskSize: "contain",
-          maskRepeat: "no-repeat",
-          maskPosition: "center",
-          maskMode: "luminance",
-          WebkitMaskSize: "contain",
-          WebkitMaskRepeat: "no-repeat",
-          WebkitMaskPosition: "center",
-          WebkitMaskMode: "luminance",
-        }}
+        style={
+          {
+            maskImage: `url(${LOGO_SRC})`,
+            WebkitMaskImage: `url(${LOGO_SRC})`,
+            maskSize: "contain",
+            maskRepeat: "no-repeat",
+            maskPosition: "center",
+            maskMode: "luminance",
+            WebkitMaskSize: "contain",
+            WebkitMaskRepeat: "no-repeat",
+            WebkitMaskPosition: "center",
+            WebkitMaskMode: "luminance",
+          } as CSSProperties
+        }
       />
     </div>
   );
