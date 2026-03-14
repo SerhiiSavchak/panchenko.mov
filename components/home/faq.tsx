@@ -41,9 +41,9 @@ export function FAQ() {
   });
 
   return (
-    <Section>
-      <div ref={ref} className="flex flex-col items-center">
-        <div className="w-full max-w-3xl text-center mb-16">
+    <Section className="!px-6 md:!px-8 lg:!px-16">
+      <div ref={ref} className="flex flex-col items-center w-full">
+        <div className="w-full max-w-3xl mx-auto text-center mb-16">
           <span className="text-xs uppercase tracking-widest text-muted-foreground block">
             Questions
           </span>
@@ -52,16 +52,16 @@ export function FAQ() {
           </h2>
         </div>
 
-        <div className={`w-full max-w-3xl ${inView ? "scroll-reveal-visible" : ""}`}>
+        <div className={`w-full max-w-3xl mx-auto ${inView ? "scroll-reveal-visible" : ""}`}>
           {faqs.map((faq, i) => (
             <div
               key={i}
-              className="scroll-reveal-item border-b border-border"
+              className="scroll-reveal-item border-b border-border px-4"
               style={{ animationDelay: `${150 + i * 50}ms` }}
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="w-full flex items-center justify-between py-7 md:py-8 text-left group hover:bg-muted/30 transition-colors px-4 -mx-4 rounded"
+                className="w-full flex items-center justify-between py-7 md:py-8 text-left group hover:bg-muted/30 transition-colors rounded -mx-4 px-4"
                 aria-expanded={openIndex === i}
               >
                 <span className="text-base md:text-lg text-foreground group-hover:text-accent transition-colors pr-6 text-left leading-snug">
@@ -79,7 +79,7 @@ export function FAQ() {
                 className={`accordion-content ${openIndex === i ? "open" : ""}`}
               >
                 <div className="accordion-inner">
-                  <p className="text-base md:text-lg text-muted-foreground pb-7 md:pb-8 leading-relaxed pl-4">
+                  <p className="text-base md:text-lg text-muted-foreground pb-7 md:pb-8 leading-relaxed">
                     {faq.a}
                   </p>
                 </div>

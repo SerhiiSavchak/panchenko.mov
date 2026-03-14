@@ -33,7 +33,7 @@ export function Section({
       id={id}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.15, margin: "0px 0px -60px 0px" }}
+      viewport={{ once: true, amount: 0.08, margin: "0px 0px -20px 0px" }}
       variants={sectionVariants}
       className={cn("px-4 md:px-8 lg:px-16 py-16 md:py-24 overflow-x-clip", className)}
     >

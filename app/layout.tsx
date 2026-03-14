@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Bebas_Neue } from "next/font/google";
 import { GraffitiLoader } from "@/components/graffiti-loader";
 import { Providers } from "@/components/providers";
+import { LoaderDismissedProvider } from "@/lib/loader-dismissed-context";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 
@@ -69,10 +70,12 @@ export default function RootLayout({
         />
       </head>
       <body className="relative font-sans bg-background text-foreground overflow-x-hidden">
-        <Providers>
-          <GraffitiLoader />
-          {children}
-        </Providers>
+        <LoaderDismissedProvider>
+          <Providers>
+            <GraffitiLoader />
+            {children}
+          </Providers>
+        </LoaderDismissedProvider>
       </body>
     </html>
   );

@@ -28,7 +28,11 @@ export function WorkCard({ work, index, priority = false }: WorkCardProps) {
     if (!el) return;
     const obs = new IntersectionObserver(
       ([e]) => e.isIntersecting && setIsInView(true),
-      { threshold: 0.15, rootMargin: "-30px" }
+      {
+        threshold: 0.05,
+        rootMargin: "20px 0px 20px 0px",
+        root: null,
+      }
     );
     obs.observe(el);
     return () => obs.disconnect();

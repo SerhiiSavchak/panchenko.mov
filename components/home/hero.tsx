@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/magnetic-button";
 import { HERO_VIDEO } from "@/lib/media";
 import { useHeroReady } from "@/lib/hero-ready-context";
+import { useLoaderDismissed } from "@/lib/loader-dismissed-context";
 import { useReducedMotion } from "@/lib/hooks";
 
 const CYCLING_WORDS = ["RAP", "CARS", "FIGHT", "BRAND"] as const;
@@ -16,6 +17,7 @@ interface HeroProps {
 export function Hero({ onQuoteOpen }: HeroProps) {
   const heroReady = useHeroReady();
   const onVideoReady = useCallback(() => heroReady?.setReady(), [heroReady]);
+  const loaderDismissed = useLoaderDismissed()?.isDismissed ?? false;
   const reducedMotion = useReducedMotion();
   const [wordIndex, setWordIndex] = useState(0);
   const currentWord = CYCLING_WORDS[wordIndex];
@@ -38,19 +40,17 @@ export function Hero({ onQuoteOpen }: HeroProps) {
 
   return (
     <section className="relative h-screen overflow-hidden">
-      {/* Video layer — pointer-events: none so CTA clicks pass through */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <HeroVideo onReady={onVideoReady} />
-        {/* Dark overlay — improves text contrast on video */}
         <div className="absolute inset-0 bg-background/25" aria-hidden="true" />
       </div>
 
-      <div className="hero-content relative z-10 flex flex-col items-center justify-center h-full px-4 text-center pointer-events-auto">
+      <div className="hero-content relative z-10 flex flex-col items-center justify-center h-full px-6 sm:px-8 md:px-12 text-center pointer-events-auto">
         {/* Badge — based in worldwide */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-6 sm:mb-8">
           <motion.span
             initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            animate={loaderDismissed ? { opacity: 1, y: 0, filter: "blur(0px)" } : { opacity: 0, y: 28, filter: "blur(8px)" }}
             transition={{
               duration: 1.4,
               delay: 0.5,
@@ -62,11 +62,11 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           </motion.span>
         </div>
 
-        {/* Headline — FROM STREET TO [word] — единая анимация появления */}
+        {/* Headline — FROM STREET TO [word] — анимация после скрытия лоадера */}
         <motion.h1
-          className="relative font-display text-[clamp(3rem,12vw,10rem)] leading-[0.85] tracking-tight text-foreground text-balance overflow-hidden"
+          className="relative font-display text-[clamp(3rem,12vw,10rem)] leading-[0.85] tracking-tight text-foreground text-balance overflow-hidden mt-2"
           initial={{ opacity: 0, y: "-0.3em", filter: "blur(12px)", scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
+          animate={loaderDismissed ? { opacity: 1, y: 0, filter: "blur(0px)", scale: 1 } : { opacity: 0, y: "-0.3em", filter: "blur(12px)", scale: 0.97 }}
           transition={{
             duration: 1.6,
             delay: 0.9,
@@ -106,30 +106,31 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           </span>
         </motion.h1>
 
-        {/* Subtext — minimal */}
+        {/* Subtext — minimal, 2 lines */}
         <motion.div
           initial={{ opacity: 0, y: 24, filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          animate={loaderDismissed ? { opacity: 1, y: 0, filter: "blur(0px)" } : { opacity: 0, y: 24, filter: "blur(4px)" }}
           transition={{
             duration: 1.1,
             delay: 1.7,
             ease: [0.22, 1, 0.36, 1],
           }}
-          className="mt-6 text-sm md:text-base text-foreground/90 max-w-xl drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
+          className="mt-8 text-sm md:text-base text-foreground/90 max-w-xl drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] space-y-1"
         >
-          Brand & product storytelling. Cinematic short-form.
+          <span className="block">Brand & product storytelling.</span>
+          <span className="block">Cinematic short-form.</span>
         </motion.div>
 
         {/* Buttons — scale + fade with subtle bounce */}
         <motion.div
           initial={{ opacity: 0, y: 32, scale: 0.88 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+          animate={loaderDismissed ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 32, scale: 0.88 }}
           transition={{
             duration: 1.2,
             delay: 2.2,
             ease: [0.34, 1.4, 0.64, 1],
           }}
-          className="flex flex-wrap items-center justify-center gap-4 mt-10"
+          className="flex flex-wrap items-center justify-center gap-4 mt-12"
         >
           <MagneticButton variant="primary" onClick={onQuoteOpen}>Book a Shoot</MagneticButton>
           <MagneticButton variant="secondary" href="#featured">Watch Work</MagneticButton>
@@ -139,13 +140,13 @@ export function Hero({ onQuoteOpen }: HeroProps) {
       {/* Scroll indicator — final reveal */}
       <motion.div
         initial={{ opacity: 0, y: 16, scale: 0.9 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        animate={loaderDismissed ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 16, scale: 0.9 }}
         transition={{
           duration: 1,
           delay: 2.8,
           ease: [0.22, 1, 0.36, 1],
         }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-10"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}
@@ -161,7 +162,6 @@ const LOAD_TIMEOUT_MS = 8000;
 
 function HeroVideo({ onReady }: { onReady?: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -177,44 +177,18 @@ function HeroVideo({ onReady }: { onReady?: () => void }) {
       .catch(() => setHasFailed(true));
   }, [onReady]);
 
-  const handleCanPlay = useCallback(() => attemptPlay(), [attemptPlay]);
-  const handleLoadedData = useCallback(() => attemptPlay(), [attemptPlay]);
-
-  const handleError = useCallback(() => setHasFailed(true), []);
-
   useEffect(() => {
-    const el = containerRef.current;
-    const video = videoRef.current;
-    if (!el || !video) return;
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting && e.intersectionRatio > 0.1) {
-          attemptPlay();
-        }
-      },
-      { threshold: [0, 0.1, 0.3, 0.5, 1], rootMargin: "0px 0px" }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
+    attemptPlay();
   }, [attemptPlay]);
 
   useEffect(() => {
-    if (hasFailed || isReady) {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      return;
-    }
+    if (hasFailed || isReady) return;
     timeoutRef.current = setTimeout(() => setHasFailed(true), LOAD_TIMEOUT_MS);
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
   }, [hasFailed, isReady]);
 
   return (
-    <div ref={containerRef} className="absolute inset-0">
-      {/* Градиент — пока грузится видео и при ошибке (если нет fallbackImage) */}
+    <div className="absolute inset-0">
       <div
         className="absolute inset-0"
         style={{
@@ -223,13 +197,6 @@ function HeroVideo({ onReady }: { onReady?: () => void }) {
         }}
         aria-hidden
       />
-      {hasFailed && HERO_VIDEO.fallbackImage && (
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${HERO_VIDEO.fallbackImage})` }}
-          aria-hidden
-        />
-      )}
       {!hasFailed && (
         <video
           ref={videoRef}
@@ -239,9 +206,9 @@ function HeroVideo({ onReady }: { onReady?: () => void }) {
           autoPlay
           preload="auto"
           poster={HERO_VIDEO.poster || undefined}
-          onCanPlay={handleCanPlay}
-          onLoadedData={handleLoadedData}
-          onError={handleError}
+          onCanPlay={attemptPlay}
+          onLoadedData={attemptPlay}
+          onError={() => setHasFailed(true)}
           className="absolute inset-0 w-full h-full object-cover"
         >
           <source src={HERO_VIDEO.video} type="video/mp4" />

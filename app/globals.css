@@ -590,34 +590,148 @@ body.modal-scroll-lock {
 .spray-loader-content {
   display: grid;
   place-items: center;
+  overflow: visible;
 }
 
-/* Логотип — маска «рисуется» слева направо как баллончиком */
+/* Сцена: баллончик + логотип */
+.spray-loader-scene {
+  position: relative;
+  width: min(90vw, 28rem);
+  overflow: visible;
+}
+
+/* Баллончик — 3D перспектива, движется слева направо */
+.spray-can-icon {
+  left: -0.5rem;
+  top: 50%;
+  transform: translateY(-50%) rotateY(-15deg) rotate(-8deg) perspective(120px);
+  transform-style: preserve-3d;
+  animation: spray-can-move 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0s forwards;
+}
+
+.spray-can-svg {
+  filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)) drop-shadow(0 0 20px rgba(14,165,233,0.15));
+}
+
+@keyframes spray-can-move {
+  0% {
+    left: -0.5rem;
+    opacity: 1;
+    transform: translateY(-50%) rotateY(-15deg) rotate(-8deg) perspective(120px);
+  }
+  100% {
+    left: calc(100% - 2rem);
+    opacity: 0.95;
+    transform: translateY(-50%) rotateY(-15deg) rotate(-8deg) perspective(120px);
+  }
+}
+
+/* Струя распыления — пульсация */
+.spray-stream ellipse {
+  animation: spray-puff 0.4s ease-in-out infinite alternate;
+}
+
+.spray-dot {
+  animation: spray-dot-pulse 0.35s ease-in-out infinite;
+}
+
+.spray-dot-2 { animation-delay: 0.1s; }
+.spray-dot-3 { animation-delay: 0.2s; }
+
+@keyframes spray-puff {
+  from { opacity: 0.4; transform: scale(0.9); }
+  to { opacity: 0.8; transform: scale(1.1); }
+}
+
+@keyframes spray-dot-pulse {
+  from { opacity: 0.2; }
+  to { opacity: 0.8; }
+}
+
+/* Частицы распыления */
+.spray-particles {
+  z-index: 5;
+}
+
+.spray-particle {
+  animation: spray-particle-fly 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes spray-particle-fly {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  20% {
+    opacity: 0.8;
+    transform: translate(20px, -4px) scale(1);
+  }
+  70% {
+    opacity: 0.4;
+    transform: translate(80px, 2px) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(120px, 0) scale(0.3);
+  }
+}
+
+/* Логотип — маска «рисуется» с эффектом распыления (мягкие края, overspray) */
 .spray-loader-logo {
   position: relative;
   overflow: hidden;
 }
 
 .spray-can-reveal {
-  mask-image: linear-gradient(to right, black 0%, black 0%);
+  /* Градиент с мягким краем — имитация overspray от баллончика */
+  mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black 70%,
+    rgba(0,0,0,0.6) 85%,
+    transparent 100%
+  );
   mask-size: 0% 100%;
   mask-repeat: no-repeat;
   mask-position: left center;
-  -webkit-mask-image: linear-gradient(to right, black 0%, black 0%);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black 70%,
+    rgba(0,0,0,0.6) 85%,
+    transparent 100%
+  );
   -webkit-mask-size: 0% 100%;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: left center;
-  animation: spray-can-draw 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s forwards;
+  animation: spray-can-draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0s forwards;
 }
 
 @keyframes spray-can-draw {
   0% {
-    mask-size: 0% 100%;
-    -webkit-mask-size: 0% 100%;
+    mask-size: 0% 120%;
+    -webkit-mask-size: 0% 120%;
+    mask-position: 0% 50%;
+    -webkit-mask-position: 0% 50%;
+  }
+  15% {
+    mask-size: 8% 120%;
+    -webkit-mask-size: 8% 120%;
+  }
+  50% {
+    mask-size: 55% 120%;
+    -webkit-mask-size: 55% 120%;
+  }
+  85% {
+    mask-size: 98% 120%;
+    -webkit-mask-size: 98% 120%;
   }
   100% {
-    mask-size: 100% 100%;
-    -webkit-mask-size: 100% 100%;
+    mask-size: 110% 120%;
+    -webkit-mask-size: 110% 120%;
+    mask-position: 0% 50%;
+    -webkit-mask-position: 0% 50%;
   }
 }
 
@@ -788,6 +902,21 @@ body.modal-scroll-lock {
     animation: none;
     mask-size: 100% 100%;
     -webkit-mask-size: 100% 100%;
+  }
+
+  .spray-can-icon {
+    animation: none;
+    left: calc(100% - 2rem);
+  }
+
+  .spray-particle {
+    animation: none;
+    opacity: 0;
+  }
+
+  .spray-stream ellipse,
+  .spray-dot {
+    animation: none;
   }
 
   .spray-loader-mist {

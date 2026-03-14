@@ -4,7 +4,7 @@
 // fallbackImage: null = показываем градиент при ошибке (надёжно, без загрузки картинки)
 export const HERO_VIDEO = {
   video: "https://assets.mixkit.co/videos/46422/46422-720.mp4",
-  poster: "", // пусто = градиент пока грузится
+  poster: "https://assets.mixkit.co/videos/46422/46422-thumb-720-0.jpg",
   fallbackImage: null as string | null,
 } as const;
 
