@@ -33,8 +33,8 @@ export function BrandLogo({
 
   const doAnimate = variant === "loader" && animate && !reducedMotion;
 
-  const sizes = { sm: "h-14", md: "h-28 md:h-40", lg: "h-32 md:h-44" };
-  const loaderSize = "w-[min(90vw,22rem)] md:w-[28rem]";
+  const sizes = { sm: "h-10", md: "h-12 md:h-14", lg: "h-14 md:h-16" };
+  const loaderSize = "w-[min(65vw,11rem)] md:w-[14rem]";
 
   if (variant === "loader") {
     return (
@@ -47,7 +47,7 @@ export function BrandLogo({
           alt="PANCHENKO"
           width={320}
           height={100}
-          className={`${loaderSize} h-auto object-contain object-center drop-shadow-[0_0_16px_rgba(255,255,255,0.15)]`}
+          className={`${loaderSize} h-auto object-contain object-center drop-shadow-[0_0_16px_rgba(255,255,255,0.15)] mix-blend-screen`}
           priority
           unoptimized
         />
@@ -55,24 +55,28 @@ export function BrandLogo({
     );
   }
 
-  // Header / static — блок обрезан по фактическому контенту (PNG имеет прозрачные поля ~50% по ширине)
-  const blockWidths = { sm: "w-[6rem]", md: "w-[9rem] md:w-[14rem]", lg: "w-[10rem] md:w-[16rem]" };
+  // Header / static — компактный контейнер, mask убирает чёрный фон
+  const blockWidths = { sm: "w-[5rem]", md: "w-[6.5rem] md:w-[8rem]", lg: "w-[7rem] md:w-[9rem]" };
   return (
     <div
-      className={`inline-flex items-center justify-center leading-[0] logo-graffiti overflow-hidden ${blockWidths[size]} ${className}`}
+      className={`inline-flex items-center justify-center leading-[0] logo-graffiti overflow-hidden pointer-events-auto ${blockWidths[size]} ${className}`}
       aria-label="PANCHENKO"
     >
-      <div className={`${sizes[size]} flex shrink-0 items-center justify-center`}>
-        <Image
-          src={LOGO_SRC}
-          alt="PANCHENKO"
-          width={400}
-          height={125}
-          className="max-h-full w-auto object-contain object-center block"
-          priority
-          unoptimized
-        />
-      </div>
+      <div
+        className={`${sizes[size]} w-full bg-foreground pointer-events-none ${variant === "header" ? "translate-y-[3px]" : ""}`}
+        style={{
+          maskImage: `url(${LOGO_SRC})`,
+          WebkitMaskImage: `url(${LOGO_SRC})`,
+          maskSize: "contain",
+          maskRepeat: "no-repeat",
+          maskPosition: "center",
+          maskMode: "luminance",
+          WebkitMaskSize: "contain",
+          WebkitMaskRepeat: "no-repeat",
+          WebkitMaskPosition: "center",
+          WebkitMaskMode: "luminance",
+        }}
+      />
     </div>
   );
 }

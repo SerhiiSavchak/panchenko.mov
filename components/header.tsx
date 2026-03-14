@@ -1,13 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 
 export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleLogoClick = () => {
+    if (pathname === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -35,7 +43,12 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
         )}
       >
         <div className="flex items-center justify-between px-4 md:px-8 lg:px-16 h-20">
-          <Link href="/" aria-label="Home" className="logo-graffiti shrink-0 inline-flex">
+          <Link
+            href="/"
+            aria-label="Home"
+            className="logo-graffiti shrink-0 inline-flex cursor-pointer"
+            onClick={handleLogoClick}
+          >
             <BrandLogo variant="header" size="md" />
           </Link>
 
