@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
@@ -8,31 +8,18 @@ import { useReducedMotion } from "@/lib/hooks";
 import { useHeroReady } from "@/lib/hero-ready-context";
 import { useLoaderDismissed } from "@/lib/loader-dismissed-context";
 
-const MIN_DISPLAY_MS = 900;  // Краткий показ — hero появляется быстро
-const MAX_WAIT_MS = 2000;    // Не блокировать дольше 2с
+const MIN_DISPLAY_MS = 900;
+const MAX_WAIT_MS = 2000;
 
 export function GraffitiLoader() {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
-  const [minTimePassed, setMinTimePassed] = useState(false);
-  const [maxWaitPassed, setMaxWaitPassed] = useState(false);
   const pathname = usePathname();
   const reducedMotion = useReducedMotion();
   const heroReady = useHeroReady();
   const setLoaderDismissed = useLoaderDismissed()?.setDismissed;
 
-  // On non-home pages there is no hero — treat as ready after min time
   const hasHero = pathname === "/";
-  const heroReadyForReveal = hasHero ? (heroReady?.isReady ?? false) : true;
-
-  useEffect(() => {
-    const t1 = setTimeout(() => setMinTimePassed(true), MIN_DISPLAY_MS);
-    const t2 = setTimeout(() => setMaxWaitPassed(true), MAX_WAIT_MS);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, []);
 
   useEffect(() => {
     if (reducedMotion) {
@@ -42,13 +29,21 @@ export function GraffitiLoader() {
       }, 400);
       return () => clearTimeout(t);
     }
-    // Reveal when: (minTime AND heroReady) OR maxWait — never show broken hero
-    const canReveal = (minTimePassed && heroReadyForReveal) || maxWaitPassed;
-    if (canReveal) {
+
+    const minDelay = new Promise<void>((r) => setTimeout(r, MIN_DISPLAY_MS));
+    const maxWait = new Promise<void>((r) => setTimeout(r, MAX_WAIT_MS));
+    const mediaReady = hasHero
+      ? (heroReady?.readyPromise ?? Promise.resolve())
+      : Promise.resolve();
+
+    Promise.race([
+      Promise.all([minDelay, mediaReady]),
+      maxWait,
+    ]).then(() => {
       setVisible(false);
       setLoaderDismissed?.();
-    }
-  }, [reducedMotion, minTimePassed, maxWaitPassed, heroReadyForReveal, setLoaderDismissed]);
+    });
+  }, [reducedMotion, hasHero, heroReady?.readyPromise, setLoaderDismissed]);
 
   useEffect(() => {
     if (!visible) {
@@ -57,17 +52,15 @@ export function GraffitiLoader() {
     }
   }, [visible]);
 
-  // Memoize static content — only root className changes on exit. Must be before any conditional return (hooks rule).
-  const content = useMemo(
-    () => (
-      <div
-        className={`spray-loader spray-loader-gpu fixed inset-0 z-[100] overflow-hidden ${!visible ? "spray-loader-exit" : ""}`}
-        aria-hidden
-      >
-        <div className="spray-loader-wall absolute inset-0 bg-black" aria-hidden />
-        <div className="spray-loader-content absolute inset-0 flex items-center justify-center">
-          <div className="spray-loader-scene relative flex items-center justify-center">
-            <div className="spray-can-icon absolute z-10" aria-hidden>
+  const content = (
+    <div
+      className={`spray-loader spray-loader-gpu fixed inset-0 z-[100] overflow-hidden ${!visible ? "spray-loader-exit" : ""}`}
+      aria-hidden
+    >
+      <div className="spray-loader-wall absolute inset-0 bg-black" aria-hidden />
+      <div className="spray-loader-content absolute inset-0 flex items-center justify-center">
+        <div className="spray-loader-scene relative flex items-center justify-center">
+          <div className="spray-can-icon absolute z-10" aria-hidden>
             <svg viewBox="0 0 80 100" className="spray-can-svg w-14 h-[5.5rem] md:w-[4.5rem] md:h-[6.5rem]">
               <defs>
                 <linearGradient id="can-body" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -117,15 +110,13 @@ export function GraffitiLoader() {
                 </g>
               </g>
             </svg>
-            </div>
-            <div className="spray-loader-logo loader-logo-visible">
-              <BrandLogo variant="loader" animate={false} />
-            </div>
+          </div>
+          <div className="spray-loader-logo loader-logo-visible">
+            <BrandLogo variant="loader" animate={false} />
           </div>
         </div>
       </div>
-    ),
-    [visible]
+    </div>
   );
 
   if (!mounted || typeof document === "undefined") return null;

@@ -563,9 +563,11 @@ body.modal-scroll-lock {
   animation: about-line-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* Hero background video — no native controls, no play overlay */
+/* Hero background video — non-interactive, no native controls, no play overlay */
 .hero-video-bg {
   pointer-events: none;
+  /* Prevent focus ring and interaction states */
+  outline: none;
 }
 .hero-video-bg::-webkit-media-controls,
 .hero-video-bg::-webkit-media-controls-panel,

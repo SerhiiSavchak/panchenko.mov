@@ -1,99 +1,37 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useEffect } from "react";
 import { HERO_VIDEO } from "@/lib/media";
-
-type HeroVideoStatus = "loading" | "playing" | "fallback";
+import { useHeroMedia } from "@/lib/use-hero-media";
 
 /**
- * Hero background video — true background layer, not interactive.
- * - Autoplay with explicit play() for reliable mobile support
- * - Graceful fallback to poster when autoplay is blocked
- * - No controls, no play icon, no frozen frame
+ * Hero background video — non-interactive visual layer.
+ * - Autoplay with explicit play() for mobile Safari / Chrome
+ * - Graceful fallback to poster when autoplay blocked
+ * - No controls, no play icon, no broken states
+ * - Pauses when scrolled out for performance (optional)
  */
 interface HeroVideoProps {
   onReady?: () => void;
+  /** When true, video is paused (e.g. when hero is off-screen) */
+  paused?: boolean;
 }
 
-export function HeroVideo({ onReady }: HeroVideoProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const onReadyCalled = useRef(false);
-  const [status, setStatus] = useState<HeroVideoStatus>("loading");
-
-  const notifyReady = useCallback(() => {
-    if (onReadyCalled.current) return;
-    onReadyCalled.current = true;
-    onReady?.();
-  }, [onReady]);
-
-  const attemptPlay = useCallback(() => {
-    const v = videoRef.current;
-    if (!v) return;
-
-    const playPromise = v.play();
-    if (playPromise === undefined) {
-      // Sync play (legacy)
-      setStatus("playing");
-      notifyReady();
-      return;
-    }
-
-    playPromise
-      .then(() => {
-        setStatus("playing");
-        notifyReady();
-      })
-      .catch(() => {
-        // Autoplay blocked (e.g. mobile Safari, low power mode)
-        setStatus("fallback");
-        notifyReady();
-      });
-  }, [notifyReady]);
+export function HeroVideo({ onReady, paused = false }: HeroVideoProps) {
+  const { videoRef, status, pause, play } = useHeroMedia({ onReady });
 
   useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-
-    const handleCanPlay = () => {
-      if (status !== "loading") return;
-      attemptPlay();
-    };
-    const handlePlay = () => {
-      setStatus("playing");
-      notifyReady();
-    };
-    const handleError = () => {
-      setStatus("fallback");
-      notifyReady();
-    };
-
-    v.addEventListener("canplay", handleCanPlay);
-    v.addEventListener("play", handlePlay);
-    v.addEventListener("error", handleError);
-
-    // Already loaded (cached or event fired before listener)
-    if (v.readyState >= 3) {
-      if (v.paused) attemptPlay();
-      else {
-        setStatus("playing");
-        notifyReady();
-      }
-    }
-
-    return () => {
-      v.removeEventListener("canplay", handleCanPlay);
-      v.removeEventListener("play", handlePlay);
-      v.removeEventListener("error", handleError);
-    };
-  }, [status, attemptPlay, notifyReady]);
+    if (status !== "playing") return;
+    if (paused) pause();
+    else play();
+  }, [paused, status, pause, play]);
 
   const showVideo = status === "playing";
-
   const videoSrc = HERO_VIDEO.useLocalHero ? "/videos/hero.mp4" : HERO_VIDEO.video;
 
   return (
     <div className="absolute inset-0" aria-hidden>
-      {/* Poster — visible until video is actually playing */}
+      {/* Poster — visible until video is playing; premium fallback when autoplay blocked */}
       <div
         className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
         style={{
@@ -113,6 +51,8 @@ export function HeroVideo({ onReady }: HeroVideoProps) {
         disablePictureInPicture
         disableRemotePlayback
         tabIndex={-1}
+        controls={false}
+        controlsList="nodownload nofullscreen noremoteplayback"
         className="hero-video-bg absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
         style={{ opacity: showVideo ? 1 : 0 }}
       />

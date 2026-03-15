@@ -14,6 +14,8 @@ interface HeroProps {
   onQuoteOpen: () => void;
 }
 
+const HERO_VISIBILITY_THRESHOLD = 0.3;
+
 export function Hero({ onQuoteOpen }: HeroProps) {
   const heroReady = useHeroReady();
   const onVideoReady = useCallback(() => heroReady?.setReady(), [heroReady]);
@@ -23,6 +25,21 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   const currentWord = CYCLING_WORDS[wordIndex];
   const measureRef = useRef<HTMLSpanElement>(null);
   const [wordWidth, setWordWidth] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const [videoPaused, setVideoPaused] = useState(false);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setVideoPaused((entry?.intersectionRatio ?? 0) < HERO_VISIBILITY_THRESHOLD);
+      },
+      { threshold: HERO_VISIBILITY_THRESHOLD }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -39,9 +56,9 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   }, [currentWord]);
 
   return (
-    <section className="relative h-screen overflow-hidden">
+    <section ref={sectionRef} className="relative h-screen overflow-hidden">
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <HeroVideo onReady={onVideoReady} />
+        <HeroVideo onReady={onVideoReady} paused={videoPaused} />
         <div className="absolute inset-0 bg-background/25" aria-hidden="true" />
       </div>
 
