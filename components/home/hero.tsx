@@ -172,6 +172,7 @@ function HeroVideo({ onReady }: { onReady?: () => void }) {
 
   const markReady = useCallback(() => {
     setIsReady(true);
+    setFirstFrameReady(true);
     onReady?.();
   }, [onReady]);
 
@@ -190,8 +191,20 @@ function HeroVideo({ onReady }: { onReady?: () => void }) {
   }, [attemptPlay]);
 
   useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+
+    // CRITICAL: Events (onCanPlay, onLoadedData) can fire BEFORE React hydration completes.
+    // If the video loads from SSR HTML before JS runs, we miss those events.
+    // Check readyState on mount — if already can play, handle immediately.
+    // readyState: 0=HAVE_NOTHING, 1=HAVE_METADATA, 2=HAVE_CURRENT_DATA, 3=HAVE_FUTURE_DATA, 4=HAVE_ENOUGH_DATA
+    if (v.readyState >= 3) {
+      handleFirstFrame();
+      return;
+    }
+
     attemptPlay();
-  }, [attemptPlay]);
+  }, [attemptPlay, handleFirstFrame]);
 
   useEffect(() => {
     if (hasFailed || isReady) return;
@@ -236,6 +249,7 @@ function HeroVideo({ onReady }: { onReady?: () => void }) {
           preload="auto"
           onCanPlay={handleFirstFrame}
           onLoadedData={handleFirstFrame}
+          onPlay={handleFirstFrame}
           onError={() => setHasFailed(true)}
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-out"
           style={{ opacity: firstFrameReady ? 1 : 0 }}
