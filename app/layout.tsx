@@ -63,6 +63,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://videos.pexels.com" />
         <link rel="preconnect" href="https://images.pexels.com" />
         <link rel="preload" as="video" href="https://assets.mixkit.co/videos/46422/46422-720.mp4" />
+        <link rel="preload" as="image" href="https://assets.mixkit.co/videos/46422/46422-thumb-720-0.jpg" />
         <style
           dangerouslySetInnerHTML={{
             __html: `html{background:#050505}body{background:#050505;color:#f0f0f0}`,

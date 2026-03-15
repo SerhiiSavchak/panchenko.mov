@@ -5,15 +5,22 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
+import { useLenis } from "@/components/lenis-provider";
 
 export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
   const pathname = usePathname();
+  const lenis = useLenis();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleLogoClick = () => {
+  const handleLogoClick = (e: React.MouseEvent) => {
     if (pathname === "/") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      e.preventDefault();
+      if (lenis) {
+        lenis.scrollTo(0, { force: true });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
   };
 
