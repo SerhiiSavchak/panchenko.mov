@@ -563,6 +563,19 @@ body.modal-scroll-lock {
   animation: about-line-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
+/* Hero background video — no native controls, no play overlay */
+.hero-video-bg {
+  pointer-events: none;
+}
+.hero-video-bg::-webkit-media-controls,
+.hero-video-bg::-webkit-media-controls-panel,
+.hero-video-bg::-webkit-media-controls-play-button,
+.hero-video-bg::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Loader — одна плавная анимация */
 .loader-simple {
   min-height: 100vh;
@@ -599,7 +612,14 @@ body.modal-scroll-lock {
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
+/* GPU layer for smooth animation, no reflow during exit */
+.spray-loader-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 .spray-loader-exit {
+  will-change: opacity;
   animation: spray-loader-fade-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 

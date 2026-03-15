@@ -1,11 +1,12 @@
 // Comprehensive media system - Pexels free stock
 
-// Hero: single video — same on desktop and mobile (cinematic background)
-// Для мгновенной загрузки: положите hero.mp4 в /public/videos/ и используйте /videos/hero.mp4
+// Hero: одно видео. Для быстрой загрузки — сожмите и положите в /public/videos/hero.mp4, useLocalHero: true
 export const HERO_VIDEO = {
   video: "https://assets.mixkit.co/videos/46422/46422-720.mp4",
   poster: "https://assets.mixkit.co/videos/46422/46422-thumb-720-0.jpg",
   fallbackImage: null as string | null,
+  /** true = использовать /videos/hero.mp4 (сжатое локально, ~700KB вместо 3–5MB) */
+  useLocalHero: true,
 } as const;
 
 // Rap: Mixkit реперский клип. Cars: Pexels drift (Tokyo Drift style). Fight: boxing

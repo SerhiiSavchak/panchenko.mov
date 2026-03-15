@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 import { useReducedMotion } from "@/lib/hooks";
 import { useHeroReady } from "@/lib/hero-ready-context";
@@ -15,9 +16,14 @@ export function GraffitiLoader() {
   const [mounted, setMounted] = useState(true);
   const [minTimePassed, setMinTimePassed] = useState(false);
   const [maxWaitPassed, setMaxWaitPassed] = useState(false);
+  const pathname = usePathname();
   const reducedMotion = useReducedMotion();
   const heroReady = useHeroReady();
   const setLoaderDismissed = useLoaderDismissed()?.setDismissed;
+
+  // On non-home pages there is no hero — treat as ready after min time
+  const hasHero = pathname === "/";
+  const heroReadyForReveal = hasHero ? (heroReady?.isReady ?? false) : true;
 
   useEffect(() => {
     const t1 = setTimeout(() => setMinTimePassed(true), MIN_DISPLAY_MS);
@@ -36,13 +42,13 @@ export function GraffitiLoader() {
       }, 400);
       return () => clearTimeout(t);
     }
-    // Hero показываем при minTime ИЛИ video ready — что раньше (не ждём оба)
-    const canReveal = minTimePassed || heroReady?.isReady || maxWaitPassed;
+    // Reveal when: (minTime AND heroReady) OR maxWait — never show broken hero
+    const canReveal = (minTimePassed && heroReadyForReveal) || maxWaitPassed;
     if (canReveal) {
       setVisible(false);
       setLoaderDismissed?.();
     }
-  }, [reducedMotion, minTimePassed, maxWaitPassed, heroReady?.isReady, setLoaderDismissed]);
+  }, [reducedMotion, minTimePassed, maxWaitPassed, heroReadyForReveal, setLoaderDismissed]);
 
   useEffect(() => {
     if (!visible) {
@@ -51,17 +57,17 @@ export function GraffitiLoader() {
     }
   }, [visible]);
 
-  if (!mounted || typeof document === "undefined") return null;
-
-  const content = (
-    <div
-      className={`spray-loader fixed inset-0 z-[100] overflow-hidden ${!visible ? "spray-loader-exit" : ""}`}
-      aria-hidden
-    >
-      <div className="spray-loader-wall absolute inset-0 bg-black" aria-hidden />
-      <div className="spray-loader-content absolute inset-0 flex items-center justify-center">
-        <div className="spray-loader-scene relative flex items-center justify-center">
-          <div className="spray-can-icon absolute z-10" aria-hidden>
+  // Memoize static content — only root className changes on exit. Must be before any conditional return (hooks rule).
+  const content = useMemo(
+    () => (
+      <div
+        className={`spray-loader spray-loader-gpu fixed inset-0 z-[100] overflow-hidden ${!visible ? "spray-loader-exit" : ""}`}
+        aria-hidden
+      >
+        <div className="spray-loader-wall absolute inset-0 bg-black" aria-hidden />
+        <div className="spray-loader-content absolute inset-0 flex items-center justify-center">
+          <div className="spray-loader-scene relative flex items-center justify-center">
+            <div className="spray-can-icon absolute z-10" aria-hidden>
             <svg viewBox="0 0 80 100" className="spray-can-svg w-14 h-[5.5rem] md:w-[4.5rem] md:h-[6.5rem]">
               <defs>
                 <linearGradient id="can-body" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -111,14 +117,18 @@ export function GraffitiLoader() {
                 </g>
               </g>
             </svg>
-          </div>
-          <div className="spray-loader-logo loader-logo-visible">
-            <BrandLogo variant="loader" animate={false} />
+            </div>
+            <div className="spray-loader-logo loader-logo-visible">
+              <BrandLogo variant="loader" animate={false} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    ),
+    [visible]
   );
+
+  if (!mounted || typeof document === "undefined") return null;
 
   return createPortal(content, document.body);
 }

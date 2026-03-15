@@ -1,60 +1,120 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { HERO_VIDEO } from "@/lib/media";
 
-/**
- * Hero video — один элемент, без лишней логики.
- * Браузер сам показывает poster до первого кадра и запускает autoplay.
- */
+type HeroVideoStatus = "loading" | "playing" | "fallback";
 
+/**
+ * Hero background video — true background layer, not interactive.
+ * - Autoplay with explicit play() for reliable mobile support
+ * - Graceful fallback to poster when autoplay is blocked
+ * - No controls, no play icon, no frozen frame
+ */
 interface HeroVideoProps {
   onReady?: () => void;
 }
 
 export function HeroVideo({ onReady }: HeroVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const notified = useRef(false);
-  const [playing, setPlaying] = useState(false);
+  const onReadyCalled = useRef(false);
+  const [status, setStatus] = useState<HeroVideoStatus>("loading");
 
-  const handleReady = () => {
-    setPlaying(true);
-    if (notified.current) return;
-    notified.current = true;
+  const notifyReady = useCallback(() => {
+    if (onReadyCalled.current) return;
+    onReadyCalled.current = true;
     onReady?.();
-  };
+  }, [onReady]);
 
-  // События могут сработать до гидратации — проверяем readyState при mount
+  const attemptPlay = useCallback(() => {
+    const v = videoRef.current;
+    if (!v) return;
+
+    const playPromise = v.play();
+    if (playPromise === undefined) {
+      // Sync play (legacy)
+      setStatus("playing");
+      notifyReady();
+      return;
+    }
+
+    playPromise
+      .then(() => {
+        setStatus("playing");
+        notifyReady();
+      })
+      .catch(() => {
+        // Autoplay blocked (e.g. mobile Safari, low power mode)
+        setStatus("fallback");
+        notifyReady();
+      });
+  }, [notifyReady]);
+
   useEffect(() => {
     const v = videoRef.current;
-    if (v && v.readyState >= 3) handleReady();
-  }, []);
+    if (!v) return;
+
+    const handleCanPlay = () => {
+      if (status !== "loading") return;
+      attemptPlay();
+    };
+    const handlePlay = () => {
+      setStatus("playing");
+      notifyReady();
+    };
+    const handleError = () => {
+      setStatus("fallback");
+      notifyReady();
+    };
+
+    v.addEventListener("canplay", handleCanPlay);
+    v.addEventListener("play", handlePlay);
+    v.addEventListener("error", handleError);
+
+    // Already loaded (cached or event fired before listener)
+    if (v.readyState >= 3) {
+      if (v.paused) attemptPlay();
+      else {
+        setStatus("playing");
+        notifyReady();
+      }
+    }
+
+    return () => {
+      v.removeEventListener("canplay", handleCanPlay);
+      v.removeEventListener("play", handlePlay);
+      v.removeEventListener("error", handleError);
+    };
+  }, [status, attemptPlay, notifyReady]);
+
+  const showVideo = status === "playing";
+
+  const videoSrc = HERO_VIDEO.useLocalHero ? "/videos/hero.mp4" : HERO_VIDEO.video;
 
   return (
-    <div className="absolute inset-0">
-      {/* Poster — виден сразу, скрывается когда видео играет */}
+    <div className="absolute inset-0" aria-hidden>
+      {/* Poster — visible until video is actually playing */}
       <div
         className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
         style={{
           backgroundImage: `url(${HERO_VIDEO.poster})`,
-          opacity: playing ? 0 : 1,
+          opacity: showVideo ? 0 : 1,
         }}
-        aria-hidden
       />
       <video
         ref={videoRef}
-        src={`${HERO_VIDEO.video}#t=0.001`}
+        src={`${videoSrc}#t=0.001`}
         poster={HERO_VIDEO.poster}
         muted
         loop
         playsInline
         autoPlay
         preload="auto"
-        onCanPlay={handleReady}
-        onPlay={handleReady}
-        onError={handleReady}
-        className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
-        style={{ opacity: playing ? 1 : 0 }}
+        disablePictureInPicture
+        disableRemotePlayback
+        tabIndex={-1}
+        className="hero-video-bg absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+        style={{ opacity: showVideo ? 1 : 0 }}
       />
     </div>
   );
