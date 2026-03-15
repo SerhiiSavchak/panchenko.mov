@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useCallback, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/magnetic-button";
-import { HERO_VIDEO } from "@/lib/media";
+import { HeroVideo } from "@/components/home/hero-video";
 import { useHeroReady } from "@/lib/hero-ready-context";
 import { useLoaderDismissed } from "@/lib/loader-dismissed-context";
 import { useReducedMotion } from "@/lib/hooks";
@@ -155,108 +155,5 @@ export function Hero({ onQuoteOpen }: HeroProps) {
         />
       </motion.div>
     </section>
-  );
-}
-
-const LOAD_TIMEOUT_MS = 8000;
-
-// #t=0.001 helps Safari/iOS preload and display the first frame instead of black
-const HERO_VIDEO_SRC = `${HERO_VIDEO.video}#t=0.001`;
-
-function HeroVideo({ onReady }: { onReady?: () => void }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isReady, setIsReady] = useState(false);
-  const [hasFailed, setHasFailed] = useState(false);
-  const [firstFrameReady, setFirstFrameReady] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const markReady = useCallback(() => {
-    setIsReady(true);
-    setFirstFrameReady(true);
-    onReady?.();
-  }, [onReady]);
-
-  const attemptPlay = useCallback(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.play()
-      .then(markReady)
-      .catch(() => setHasFailed(true));
-  }, [markReady]);
-
-  // onLoadedData/onCanPlay = first frame decoded; only then fade in video (fixes black flash)
-  const handleFirstFrame = useCallback(() => {
-    setFirstFrameReady(true);
-    attemptPlay();
-  }, [attemptPlay]);
-
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-
-    // CRITICAL: Events (onCanPlay, onLoadedData) can fire BEFORE React hydration completes.
-    // If the video loads from SSR HTML before JS runs, we miss those events.
-    // Check readyState on mount — if already can play, handle immediately.
-    // readyState: 0=HAVE_NOTHING, 1=HAVE_METADATA, 2=HAVE_CURRENT_DATA, 3=HAVE_FUTURE_DATA, 4=HAVE_ENOUGH_DATA
-    if (v.readyState >= 3) {
-      handleFirstFrame();
-      return;
-    }
-
-    attemptPlay();
-  }, [attemptPlay, handleFirstFrame]);
-
-  useEffect(() => {
-    if (hasFailed || isReady) return;
-    timeoutRef.current = setTimeout(() => setHasFailed(true), LOAD_TIMEOUT_MS);
-    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
-  }, [hasFailed, isReady]);
-
-  return (
-    <div className="absolute inset-0">
-      {/* Base gradient — fallback when no poster or video failed */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, #050505 0%, #0a0f14 35%, #050505 100%)",
-        }}
-        aria-hidden
-      />
-
-      {/* Poster — visible until video has first frame (fixes Safari black screen) */}
-      {HERO_VIDEO.poster && (
-        <div
-          className="absolute inset-0 transition-opacity duration-500 ease-out"
-          style={{
-            opacity: firstFrameReady ? 0 : 1,
-            backgroundImage: `url(${HERO_VIDEO.poster})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-          aria-hidden
-        />
-      )}
-
-      {/* Video — fades in only when first frame is decoded */}
-      {!hasFailed && (
-        <video
-          ref={videoRef}
-          muted
-          loop
-          playsInline
-          autoPlay
-          preload="auto"
-          onCanPlay={handleFirstFrame}
-          onLoadedData={handleFirstFrame}
-          onPlay={handleFirstFrame}
-          onError={() => setHasFailed(true)}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-out"
-          style={{ opacity: firstFrameReady ? 1 : 0 }}
-        >
-          <source src={HERO_VIDEO_SRC} type="video/mp4" />
-        </video>
-      )}
-    </div>
   );
 }
