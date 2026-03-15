@@ -1,7 +1,7 @@
 // Comprehensive media system - Pexels free stock
 
 // Hero: single video — same on desktop and mobile (cinematic background)
-// fallbackImage: null = показываем градиент при ошибке (надёжно, без загрузки картинки)
+// Для мгновенной загрузки: положите hero.mp4 в /public/videos/ и используйте /videos/hero.mp4
 export const HERO_VIDEO = {
   video: "https://assets.mixkit.co/videos/46422/46422-720.mp4",
   poster: "https://assets.mixkit.co/videos/46422/46422-thumb-720-0.jpg",

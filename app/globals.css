@@ -563,7 +563,36 @@ body.modal-scroll-lock {
   animation: about-line-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* Spray loader — чёрная стена, лого рисуется баллончиком */
+/* Loader — одна плавная анимация */
+.loader-simple {
+  min-height: 100vh;
+  min-height: 100dvh;
+  animation: loader-fade-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.loader-simple-exit {
+  animation: loader-fade-out 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.loader-simple-logo {
+  animation: loader-logo-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
+@keyframes loader-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes loader-fade-out {
+  to { opacity: 0; pointer-events: none; }
+}
+
+@keyframes loader-logo-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Spray loader — баллончик + лого (без маски) */
 .spray-loader {
   min-height: 100vh;
   min-height: 100dvh;
@@ -677,12 +706,16 @@ body.modal-scroll-lock {
   }
 }
 
-/* Логотип — маска «рисуется» с эффектом распыления (мягкие края, overspray) */
+/* Логотип — без маски, просто видим */
 .spray-loader-logo {
   position: relative;
-  overflow: hidden;
 }
 
+.loader-logo-visible {
+  animation: loader-logo-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+
+/* Маска — отключена (spray-can-reveal не используется) */
 .spray-can-reveal {
   /* Градиент с мягким краем — имитация overspray от баллончика */
   mask-image: linear-gradient(
@@ -894,6 +927,18 @@ body.modal-scroll-lock {
 
 /* prefers-reduced-motion: shorten all animations */
 @media (prefers-reduced-motion: reduce) {
+  .loader-simple,
+  .loader-logo-visible {
+    animation: none;
+  }
+  .loader-simple-logo {
+    animation: none;
+    opacity: 1;
+  }
+  .loader-simple-exit {
+    animation-duration: 0.2s;
+  }
+
   .spray-loader-exit {
     animation-duration: 0.2s;
   }

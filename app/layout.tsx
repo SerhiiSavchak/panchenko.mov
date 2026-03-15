@@ -59,7 +59,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${bebas.variable} relative`}>
       <head>
-        <link rel="preconnect" href="https://assets.mixkit.co" />
+        <link rel="dns-prefetch" href="https://assets.mixkit.co" />
+        <link rel="preconnect" href="https://assets.mixkit.co" crossOrigin="" />
         <link rel="preconnect" href="https://videos.pexels.com" />
         <link rel="preconnect" href="https://images.pexels.com" />
         <link rel="preload" as="video" href="https://assets.mixkit.co/videos/46422/46422-720.mp4" fetchPriority="high" />

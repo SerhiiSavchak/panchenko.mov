@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { BrandLogo } from "@/components/brand-logo";
 import { useReducedMotion } from "@/lib/hooks";
 import { useHeroReady } from "@/lib/hero-ready-context";
 import { useLoaderDismissed } from "@/lib/loader-dismissed-context";
 
-// Loader waits for BOTH min display time AND hero video ready
-const MIN_DISPLAY_MS = 2800; // Give video time to load — avoid black screen on reveal
-const MAX_WAIT_MS = 5500; // Fallback — never block user longer than this
+const MIN_DISPLAY_MS = 900;  // Краткий показ — hero появляется быстро
+const MAX_WAIT_MS = 2000;    // Не блокировать дольше 2с
 
 export function GraffitiLoader() {
   const [visible, setVisible] = useState(true);
@@ -18,11 +18,6 @@ export function GraffitiLoader() {
   const reducedMotion = useReducedMotion();
   const heroReady = useHeroReady();
   const setLoaderDismissed = useLoaderDismissed()?.setDismissed;
-
-  const hide = () => {
-    setVisible(false);
-    setLoaderDismissed?.();
-  };
 
   useEffect(() => {
     const t1 = setTimeout(() => setMinTimePassed(true), MIN_DISPLAY_MS);
@@ -35,43 +30,40 @@ export function GraffitiLoader() {
 
   useEffect(() => {
     if (reducedMotion) {
-      const t = setTimeout(hide, 400);
+      const t = setTimeout(() => {
+        setVisible(false);
+        setLoaderDismissed?.();
+      }, 400);
       return () => clearTimeout(t);
     }
-    // Hide only when: (minTime AND video ready) OR maxWait fallback
-    const canReveal = (minTimePassed && heroReady?.isReady) || maxWaitPassed;
+    // Hero показываем при minTime ИЛИ video ready — что раньше (не ждём оба)
+    const canReveal = minTimePassed || heroReady?.isReady || maxWaitPassed;
     if (canReveal) {
-      hide();
+      setVisible(false);
+      setLoaderDismissed?.();
     }
-  }, [reducedMotion, heroReady?.isReady, minTimePassed, maxWaitPassed]);
+  }, [reducedMotion, minTimePassed, maxWaitPassed, heroReady?.isReady, setLoaderDismissed]);
 
   useEffect(() => {
     if (!visible) {
-      const unmount = setTimeout(() => setMounted(false), 500);
-      return () => clearTimeout(unmount);
+      const t = setTimeout(() => setMounted(false), 400);
+      return () => clearTimeout(t);
     }
   }, [visible]);
 
-  if (!mounted) return null;
+  if (!mounted || typeof document === "undefined") return null;
 
-  return (
+  const content = (
     <div
       className={`spray-loader fixed inset-0 z-[100] overflow-hidden ${!visible ? "spray-loader-exit" : ""}`}
+      aria-hidden
     >
-      {/* Чёрная стена */}
       <div className="spray-loader-wall absolute inset-0 bg-black" aria-hidden />
-
-      {/* Логотип + баллончик — появляется как нарисованный распылением */}
       <div className="spray-loader-content absolute inset-0 flex items-center justify-center">
         <div className="spray-loader-scene relative flex items-center justify-center">
-          {/* Баллончик в стиле граффити — объёмный, с распылением */}
           <div className="spray-can-icon absolute z-10" aria-hidden>
-            <svg
-              viewBox="0 0 80 100"
-              className="spray-can-svg w-14 h-[5.5rem] md:w-[4.5rem] md:h-[6.5rem]"
-            >
+            <svg viewBox="0 0 80 100" className="spray-can-svg w-14 h-[5.5rem] md:w-[4.5rem] md:h-[6.5rem]">
               <defs>
-                {/* Металлический градиент корпуса */}
                 <linearGradient id="can-body" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#1a1a1a" />
                   <stop offset="15%" stopColor="#2d2d2d" />
@@ -92,7 +84,6 @@ export function GraffitiLoader() {
                   <stop offset="0%" stopColor="rgba(14,165,233,0.8)" />
                   <stop offset="100%" stopColor="rgba(14,165,233,0)" />
                 </radialGradient>
-                {/* Неоновое свечение */}
                 <filter id="can-glow">
                   <feGaussianBlur stdDeviation="1" result="blur" />
                   <feMerge>
@@ -101,32 +92,17 @@ export function GraffitiLoader() {
                   </feMerge>
                 </filter>
               </defs>
-              {/* Корпус — цилиндр с перспективой */}
               <ellipse cx="40" cy="28" rx="18" ry="6" fill="url(#can-body)" />
-              <path
-                d="M22 28 L22 78 Q22 84 40 84 Q58 84 58 78 L58 28"
-                fill="url(#can-body)"
-                stroke="#333"
-                strokeWidth="1"
-              />
+              <path d="M22 28 L22 78 Q22 84 40 84 Q58 84 58 78 L58 28" fill="url(#can-body)" stroke="#333" strokeWidth="1" />
               <ellipse cx="40" cy="78" rx="18" ry="6" fill="#151515" />
-              {/* Полоски — граффити стиль */}
               <path d="M24 42 Q40 40 56 42" stroke="#0ea5e9" strokeWidth="2" fill="none" opacity="0.9" />
               <path d="M24 56 Q40 54 56 56" stroke="#0ea5e9" strokeWidth="2" fill="none" opacity="0.7" />
               <path d="M24 70 Q40 68 56 70" stroke="#0ea5e9" strokeWidth="2" fill="none" opacity="0.5" />
-              {/* Крышка */}
               <ellipse cx="40" cy="18" rx="14" ry="4" fill="url(#can-cap)" />
               <path d="M26 18 L26 24 Q40 26 54 24 L54 18" fill="url(#can-cap)" stroke="#222" strokeWidth="0.5" />
               <rect x="34" y="8" width="12" height="10" rx="2" fill="#333" />
-              {/* Сопло + струя */}
               <g filter="url(#can-glow)">
-                <path
-                  d="M58 42 L75 44 L72 54 L58 52 Z"
-                  fill="url(#can-nozzle)"
-                  stroke="#38bdf8"
-                  strokeWidth="0.5"
-                />
-                {/* Струя распыления */}
+                <path d="M58 42 L75 44 L72 54 L58 52 Z" fill="url(#can-nozzle)" stroke="#38bdf8" strokeWidth="0.5" />
                 <g className="spray-stream">
                   <ellipse cx="78" cy="48" rx="12" ry="8" fill="url(#spray-fill)" opacity="0.6" />
                   <circle cx="82" cy="46" r="2" fill="rgba(14,165,233,0.5)" className="spray-dot" />
@@ -136,28 +112,13 @@ export function GraffitiLoader() {
               </g>
             </svg>
           </div>
-          <div className="spray-loader-logo spray-can-reveal">
+          <div className="spray-loader-logo loader-logo-visible">
             <BrandLogo variant="loader" animate={false} />
-          </div>
-          {/* Частицы распыления — летят от баллончика к стене */}
-          <div className="spray-particles absolute inset-0 pointer-events-none" aria-hidden>
-            {[...Array(12)].map((_, i) => (
-              <div
-                key={i}
-                className="spray-particle absolute w-1 h-1 rounded-full bg-[#0ea5e9]/60"
-                style={{
-                  left: `${15 + i * 6}%`,
-                  top: `${40 + (i % 3) * 8}%`,
-                  animationDelay: `${i * 0.06}s`,
-                }}
-              />
-            ))}
           </div>
         </div>
       </div>
-
-      {/* Лёгкий туман от баллончика во время рисования */}
-      <div className="spray-loader-mist absolute inset-0 pointer-events-none" aria-hidden />
     </div>
   );
+
+  return createPortal(content, document.body);
 }
