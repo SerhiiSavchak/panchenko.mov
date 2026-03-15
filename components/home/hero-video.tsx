@@ -15,7 +15,7 @@ import { HERO_VIDEO } from "@/lib/media";
  */
 
 const VIDEO_SRC = `${HERO_VIDEO.video}#t=0.001`;
-const LOAD_TIMEOUT_MS = 8000;
+const LOAD_TIMEOUT_MS = 4000; // Align with loader max wait; notify so loader can dismiss
 
 // readyState: 3=HAVE_FUTURE_DATA, 4=HAVE_ENOUGH_DATA — can play
 const CAN_PLAY_STATE = 3;
@@ -50,17 +50,25 @@ export function HeroVideo({ onReady }: HeroVideoProps) {
       .then(() => {
         clearLoadTimeout();
         setShowVideo(true);
-        notifyReady();
+        notifyReady(); // play() succeeded — we have playing video
       })
       .catch(() => {
         clearLoadTimeout();
-        notifyReady();
+        setShowVideo(true);
+        notifyReady(); // Autoplay blocked — show current frame
       });
   }, [notifyReady, clearLoadTimeout]);
 
-  const handleCanPlay = useCallback(() => {
+  // Called when we have a displayable frame (canplay/loadeddata/play or readyState on mount)
+  const handleHasData = useCallback(() => {
+    setShowVideo(true);
+    notifyReady(); // Signal ready — loader can dismiss when minTime also passed
     tryPlay();
-  }, [tryPlay]);
+  }, [notifyReady, tryPlay]);
+
+  const handleCanPlay = useCallback(() => {
+    handleHasData();
+  }, [handleHasData]);
 
   // Mount: check if video already loaded (pre-hydration events missed)
   useLayoutEffect(() => {
@@ -68,19 +76,20 @@ export function HeroVideo({ onReady }: HeroVideoProps) {
     if (!v) return;
 
     if (v.readyState >= CAN_PLAY_STATE) {
-      tryPlay();
+      handleHasData();
       return;
     }
 
-    tryPlay(); // Also attempt immediately — play() may resolve when ready
-  }, [tryPlay]);
+    tryPlay(); // Attempt play; canplay will fire when ready
+  }, [handleHasData, tryPlay]);
 
   // Timeout fallback — stop waiting after LOAD_TIMEOUT_MS
   useEffect(() => {
     if (notifiedRef.current) return;
     timeoutRef.current = setTimeout(() => {
       timeoutRef.current = null;
-      notifyReady(); // Let loader dismiss; poster stays visible
+      setShowVideo(true);
+      notifyReady(); // Fallback — show whatever we have
     }, LOAD_TIMEOUT_MS);
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -89,25 +98,21 @@ export function HeroVideo({ onReady }: HeroVideoProps) {
 
   return (
     <div className="absolute inset-0">
-      {/* Fallback gradient — visible when video fails or as base */}
+      {/* Base: gradient + poster — poster is first frame, prevents black screen */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-[#050505] via-[#0a0f14] to-[#050505]"
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: HERO_VIDEO.poster ? `url(${HERO_VIDEO.poster})` : undefined,
+          backgroundColor: "#0a0f14",
+        }}
+        aria-hidden
+      />
+      <div
+        className="absolute inset-0 bg-gradient-to-b from-[#050505]/80 via-transparent to-[#050505]/80 pointer-events-none"
         aria-hidden
       />
 
-      {/* Poster — visible until first frame (Safari black flash fix) */}
-      {HERO_VIDEO.poster && (
-        <div
-          className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
-          style={{
-            backgroundImage: `url(${HERO_VIDEO.poster})`,
-            opacity: showVideo ? 0 : 1,
-          }}
-          aria-hidden
-        />
-      )}
-
-      {/* Video — fades in when first frame ready */}
+      {/* Video — fades in over poster when first frame ready */}
       <video
         ref={videoRef}
         src={VIDEO_SRC}
@@ -123,7 +128,7 @@ export function HeroVideo({ onReady }: HeroVideoProps) {
           clearLoadTimeout();
           notifyReady();
         }}
-        className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+        className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out"
         style={{ opacity: showVideo ? 1 : 0 }}
       />
     </div>

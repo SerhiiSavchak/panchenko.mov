@@ -6,13 +6,15 @@ import { useReducedMotion } from "@/lib/hooks";
 import { useHeroReady } from "@/lib/hero-ready-context";
 import { useLoaderDismissed } from "@/lib/loader-dismissed-context";
 
-// Лоадер не ждёт видео — скрывается через MIN_DISPLAY_MS или когда видео готово (что раньше)
-const MIN_DISPLAY_MS = 1200;
+// Loader waits for BOTH min display time AND hero video ready
+const MIN_DISPLAY_MS = 2800; // Give video time to load — avoid black screen on reveal
+const MAX_WAIT_MS = 5500; // Fallback — never block user longer than this
 
 export function GraffitiLoader() {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
   const [minTimePassed, setMinTimePassed] = useState(false);
+  const [maxWaitPassed, setMaxWaitPassed] = useState(false);
   const reducedMotion = useReducedMotion();
   const heroReady = useHeroReady();
   const setLoaderDismissed = useLoaderDismissed()?.setDismissed;
@@ -23,8 +25,12 @@ export function GraffitiLoader() {
   };
 
   useEffect(() => {
-    const t = setTimeout(() => setMinTimePassed(true), MIN_DISPLAY_MS);
-    return () => clearTimeout(t);
+    const t1 = setTimeout(() => setMinTimePassed(true), MIN_DISPLAY_MS);
+    const t2 = setTimeout(() => setMaxWaitPassed(true), MAX_WAIT_MS);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, []);
 
   useEffect(() => {
@@ -32,11 +38,12 @@ export function GraffitiLoader() {
       const t = setTimeout(hide, 400);
       return () => clearTimeout(t);
     }
-    // Скрыть когда прошло minTime ИЛИ видео готово (что раньше)
-    if (minTimePassed || heroReady?.isReady) {
+    // Hide only when: (minTime AND video ready) OR maxWait fallback
+    const canReveal = (minTimePassed && heroReady?.isReady) || maxWaitPassed;
+    if (canReveal) {
       hide();
     }
-  }, [reducedMotion, heroReady?.isReady, minTimePassed]);
+  }, [reducedMotion, heroReady?.isReady, minTimePassed, maxWaitPassed]);
 
   useEffect(() => {
     if (!visible) {
