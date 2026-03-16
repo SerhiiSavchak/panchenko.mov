@@ -28,6 +28,8 @@ export const HERO_MEDIA_TIMING = {
   MAX_REVEAL_WAIT_MS: 6000,
   /** Media fallback if canplay/play never resolve — only timeout in media lifecycle */
   MEDIA_FALLBACK_TIMEOUT_MS: 5000,
+  /** Delay before retrying play() after loader dismissal (viewport now visible) */
+  RETRY_AFTER_LOADER_MS: 150,
 } as const;
 
 /** Derived: safe to reveal hero (playing or intentional fallback) */

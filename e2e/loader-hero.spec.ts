@@ -13,6 +13,22 @@ test.describe("Loader and Hero Video", () => {
     await expect(loader).not.toBeVisible({ timeout: 10000 });
   });
 
+  test("hero video or poster is visible after loader dismisses", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.waitForLoadState("domcontentloaded");
+
+    await page.waitForSelector(".spray-loader", { state: "hidden", timeout: 10000 });
+
+    const heroVideo = page.locator(".hero-video-bg");
+    await expect(heroVideo).toBeVisible({ timeout: 3000 });
+
+    const video = page.locator("video.hero-video-bg");
+    await expect(video).toHaveCount(1);
+    await expect(video).toHaveAttribute("src", /hero\.mp4|46422-720\.mp4/);
+  });
+
   test("loader animation runs smoothly without console errors", async ({
     page,
   }) => {

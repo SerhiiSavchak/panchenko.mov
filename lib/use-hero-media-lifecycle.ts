@@ -10,11 +10,13 @@ import {
 
 /**
  * Connects a video element to the hero media lifecycle.
- * Uses ref callback to attach listeners immediately when element mounts —
- * eliminates canplay race where listeners were attached too late in an effect.
+ * Uses ref callback to attach listeners immediately when element mounts.
  *
- * Single timeout strategy: MEDIA_FALLBACK_TIMEOUT_MS is the only fallback timer.
- * Loader uses MAX_REVEAL_WAIT_MS as a safety net; this hook owns media timing.
+ * Key improvements:
+ * - Video loads with poster on top (video never hidden during load)
+ * - play() failure goes to fallback but resolveReveal lets loader dismiss
+ * - retryPlay() allows recovery when Hero becomes visible after loader
+ * - Single fallback timeout; loader has its own safety net
  */
 export function useHeroMediaLifecycle() {
   const ctx = useHeroMedia();
@@ -28,7 +30,6 @@ export function useHeroMediaLifecycle() {
     const c = ctxRef.current;
     if (!c) return;
 
-    // Clear any pending fallback timeout from previous mount
     if (fallbackTimeoutRef.current) {
       clearTimeout(fallbackTimeoutRef.current);
       fallbackTimeoutRef.current = null;
@@ -116,7 +117,6 @@ export function useHeroMediaLifecycle() {
 
     setStatus("loading");
 
-    // Cannot miss canplay: check readyState immediately
     if (el.readyState >= 3) {
       if (el.paused) {
         attemptPlay();
@@ -127,7 +127,6 @@ export function useHeroMediaLifecycle() {
       return;
     }
 
-    // Single fallback timeout — centralizes media timing
     fallbackTimeoutRef.current = setTimeout(() => {
       fallbackTimeoutRef.current = null;
       const current = ctxRef.current;
@@ -153,8 +152,11 @@ export function useHeroMediaLifecycle() {
   }, []);
 
   const pause = useCallback(() => videoRef.current?.pause(), []);
+
   const play = useCallback(() => {
-    videoRef.current?.play().catch(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.play().catch(() => {
       const c = ctxRef.current;
       if (c) {
         c.setStatus("fallback");
@@ -163,9 +165,41 @@ export function useHeroMediaLifecycle() {
     });
   }, []);
 
+  /**
+   * Retry play() when Hero is visible (e.g. after loader dismissal).
+   * Call only when status is fallback — HeroVideo controls this.
+   */
+  const retryPlay = useCallback(() => {
+    const v = videoRef.current;
+    const c = ctxRef.current;
+    if (!v || !c) return;
+
+    c.setStatus((s: HeroMediaStatus) => {
+      if (s !== "fallback" && s !== "error") return s;
+      return "attempting_play";
+    });
+
+    v.play()
+      .then(() => {
+        const curr = ctxRef.current;
+        if (curr) {
+          curr.setStatus("playing");
+          curr.revealApi.resolveReveal();
+        }
+      })
+      .catch(() => {
+        const curr = ctxRef.current;
+        if (curr) {
+          curr.setStatus("fallback");
+          curr.revealApi.resolveReveal();
+        }
+      });
+  }, []);
+
   return {
     setVideoRef,
     pause,
     play,
+    retryPlay,
   };
 }
