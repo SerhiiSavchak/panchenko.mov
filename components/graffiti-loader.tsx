@@ -5,15 +5,20 @@ import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 import { useReducedMotion } from "@/lib/hooks";
-import { useHeroMedia, HERO_MEDIA_TIMING } from "@/lib/hero-media-context";
+import { useHeroRevealApi, HERO_MEDIA_TIMING } from "@/lib/hero-media-context";
 import { useLoaderDismissed } from "@/lib/loader-dismissed-context";
 
+/**
+ * Loader orchestration runs once per hasHero/reducedMotion change.
+ * Uses stable revealApi — no dependency on full heroMedia object.
+ * Properly cancels timers and ignores stale async results on cleanup.
+ */
 export function GraffitiLoader() {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
   const pathname = usePathname();
   const reducedMotion = useReducedMotion();
-  const heroMedia = useHeroMedia();
+  const revealApi = useHeroRevealApi();
   const setLoaderDismissed = useLoaderDismissed()?.setDismissed;
   const dismissedRef = useRef(false);
 
@@ -38,8 +43,7 @@ export function GraffitiLoader() {
       return () => clearTimeout(t);
     }
 
-    const heroCtx = heroMedia;
-    if (!heroCtx) {
+    if (!revealApi) {
       const t = setTimeout(() => {
         dismissedRef.current = true;
         setVisible(false);
@@ -48,17 +52,16 @@ export function GraffitiLoader() {
       return () => clearTimeout(t);
     }
 
-    const minDelay = new Promise<void>((r) =>
-      setTimeout(r, HERO_MEDIA_TIMING.MIN_REVEAL_DELAY_MS)
-    );
-    const maxWait = new Promise<void>((r) => {
-      setTimeout(() => {
-        heroCtx.forceFallback();
-        r();
-      }, HERO_MEDIA_TIMING.MAX_REVEAL_WAIT_MS);
+    let cancelled = false;
+    let minDelayId: ReturnType<typeof setTimeout>;
+    const minDelay = new Promise<void>((r) => {
+      minDelayId = setTimeout(r, HERO_MEDIA_TIMING.MIN_REVEAL_DELAY_MS);
     });
-
-    const reveal = heroCtx.revealPromise;
+    const maxWaitId = setTimeout(() => {
+      if (cancelled) return;
+      revealApi.forceFallback();
+    }, HERO_MEDIA_TIMING.MAX_REVEAL_WAIT_MS);
+    const reveal = revealApi.revealPromise;
 
     const dismiss = () => {
       if (dismissedRef.current) return;
@@ -67,15 +70,22 @@ export function GraffitiLoader() {
       setLoaderDismissed?.();
     };
 
-    Promise.race([
-      Promise.all([minDelay, reveal]),
-      maxWait,
-    ]).then(dismiss);
+    Promise.all([minDelay, reveal])
+      .then(() => {
+        if (cancelled) return;
+        dismiss();
+      })
+      .catch(() => {
+        if (cancelled) return;
+        dismiss();
+      });
 
     return () => {
-      // Do not set dismissedRef here — it would block the next effect's dismiss
+      cancelled = true;
+      clearTimeout(minDelayId!);
+      clearTimeout(maxWaitId);
     };
-  }, [reducedMotion, hasHero, heroMedia, setLoaderDismissed]);
+  }, [reducedMotion, hasHero, revealApi, setLoaderDismissed]);
 
   useEffect(() => {
     if (!visible) {

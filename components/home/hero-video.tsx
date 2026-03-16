@@ -7,9 +7,10 @@ import { useHeroMediaLifecycle } from "@/lib/use-hero-media-lifecycle";
 
 /**
  * Hero background video — non-interactive visual layer.
- * - Single poster layer (no duplication with video poster attribute)
- * - Deterministic reveal: video or fallback, never broken
- * - No controls, no play icon
+ * Deterministic poster/video transition:
+ * - Video visible only when status === "playing"
+ * - Poster visible for loading states and intentional fallback (autoplay blocked, error)
+ * - Never stuck: lifecycle always reaches playing or fallback via timeout
  */
 interface HeroVideoProps {
   /** When true, video is paused (e.g. when hero is off-screen) */
@@ -36,7 +37,7 @@ export function HeroVideo({ paused = false }: HeroVideoProps) {
 
   return (
     <div className="absolute inset-0" aria-hidden>
-      {/* Single poster layer — visible until video is playing; fallback when autoplay blocked */}
+      {/* Poster: loading state + intentional fallback when autoplay blocked */}
       <div
         className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
         style={{

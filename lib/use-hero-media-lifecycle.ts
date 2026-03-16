@@ -12,6 +12,9 @@ import {
  * Connects a video element to the hero media lifecycle.
  * Uses ref callback to attach listeners immediately when element mounts —
  * eliminates canplay race where listeners were attached too late in an effect.
+ *
+ * Single timeout strategy: MEDIA_FALLBACK_TIMEOUT_MS is the only fallback timer.
+ * Loader uses MAX_REVEAL_WAIT_MS as a safety net; this hook owns media timing.
  */
 export function useHeroMediaLifecycle() {
   const ctx = useHeroMedia();
@@ -19,121 +22,131 @@ export function useHeroMediaLifecycle() {
   ctxRef.current = ctx;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const listenersRef = useRef<(() => void) | null>(null);
+  const fallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setVideoRef = useCallback((el: HTMLVideoElement | null) => {
     const c = ctxRef.current;
     if (!c) return;
 
-      // Cleanup previous
-      listenersRef.current?.();
-      listenersRef.current = null;
-      videoRef.current = null;
+    // Clear any pending fallback timeout from previous mount
+    if (fallbackTimeoutRef.current) {
+      clearTimeout(fallbackTimeoutRef.current);
+      fallbackTimeoutRef.current = null;
+    }
 
-      if (!el) return;
-      videoRef.current = el;
+    listenersRef.current?.();
+    listenersRef.current = null;
+    videoRef.current = null;
 
-      const { setStatus, resolveReveal } = c;
+    if (!el) return;
+    videoRef.current = el;
 
-      const attemptPlay = () => {
-        const v = videoRef.current;
-        if (!v) return;
+    const { setStatus, revealApi } = c;
+    const { resolveReveal } = revealApi;
 
-        setStatus("attempting_play");
-        const playPromise = v.play();
+    const attemptPlay = () => {
+      const v = videoRef.current;
+      if (!v) return;
 
-        if (playPromise === undefined) {
-          setStatus("playing");
-          resolveReveal();
-          return;
-        }
+      setStatus("attempting_play");
+      const playPromise = v.play();
 
-        playPromise
-          .then(() => {
-            setStatus("playing");
-            resolveReveal();
-          })
-          .catch(() => {
-            setStatus("fallback");
-            resolveReveal();
-          });
-      };
-
-      const handleCanPlay = () => {
-        const v = videoRef.current;
-        if (!v) return;
-
-        if (v.paused) {
-          attemptPlay();
-        } else {
-          setStatus("playing");
-          resolveReveal();
-        }
-      };
-
-      const handlePlay = () => {
+      if (playPromise === undefined) {
         setStatus("playing");
         resolveReveal();
-      };
+        return;
+      }
 
-      const handleError = () => {
-        setStatus("fallback");
-        resolveReveal();
-      };
-
-      const handleStalled = () => {
-        setStatus("fallback");
-        resolveReveal();
-      };
-
-      const handleAbort = () => {
-        setStatus("fallback");
-        resolveReveal();
-      };
-
-      el.addEventListener("canplay", handleCanPlay);
-      el.addEventListener("play", handlePlay);
-      el.addEventListener("error", handleError);
-      el.addEventListener("stalled", handleStalled);
-      el.addEventListener("abort", handleAbort);
-
-      listenersRef.current = () => {
-        el.removeEventListener("canplay", handleCanPlay);
-        el.removeEventListener("play", handlePlay);
-        el.removeEventListener("error", handleError);
-        el.removeEventListener("stalled", handleStalled);
-        el.removeEventListener("abort", handleAbort);
-      };
-
-      setStatus("loading");
-
-      // Cannot miss canplay: check readyState immediately
-      if (el.readyState >= 3) {
-        if (el.paused) {
-          attemptPlay();
-        } else {
+      playPromise
+        .then(() => {
           setStatus("playing");
           resolveReveal();
-        }
+        })
+        .catch(() => {
+          setStatus("fallback");
+          resolveReveal();
+        });
+    };
+
+    const handleCanPlay = () => {
+      const v = videoRef.current;
+      if (!v) return;
+
+      if (v.paused) {
+        attemptPlay();
+      } else {
+        setStatus("playing");
+        resolveReveal();
       }
-  }, []);
+    };
 
-  useEffect(() => {
-    const c = ctxRef.current;
-    if (!c) return;
+    const handlePlay = () => {
+      setStatus("playing");
+      resolveReveal();
+    };
 
-    const t = setTimeout(() => {
-      c.setStatus((s: HeroMediaStatus) => {
+    const handleError = () => {
+      setStatus("fallback");
+      resolveReveal();
+    };
+
+    const handleStalled = () => {
+      setStatus("fallback");
+      resolveReveal();
+    };
+
+    const handleAbort = () => {
+      setStatus("fallback");
+      resolveReveal();
+    };
+
+    el.addEventListener("canplay", handleCanPlay);
+    el.addEventListener("play", handlePlay);
+    el.addEventListener("error", handleError);
+    el.addEventListener("stalled", handleStalled);
+    el.addEventListener("abort", handleAbort);
+
+    listenersRef.current = () => {
+      el.removeEventListener("canplay", handleCanPlay);
+      el.removeEventListener("play", handlePlay);
+      el.removeEventListener("error", handleError);
+      el.removeEventListener("stalled", handleStalled);
+      el.removeEventListener("abort", handleAbort);
+    };
+
+    setStatus("loading");
+
+    // Cannot miss canplay: check readyState immediately
+    if (el.readyState >= 3) {
+      if (el.paused) {
+        attemptPlay();
+      } else {
+        setStatus("playing");
+        resolveReveal();
+      }
+      return;
+    }
+
+    // Single fallback timeout — centralizes media timing
+    fallbackTimeoutRef.current = setTimeout(() => {
+      fallbackTimeoutRef.current = null;
+      const current = ctxRef.current;
+      if (!current) return;
+
+      current.setStatus((s: HeroMediaStatus) => {
         if (isRevealAllowed(s)) return s;
         return "fallback";
       });
-      c.resolveReveal();
+      current.revealApi.resolveReveal();
     }, HERO_MEDIA_TIMING.MEDIA_FALLBACK_TIMEOUT_MS);
-
-    return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {
     return () => {
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current);
+        fallbackTimeoutRef.current = null;
+      }
       listenersRef.current?.();
       listenersRef.current = null;
     };
@@ -142,8 +155,11 @@ export function useHeroMediaLifecycle() {
   const pause = useCallback(() => videoRef.current?.pause(), []);
   const play = useCallback(() => {
     videoRef.current?.play().catch(() => {
-      ctxRef.current?.setStatus("fallback");
-      ctxRef.current?.resolveReveal();
+      const c = ctxRef.current;
+      if (c) {
+        c.setStatus("fallback");
+        c.revealApi.resolveReveal();
+      }
     });
   }, []);
 
