@@ -9,8 +9,8 @@ test.describe("Loader and Hero Video", () => {
     const loader = page.locator(".spray-loader");
     await expect(loader).toBeVisible({ timeout: 5000 });
 
-    // Loader should disappear within ~5s (min 900ms + video load + buffer)
-    await expect(loader).not.toBeVisible({ timeout: 8000 });
+    // Loader disappears when media is ready (min 900ms) or max 6s fallback
+    await expect(loader).not.toBeVisible({ timeout: 10000 });
   });
 
   test("loader animation runs smoothly without console errors", async ({
@@ -23,8 +23,8 @@ test.describe("Loader and Hero Video", () => {
 
     await page.goto("/");
 
-    // Wait for loader to finish
-    await page.waitForSelector(".spray-loader", { state: "hidden", timeout: 5000 });
+    // Wait for loader to finish (max 6s when fallback is forced)
+    await page.waitForSelector(".spray-loader", { state: "hidden", timeout: 10000 });
 
     expect(errors).toHaveLength(0);
   });

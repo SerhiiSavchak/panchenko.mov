@@ -2,23 +2,27 @@
 
 import { useEffect } from "react";
 import { HERO_VIDEO } from "@/lib/media";
-import { useHeroMedia } from "@/lib/use-hero-media";
+import { useHeroMedia } from "@/lib/hero-media-context";
+import { useHeroMediaLifecycle } from "@/lib/use-hero-media-lifecycle";
 
 /**
  * Hero background video — non-interactive visual layer.
- * - Autoplay with explicit play() for mobile Safari / Chrome
- * - Graceful fallback to poster when autoplay blocked
- * - No controls, no play icon, no broken states
- * - Pauses when scrolled out for performance (optional)
+ * - Single poster layer (no duplication with video poster attribute)
+ * - Deterministic reveal: video or fallback, never broken
+ * - No controls, no play icon
  */
 interface HeroVideoProps {
-  onReady?: () => void;
   /** When true, video is paused (e.g. when hero is off-screen) */
   paused?: boolean;
 }
 
-export function HeroVideo({ onReady, paused = false }: HeroVideoProps) {
-  const { videoRef, status, pause, play } = useHeroMedia({ onReady });
+export function HeroVideo({ paused = false }: HeroVideoProps) {
+  const ctx = useHeroMedia();
+  const { setVideoRef, pause, play } = useHeroMediaLifecycle();
+
+  const status = ctx?.status ?? "idle";
+  const showVideo = status === "playing";
+  const showPoster = !showVideo;
 
   useEffect(() => {
     if (status !== "playing") return;
@@ -26,23 +30,24 @@ export function HeroVideo({ onReady, paused = false }: HeroVideoProps) {
     else play();
   }, [paused, status, pause, play]);
 
-  const showVideo = status === "playing";
   const videoSrc = HERO_VIDEO.useLocalHero ? "/videos/hero.mp4" : HERO_VIDEO.video;
+
+  if (!ctx) return null;
 
   return (
     <div className="absolute inset-0" aria-hidden>
-      {/* Poster — visible until video is playing; premium fallback when autoplay blocked */}
+      {/* Single poster layer — visible until video is playing; fallback when autoplay blocked */}
       <div
         className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
         style={{
           backgroundImage: `url(${HERO_VIDEO.poster})`,
-          opacity: showVideo ? 0 : 1,
+          opacity: showPoster ? 1 : 0,
+          pointerEvents: "none",
         }}
       />
       <video
-        ref={videoRef}
+        ref={setVideoRef}
         src={`${videoSrc}#t=0.001`}
-        poster={HERO_VIDEO.poster}
         muted
         loop
         playsInline

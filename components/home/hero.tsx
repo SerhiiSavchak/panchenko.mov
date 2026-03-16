@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback, useLayoutEffect } from "react";
+import { useRef, useEffect, useState, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/magnetic-button";
 import { HeroVideo } from "@/components/home/hero-video";
-import { useHeroReady } from "@/lib/hero-ready-context";
 import { useLoaderDismissed } from "@/lib/loader-dismissed-context";
 import { useReducedMotion } from "@/lib/hooks";
 
@@ -17,8 +16,6 @@ interface HeroProps {
 const HERO_VISIBILITY_THRESHOLD = 0.3;
 
 export function Hero({ onQuoteOpen }: HeroProps) {
-  const heroReady = useHeroReady();
-  const onVideoReady = useCallback(() => heroReady?.setReady(), [heroReady]);
   const loaderDismissed = useLoaderDismissed()?.isDismissed ?? false;
   const reducedMotion = useReducedMotion();
   const [wordIndex, setWordIndex] = useState(0);
@@ -58,7 +55,7 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   return (
     <section ref={sectionRef} className="relative h-screen overflow-hidden">
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <HeroVideo onReady={onVideoReady} paused={videoPaused} />
+        <HeroVideo paused={videoPaused} />
         <div className="absolute inset-0 bg-background/25" aria-hidden="true" />
       </div>
 

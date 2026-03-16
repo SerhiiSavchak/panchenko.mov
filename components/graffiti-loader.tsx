@@ -1,49 +1,81 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 import { useReducedMotion } from "@/lib/hooks";
-import { useHeroReady } from "@/lib/hero-ready-context";
+import { useHeroMedia, HERO_MEDIA_TIMING } from "@/lib/hero-media-context";
 import { useLoaderDismissed } from "@/lib/loader-dismissed-context";
-
-const MIN_DISPLAY_MS = 900;
-const MAX_WAIT_MS = 2000;
 
 export function GraffitiLoader() {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
   const pathname = usePathname();
   const reducedMotion = useReducedMotion();
-  const heroReady = useHeroReady();
+  const heroMedia = useHeroMedia();
   const setLoaderDismissed = useLoaderDismissed()?.setDismissed;
+  const dismissedRef = useRef(false);
 
   const hasHero = pathname === "/";
 
   useEffect(() => {
     if (reducedMotion) {
       const t = setTimeout(() => {
+        dismissedRef.current = true;
         setVisible(false);
         setLoaderDismissed?.();
       }, 400);
       return () => clearTimeout(t);
     }
 
-    const minDelay = new Promise<void>((r) => setTimeout(r, MIN_DISPLAY_MS));
-    const maxWait = new Promise<void>((r) => setTimeout(r, MAX_WAIT_MS));
-    const mediaReady = hasHero
-      ? (heroReady?.readyPromise ?? Promise.resolve())
-      : Promise.resolve();
+    if (!hasHero) {
+      const t = setTimeout(() => {
+        dismissedRef.current = true;
+        setVisible(false);
+        setLoaderDismissed?.();
+      }, 400);
+      return () => clearTimeout(t);
+    }
 
-    Promise.race([
-      Promise.all([minDelay, mediaReady]),
-      maxWait,
-    ]).then(() => {
+    const heroCtx = heroMedia;
+    if (!heroCtx) {
+      const t = setTimeout(() => {
+        dismissedRef.current = true;
+        setVisible(false);
+        setLoaderDismissed?.();
+      }, 400);
+      return () => clearTimeout(t);
+    }
+
+    const minDelay = new Promise<void>((r) =>
+      setTimeout(r, HERO_MEDIA_TIMING.MIN_REVEAL_DELAY_MS)
+    );
+    const maxWait = new Promise<void>((r) => {
+      setTimeout(() => {
+        heroCtx.forceFallback();
+        r();
+      }, HERO_MEDIA_TIMING.MAX_REVEAL_WAIT_MS);
+    });
+
+    const reveal = heroCtx.revealPromise;
+
+    const dismiss = () => {
+      if (dismissedRef.current) return;
+      dismissedRef.current = true;
       setVisible(false);
       setLoaderDismissed?.();
-    });
-  }, [reducedMotion, hasHero, heroReady?.readyPromise, setLoaderDismissed]);
+    };
+
+    Promise.race([
+      Promise.all([minDelay, reveal]),
+      maxWait,
+    ]).then(dismiss);
+
+    return () => {
+      // Do not set dismissedRef here — it would block the next effect's dismiss
+    };
+  }, [reducedMotion, hasHero, heroMedia, setLoaderDismissed]);
 
   useEffect(() => {
     if (!visible) {
