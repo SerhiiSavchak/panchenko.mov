@@ -7,8 +7,10 @@ import React, {
   useCallback,
   useRef,
   useMemo,
+  useEffect,
   type ReactNode,
 } from "react";
+import { HERO_VIDEO } from "@/lib/media";
 
 /** Explicit hero media lifecycle states */
 export type HeroMediaStatus =
@@ -37,20 +39,27 @@ export function isRevealAllowed(status: HeroMediaStatus): boolean {
   return status === "playing" || status === "fallback" || status === "error";
 }
 
-/** Stable API for loader — never changes reference, prevents effect re-runs */
+/** Stable API for loader — poster-first, never blocks on video */
+interface HeroPosterReadyApi {
+  /** Resolves when poster image is loaded and Hero can show a stable first frame. */
+  posterReadyPromise: Promise<void>;
+  /** Force poster ready (safety net if image load fails or times out). */
+  forcePosterReady: () => void;
+}
+
+/** Legacy API for video lifecycle — used by HeroVideo, not for loader dismissal */
 interface HeroRevealApi {
-  /** Resolves when hero can be revealed. Never resolves into broken state. */
   revealPromise: Promise<void>;
-  /** Call when media reaches playing or fallback. Idempotent. */
   resolveReveal: () => void;
-  /** Force fallback so loader can dismiss safely. */
   forceFallback: () => void;
 }
 
 interface HeroMediaContextValue {
   status: HeroMediaStatus;
   setStatus: React.Dispatch<React.SetStateAction<HeroMediaStatus>>;
-  /** Stable API — use this for loader to avoid effect re-runs on status changes */
+  /** Poster-first API — loader waits for this, not video */
+  posterReadyApi: HeroPosterReadyApi;
+  /** Video lifecycle API — used by HeroVideo, not for loader */
   revealApi: HeroRevealApi;
 }
 
@@ -83,7 +92,43 @@ export function HeroMediaProvider({ children }: { children: ReactNode }) {
     resolveReveal();
   }, [resolveReveal]);
 
-  /** Stable object — same reference across renders, safe for loader effect deps */
+  // Poster readiness — gates loader dismissal, ensures Hero has stable first frame
+  const posterResolveRef = useRef<(() => void) | null>(null);
+  const posterResolvedRef = useRef(false);
+  const [posterReadyPromise] = useState(
+    () =>
+      new Promise<void>((resolve) => {
+        posterResolveRef.current = resolve;
+      })
+  );
+
+  const forcePosterReady = useCallback(() => {
+    if (posterResolvedRef.current) return;
+    posterResolvedRef.current = true;
+    posterResolveRef.current?.();
+    posterResolveRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => forcePosterReady();
+    img.onerror = () => forcePosterReady();
+    img.src = HERO_VIDEO.poster;
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+      img.src = "";
+    };
+  }, [forcePosterReady]);
+
+  const posterReadyApi = useMemo<HeroPosterReadyApi>(
+    () => ({
+      posterReadyPromise,
+      forcePosterReady,
+    }),
+    [posterReadyPromise, forcePosterReady]
+  );
+
   const revealApi = useMemo<HeroRevealApi>(
     () => ({
       revealPromise,
@@ -97,9 +142,10 @@ export function HeroMediaProvider({ children }: { children: ReactNode }) {
     () => ({
       status,
       setStatus,
+      posterReadyApi,
       revealApi,
     }),
-    [status, revealApi]
+    [status, posterReadyApi, revealApi]
   );
 
   return (
@@ -113,7 +159,13 @@ export function useHeroMedia() {
   return useContext(HeroMediaContext);
 }
 
-/** Hook for loader only — returns stable revealApi to avoid effect churn */
+/** Hook for loader — returns poster-ready API (loader waits for poster, not video) */
+export function useHeroPosterReadyApi() {
+  const ctx = useContext(HeroMediaContext);
+  return ctx?.posterReadyApi ?? null;
+}
+
+/** Hook for HeroVideo — returns video lifecycle API */
 export function useHeroRevealApi() {
   const ctx = useContext(HeroMediaContext);
   return ctx?.revealApi ?? null;

@@ -62,10 +62,11 @@ export function HeroVideo({ paused = false, loaderDismissed = false }: HeroVideo
 
   return (
     <div className="absolute inset-0" aria-hidden>
-      {/* Video: always opacity 1 so browser loads it; poster covers it until ready */}
+      {/* Video: native poster covers black until loaded; our div layer provides stable first frame */}
       <video
         ref={setVideoRef}
         src={`${videoSrc}#t=0.001`}
+        poster={HERO_VIDEO.poster}
         muted
         loop
         playsInline
@@ -79,10 +80,11 @@ export function HeroVideo({ paused = false, loaderDismissed = false }: HeroVideo
         className="hero-video-bg absolute inset-0 h-full w-full object-cover"
         style={{ opacity: 1 }}
       />
-      {/* Poster: on top, fades out when video is playing */}
+      {/* Poster: on top, solid bg fallback so never transparent over black; fades out when video playing */}
       <div
         className="absolute inset-0 bg-cover bg-center transition-opacity duration-500 z-[1]"
         style={{
+          backgroundColor: "var(--color-background)",
           backgroundImage: `url(${HERO_VIDEO.poster})`,
           opacity: showPoster ? 1 : 0,
           pointerEvents: "none",

@@ -1,24 +1,23 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 import { useReducedMotion } from "@/lib/hooks";
-import { useHeroRevealApi, HERO_MEDIA_TIMING } from "@/lib/hero-media-context";
+import { useHeroPosterReadyApi, HERO_MEDIA_TIMING } from "@/lib/hero-media-context";
 import { useLoaderDismissed } from "@/lib/loader-dismissed-context";
 
 /**
- * Loader orchestration runs once per hasHero/reducedMotion change.
- * Uses stable revealApi — no dependency on full heroMedia object.
- * Properly cancels timers and ignores stale async results on cleanup.
+ * Loader owns the first frame — rendered on SSR, no createPortal.
+ * Waits for poster readiness (not video) so Hero reveals with a stable first frame.
+ * Stable reducedMotion init prevents effect restarts and animation jerkiness.
  */
 export function GraffitiLoader() {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
   const pathname = usePathname();
   const reducedMotion = useReducedMotion();
-  const revealApi = useHeroRevealApi();
+  const posterReadyApi = useHeroPosterReadyApi();
   const setLoaderDismissed = useLoaderDismissed()?.setDismissed;
   const dismissedRef = useRef(false);
 
@@ -43,7 +42,7 @@ export function GraffitiLoader() {
       return () => clearTimeout(t);
     }
 
-    if (!revealApi) {
+    if (!posterReadyApi) {
       const t = setTimeout(() => {
         dismissedRef.current = true;
         setVisible(false);
@@ -59,9 +58,9 @@ export function GraffitiLoader() {
     });
     const maxWaitId = setTimeout(() => {
       if (cancelled) return;
-      revealApi.forceFallback();
+      posterReadyApi.forcePosterReady();
     }, HERO_MEDIA_TIMING.MAX_REVEAL_WAIT_MS);
-    const reveal = revealApi.revealPromise;
+    const posterReady = posterReadyApi.posterReadyPromise;
 
     const dismiss = () => {
       if (dismissedRef.current) return;
@@ -70,7 +69,7 @@ export function GraffitiLoader() {
       setLoaderDismissed?.();
     };
 
-    Promise.all([minDelay, reveal])
+    Promise.all([minDelay, posterReady])
       .then(() => {
         if (cancelled) return;
         dismiss();
@@ -85,7 +84,7 @@ export function GraffitiLoader() {
       clearTimeout(minDelayId!);
       clearTimeout(maxWaitId);
     };
-  }, [reducedMotion, hasHero, revealApi, setLoaderDismissed]);
+  }, [reducedMotion, hasHero, posterReadyApi, setLoaderDismissed]);
 
   useEffect(() => {
     if (!visible) {
@@ -161,7 +160,7 @@ export function GraffitiLoader() {
     </div>
   );
 
-  if (!mounted || typeof document === "undefined") return null;
+  if (!mounted) return null;
 
-  return createPortal(content, document.body);
+  return content;
 }
