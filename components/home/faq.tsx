@@ -7,7 +7,7 @@ import { useScrollReveal } from "@/lib/scroll-animate";
 const faqs = [
   {
     q: "How much does a project cost?",
-    a: "Starting from $300 for short-form reels. Use the Build Your Shoot calculator above for a custom estimate, or reach out for a quote.",
+    a: "Starting from $300 for short-form reels. Reach out for a detailed quote — scope and deliverables vary by project.",
   },
   {
     q: "What's the typical turnaround time?",

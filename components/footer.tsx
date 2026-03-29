@@ -9,7 +9,7 @@ export function Footer() {
           <BrandLogo variant="static" size="md" animate={false} />
         </Link>
         <nav className="flex items-center gap-6 text-xs uppercase tracking-widest text-muted-foreground">
-          <Link href="/work" className="hover:text-accent transition-colors">Work</Link>
+          <Link href="/#works" className="hover:text-accent transition-colors">Work</Link>
           <Link href="/contact" className="hover:text-accent transition-colors">Contact</Link>
           <a href="https://instagram.com/panchenko.mov" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">Instagram</a>
         </nav>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Header } from "@/components/header";
@@ -10,14 +10,21 @@ import { QuickQuoteModal } from "@/components/quick-quote-modal";
 import { MagneticButton } from "@/components/magnetic-button";
 import { VideoPosterTap } from "@/components/video-poster-tap";
 import { useScrollReveal } from "@/lib/scroll-animate";
+import { useLenis } from "@/components/lenis-provider";
 import type { WorkItem } from "@/data/work";
 
 export function CaseStudyClient({ work }: { work: WorkItem }) {
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const lenis = useLenis();
   const detailsRef = useRef(null);
   const galleryRef = useRef(null);
   const detailsInView = useScrollReveal(detailsRef, { once: true });
   const galleryInView = useScrollReveal(galleryRef, { once: true });
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    lenis?.scrollTo(0, { immediate: true, force: true });
+  }, [lenis, work.slug]);
 
   return (
     <>
@@ -28,7 +35,7 @@ export function CaseStudyClient({ work }: { work: WorkItem }) {
         <div className="px-4 md:px-8 lg:px-16">
           <div className="page-enter">
             <Link
-              href="/work"
+              href="/#works"
               className="inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-widest border border-border text-muted-foreground hover:border-accent hover:text-accent transition-colors mb-4"
             >
               <span aria-hidden>&larr;</span>

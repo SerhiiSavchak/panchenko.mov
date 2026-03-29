@@ -24,6 +24,31 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
     }
   };
 
+  const scrollToAbsoluteTop = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    lenis?.scrollTo(0, { immediate: true, force: true });
+  };
+
+  const scrollToWorks = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname !== "/") return;
+    e.preventDefault();
+    const el = document.getElementById("works");
+    if (!el) return;
+    if (lenis) {
+      lenis.scrollTo(el, { offset: -80 });
+    } else {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleMobileHomeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    setMobileOpen(false);
+    if (pathname === "/") {
+      e.preventDefault();
+      scrollToAbsoluteTop();
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -60,7 +85,11 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
           </Link>
 
           <nav className="hidden md:flex items-center gap-10">
-            <Link href="/work" className="text-base uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">
+            <Link
+              href="/#works"
+              onClick={scrollToWorks}
+              className="text-base uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors"
+            >
               Work
             </Link>
             <Link href="/contact" className="text-base uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">
@@ -95,9 +124,23 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
         )}
         aria-hidden={!mobileOpen}
       >
+        <div
+          className={cn(
+            "transition-all duration-300",
+            mobileOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          )}
+          style={{ transitionDelay: mobileOpen ? "0ms" : "0ms" }}
+        >
+          <Link
+            href="/"
+            onClick={handleMobileHomeClick}
+            className="font-display text-5xl text-foreground hover:text-accent transition-colors"
+          >
+            Home
+          </Link>
+        </div>
         {[
-          { href: "/", label: "Home" },
-          { href: "/work", label: "Work" },
+          { href: "/#works", label: "Work", scrollWorks: true },
           { href: "/contact", label: "Contact" },
         ].map((item, i) => (
           <div
@@ -106,11 +149,14 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
               "transition-all duration-300",
               mobileOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
             )}
-            style={{ transitionDelay: mobileOpen ? `${i * 100}ms` : "0ms" }}
+            style={{ transitionDelay: mobileOpen ? `${(i + 1) * 100}ms` : "0ms" }}
           >
             <Link
               href={item.href}
-              onClick={() => setMobileOpen(false)}
+              onClick={(e) => {
+                setMobileOpen(false);
+                if (item.scrollWorks) scrollToWorks(e);
+              }}
               className="font-display text-5xl text-foreground hover:text-accent transition-colors"
             >
               {item.label}
@@ -140,7 +186,11 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
         <button onClick={onQuoteOpen} className="flex-1 py-3 text-xs uppercase tracking-widest font-semibold bg-accent text-accent-foreground">
           Book
         </button>
-        <Link href="/work" className="flex-1 py-3 text-xs uppercase tracking-widest font-semibold text-center text-foreground border-l border-border">
+        <Link
+          href="/#works"
+          onClick={scrollToWorks}
+          className="flex-1 py-3 text-xs uppercase tracking-widest font-semibold text-center text-foreground border-l border-border"
+        >
           Portfolio
         </Link>
       </div>

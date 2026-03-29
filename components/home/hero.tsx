@@ -147,7 +147,7 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           className="flex flex-wrap items-center justify-center gap-4 mt-12"
         >
           <MagneticButton variant="primary" onClick={onQuoteOpen}>Book a Shoot</MagneticButton>
-          <MagneticButton variant="secondary" href="#featured">Watch Work</MagneticButton>
+          <MagneticButton variant="secondary" href="#works">Watch Work</MagneticButton>
         </motion.div>
       </div>
 

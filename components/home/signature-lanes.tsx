@@ -27,7 +27,7 @@ function LaneCard({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const cardId = `lane-${lane.category}`;
-  const href = `/work?category=${lane.category}`;
+  const href = "/#works";
   const longPress = useLongPressPreview(cardId);
   const isActive = longPress.isActive || isHovered;
   const v = lane.video as { video: string; videoMobile?: string; poster: string };

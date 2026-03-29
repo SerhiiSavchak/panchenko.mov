@@ -46,6 +46,7 @@ export function WorkCard({ work, index, priority = false }: WorkCardProps) {
     >
       <Link
         href={href}
+        scroll
         className="interactive-card group block relative overflow-hidden cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}

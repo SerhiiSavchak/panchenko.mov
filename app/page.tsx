@@ -16,28 +16,9 @@ const ScrollProgress = dynamic(
   { ssr: false }
 );
 
-const ProofStrip = dynamic(
-  () => import("@/components/home/proof-strip").then((m) => ({ default: m.ProofStrip })),
-  { ssr: true }
-);
-
 // Below-fold sections: lazy load to reduce initial bundle and improve TTI
-const About = dynamic(
-  () => import("@/components/home/about").then((m) => ({ default: m.About })),
-  { ssr: true }
-);
-const FeaturedWork = dynamic(
-  () =>
-    import("@/components/home/featured-work").then((m) => ({
-      default: m.FeaturedWork,
-    })),
-  { ssr: true }
-);
-const BuildYourShoot = dynamic(
-  () =>
-    import("@/components/home/build-your-shoot").then((m) => ({
-      default: m.BuildYourShoot,
-    })),
+const Works = dynamic(
+  () => import("@/components/home/works").then((m) => ({ default: m.Works })),
   { ssr: true }
 );
 const FAQ = dynamic(
@@ -61,10 +42,7 @@ export default function Home() {
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
       <main className="relative overflow-x-clip">
         <Hero onQuoteOpen={() => setQuoteOpen(true)} />
-        <ProofStrip />
-        <About />
-        <FeaturedWork />
-        <BuildYourShoot onQuoteOpen={() => setQuoteOpen(true)} />
+        <Works />
         <FAQ />
         <FinalCTA onQuoteOpen={() => setQuoteOpen(true)} />
       </main>

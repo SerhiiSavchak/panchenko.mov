@@ -90,9 +90,9 @@ export function pickFallback(arr: string[], index = 0): string {
 
 // BTS cards — local assets for ReelRail (link to work)
 export const BTS_RAW_CARDS = [
-  { title: "BTS", href: "/work", badge: "BTS", video: "/assets/featured/hutsy-financial-brand/preview.mp4", poster: "/assets/featured/hutsy-financial-brand/poster.jpg" },
-  { title: "BTS: Drift", href: "/work", badge: "BTS", video: "/assets/featured/drift-session/preview.mp4", poster: "/assets/featured/drift-session/poster.jpg" },
-  { title: "BTS: On Set", href: "/work", badge: "BTS", video: "/assets/featured/midnight-run-mv/preview.mp4", poster: "/assets/featured/midnight-run-mv/poster.jpg" },
-  { title: "BTS: Fight", href: "/work", badge: "BTS", video: "/assets/featured/fight-night/preview.mp4", poster: "/assets/featured/fight-night/poster.jpg" },
-  { title: "BTS: Street", href: "/work", badge: "BTS", video: "/assets/featured/streetwear-lookbook/preview.mp4", poster: "/assets/featured/streetwear-lookbook/poster.jpg" },
+  { title: "BTS", href: "/#works", badge: "BTS", video: "/assets/featured/hutsy-financial-brand/preview.mp4", poster: "/assets/featured/hutsy-financial-brand/poster.jpg" },
+  { title: "BTS: Drift", href: "/#works", badge: "BTS", video: "/assets/featured/drift-session/preview.mp4", poster: "/assets/featured/drift-session/poster.jpg" },
+  { title: "BTS: On Set", href: "/#works", badge: "BTS", video: "/assets/featured/midnight-run-mv/preview.mp4", poster: "/assets/featured/midnight-run-mv/poster.jpg" },
+  { title: "BTS: Fight", href: "/#works", badge: "BTS", video: "/assets/featured/fight-night/preview.mp4", poster: "/assets/featured/fight-night/poster.jpg" },
+  { title: "BTS: Street", href: "/#works", badge: "BTS", video: "/assets/featured/streetwear-lookbook/preview.mp4", poster: "/assets/featured/streetwear-lookbook/poster.jpg" },
 ] as const;
