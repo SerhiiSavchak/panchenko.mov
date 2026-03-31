@@ -34,13 +34,10 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
     e.preventDefault();
     const el = document.getElementById("works");
     if (!el) return;
-    const headerEl = document.querySelector<HTMLElement>("header.site-header");
-    const offset = headerEl ? Math.round(headerEl.getBoundingClientRect().height) + 8 : 88;
     if (lenis) {
-      lenis.scrollTo(el, { offset: -offset });
+      lenis.scrollTo(el, { offset: -80 });
     } else {
-      const top = el.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top, behavior: "smooth" });
+      el.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -54,7 +51,6 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
-    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -72,12 +68,11 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
     <>
       <header
         className={cn(
-          "site-header fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] transition-colors duration-300",
+          "fixed top-0 left-0 right-0 z-50 transition-colors duration-300",
           scrolled
             ? "bg-background/80 backdrop-blur-md border-b border-border"
             : "bg-transparent"
         )}
-        data-scrolled={scrolled ? "true" : "false"}
       >
         <div className="flex items-center justify-between px-4 md:px-8 lg:px-16 h-20">
           <Link
@@ -187,7 +182,7 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
         </div>
       </div>
 
-      <div className="mobile-bottom-bar site-mobile-bottom md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-background/90 backdrop-blur-md">
+      <div className="mobile-bottom-bar md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-background/90 backdrop-blur-md">
         <button onClick={onQuoteOpen} className="flex-1 py-3 text-xs uppercase tracking-widest font-semibold bg-accent text-accent-foreground">
           Book
         </button>

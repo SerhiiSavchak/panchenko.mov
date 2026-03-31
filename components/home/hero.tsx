@@ -53,10 +53,7 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   }, [currentWord]);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative min-h-screen min-h-[100dvh] overflow-hidden"
-    >
+    <section ref={sectionRef} className="relative h-screen overflow-hidden">
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <HeroVideo paused={videoPaused} loaderDismissed={loaderDismissed} />
         <div className="absolute inset-0 bg-background/25" aria-hidden="true" />
