@@ -28,6 +28,33 @@ html {
   overflow-x: clip;
 }
 
+/* Fixed site chrome — predictable stacking without extra transforms on the element */
+.site-header {
+  isolation: isolate;
+}
+
+/*
+ * Telegram WebView (WKWebView): frequent <html> class mutations + backdrop-filter
+ * on fixed layers cause jitter. Solid background replaces blur only in Telegram.
+ */
+html.telegram-webview .site-header[data-scrolled="true"] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background-color: color-mix(in srgb, var(--color-background) 93%, transparent);
+}
+
+html.telegram-webview .site-mobile-bottom {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background-color: color-mix(in srgb, var(--color-background) 95%, transparent);
+}
+
+html.telegram-webview .quick-quote-backdrop {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background-color: color-mix(in srgb, var(--color-background) 88%, transparent);
+}
+
 body {
   position: relative;
   background-color: var(--color-background);

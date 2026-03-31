@@ -110,7 +110,7 @@ export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="interactive-area fixed inset-0 z-[60] bg-background/85 backdrop-blur-md"
+            className="quick-quote-backdrop interactive-area fixed inset-0 z-[60] bg-background/85 backdrop-blur-md"
             onClick={onClose}
           />
           <div
@@ -124,7 +124,7 @@ export function QuickQuoteModal({ isOpen, onClose }: QuickQuoteModalProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 16 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full max-w-lg max-h-[min(85dvh,calc(100dvh-2rem))] md:max-h-[85vh] flex-shrink-0 md:rounded-sm bg-card border border-border flex flex-col shadow-xl my-auto"
+              className="w-full max-w-lg max-h-[min(85dvh,calc(100dvh-2rem))] md:max-h-[85dvh] flex-shrink-0 md:rounded-sm bg-card border border-border flex flex-col shadow-xl my-auto"
             >
             <div className="flex items-center justify-between shrink-0 p-6 md:p-8 pb-4 border-b border-border">
               <h2 className="font-display text-3xl text-foreground">

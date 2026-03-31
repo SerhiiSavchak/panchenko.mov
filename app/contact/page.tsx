@@ -73,7 +73,7 @@ export default function ContactPage() {
       <ScrollProgress />
       <Header onQuoteOpen={() => setQuoteOpen(true)} />
 
-      <main className="pt-20 md:pt-28 pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen overflow-x-clip">
+      <main className="pt-[calc(5rem+env(safe-area-inset-top,0px))] md:pt-[calc(7rem+env(safe-area-inset-top,0px))] pb-16 md:pb-24 px-4 md:px-8 lg:px-16 min-h-screen min-h-[100dvh] overflow-x-clip">
         <div className="page-enter">
           <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
             Get In Touch

@@ -3,7 +3,7 @@ import { BrandLogo } from "@/components/brand-logo";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border px-4 md:px-8 lg:px-16 py-8 pb-24 md:pb-8">
+    <footer className="border-t border-border px-4 md:px-8 lg:px-16 py-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-8">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <Link href="/" aria-label="Home">
           <BrandLogo variant="static" size="md" animate={false} />

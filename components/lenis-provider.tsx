@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import Lenis from "lenis";
 import type { LenisOptions } from "lenis";
+import { isTelegramWebViewClient } from "@/lib/telegram-webview";
 
 const LenisContext = createContext<Lenis | null>(null);
 
@@ -30,6 +31,12 @@ export function LenisProvider({
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReducedMotion) {
+      return;
+    }
+
+    /* Telegram WebView: Lenis mutates <html> className on scroll + smooth wheel
+       fights native touch; native scroll keeps fixed header stable. */
+    if (isTelegramWebViewClient()) {
       return;
     }
 
