@@ -7,7 +7,7 @@ import { HeroVideo } from "@/components/home/hero-video";
 import { useLoaderDismissed } from "@/lib/loader-dismissed-context";
 import { useReducedMotion } from "@/lib/hooks";
 
-const CYCLING_WORDS = ["RAP", "CARS", "FIGHT", "BRAND"] as const;
+const CYCLING_WORDS = ["BRAND", "REELS", "EDITORIAL", "MUSIC"] as const;
 
 interface HeroProps {
   onQuoteOpen: () => void;
@@ -53,14 +53,13 @@ export function Hero({ onQuoteOpen }: HeroProps) {
   }, [currentWord]);
 
   return (
-    <section ref={sectionRef} className="relative h-screen overflow-hidden">
+    <section ref={sectionRef} className="relative h-screen min-h-[100dvh] overflow-hidden">
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <HeroVideo paused={videoPaused} loaderDismissed={loaderDismissed} />
         <div className="absolute inset-0 bg-background/25" aria-hidden="true" />
       </div>
 
       <div className="hero-content relative z-10 flex flex-col items-center justify-center h-full px-6 sm:px-8 md:px-12 text-center pointer-events-auto">
-        {/* Badge — based in worldwide */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-6 sm:mb-8">
           <motion.span
             initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
@@ -76,7 +75,6 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           </motion.span>
         </div>
 
-        {/* Headline — FROM STREET TO [word] — анимация после скрытия лоадера */}
         <motion.h1
           className="relative font-display text-[clamp(3rem,12vw,10rem)] leading-[0.85] tracking-tight text-foreground text-balance overflow-hidden mt-2"
           initial={{ opacity: 0, y: "-0.3em", filter: "blur(12px)", scale: 0.97 }}
@@ -120,7 +118,6 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           </span>
         </motion.h1>
 
-        {/* Subtext — minimal, 2 lines */}
         <motion.div
           initial={{ opacity: 0, y: 24, filter: "blur(4px)" }}
           animate={loaderDismissed ? { opacity: 1, y: 0, filter: "blur(0px)" } : { opacity: 0, y: 24, filter: "blur(4px)" }}
@@ -135,7 +132,6 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           <span className="block">Cinematic short-form.</span>
         </motion.div>
 
-        {/* Buttons — scale + fade with subtle bounce */}
         <motion.div
           initial={{ opacity: 0, y: 32, scale: 0.88 }}
           animate={loaderDismissed ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 32, scale: 0.88 }}
@@ -146,12 +142,15 @@ export function Hero({ onQuoteOpen }: HeroProps) {
           }}
           className="flex flex-wrap items-center justify-center gap-4 mt-12"
         >
-          <MagneticButton variant="primary" onClick={onQuoteOpen}>Book a Shoot</MagneticButton>
-          <MagneticButton variant="secondary" href="#works">Watch Work</MagneticButton>
+          <MagneticButton variant="primary" onClick={onQuoteOpen}>
+            Book a Shoot
+          </MagneticButton>
+          <MagneticButton variant="secondary" href="#works">
+            Watch Work
+          </MagneticButton>
         </motion.div>
       </div>
 
-      {/* Scroll indicator — final reveal */}
       <motion.div
         initial={{ opacity: 0, y: 16, scale: 0.9 }}
         animate={loaderDismissed ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 16, scale: 0.9 }}

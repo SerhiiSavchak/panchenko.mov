@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "test:e2e": "playwright test",
-    "compress:hero": "node scripts/compress-hero-video.mjs"
+    "compress:hero": "node scripts/compress-hero-video.mjs",
+    "process:featured": "node scripts/process-featured-videos.mjs",
+    "process:hero": "node scripts/process-hero.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

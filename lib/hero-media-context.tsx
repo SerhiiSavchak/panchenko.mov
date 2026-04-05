@@ -10,7 +10,7 @@ import React, {
   useEffect,
   type ReactNode,
 } from "react";
-import { HERO_VIDEO } from "@/lib/media";
+import { getHeroPosterSrc } from "@/lib/media";
 
 /** Explicit hero media lifecycle states */
 export type HeroMediaStatus =
@@ -113,7 +113,7 @@ export function HeroMediaProvider({ children }: { children: ReactNode }) {
     const img = new Image();
     img.onload = () => forcePosterReady();
     img.onerror = () => forcePosterReady();
-    img.src = HERO_VIDEO.poster;
+    img.src = getHeroPosterSrc();
     return () => {
       img.onload = null;
       img.onerror = null;

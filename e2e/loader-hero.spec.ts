@@ -26,7 +26,7 @@ test.describe("Loader and Hero Video", () => {
 
     const video = page.locator("video.hero-video-bg");
     await expect(video).toHaveCount(1);
-    await expect(video).toHaveAttribute("src", /hero\.mp4|46422-720\.mp4/);
+    await expect(video).toHaveAttribute("src", /hero-cut\.mp4|hero\.mp4|46422-720\.mp4/);
   });
 
   test("loader animation runs smoothly without console errors", async ({

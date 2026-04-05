@@ -1,0 +1,137 @@
+[
+  {
+    "source": "IMG_6453",
+    "slug": "after-hours",
+    "title": "After Hours",
+    "category": "Brand",
+    "year": "2025",
+    "headline": "A cinematic brand piece built around chemistry, atmosphere, and elevated lifestyle framing.",
+    "description": "A warm, intimate brand film that turns a simple dinner setting into a premium visual story. The piece focuses on presence, interaction, texture, and mood, using restrained camera work and polished color to create a refined lifestyle-driven result.",
+    "services": [
+      "Creative Direction",
+      "Direction",
+      "Cinematography",
+      "Editing",
+      "Color Grading"
+    ],
+    "results": [
+      "Created a premium visual identity around mood and connection",
+      "Delivered a polished short-form piece with strong still-worthy frames",
+      "Built a versatile asset suitable for portfolio, social, and presentation use"
+    ],
+    "credits": [
+      { "role": "Direction", "value": "Anton Panchenko" },
+      { "role": "Cinematography", "value": "Anton Panchenko" },
+      { "role": "Editing", "value": "Anton Panchenko" },
+      { "role": "Color", "value": "Anton Panchenko" }
+    ]
+  },
+  {
+    "source": "IMG_7361",
+    "slug": "built-daily",
+    "title": "Built Daily",
+    "category": "Reels",
+    "year": "2025",
+    "headline": "A performance-led reel about discipline, routine, and personal brand energy.",
+    "description": "A dynamic short-form reel combining training, direct-to-camera moments, and everyday discipline. The goal was to create a piece that feels grounded, sharp, and social-first while still carrying a strong visual identity.",
+    "services": [
+      "Concept Development",
+      "Reel Direction",
+      "Cinematography",
+      "Editing",
+      "Social Cut"
+    ],
+    "results": [
+      "Turned ordinary daily moments into a strong personal-brand asset",
+      "Delivered a short-form piece designed for high replay value",
+      "Built a clear social-ready identity through pacing and framing"
+    ],
+    "credits": [
+      { "role": "Direction", "value": "Anton Panchenko" },
+      { "role": "Cinematography", "value": "Anton Panchenko" },
+      { "role": "Editing", "value": "Anton Panchenko" },
+      { "role": "Talent", "value": "Featured Subject" }
+    ]
+  },
+  {
+    "source": "IMG_3716",
+    "slug": "relocation",
+    "title": "Relocation",
+    "category": "Editorial",
+    "year": "2025",
+    "headline": "An editorial portrait shaped by city rhythm, movement, and documentary texture.",
+    "description": "This project blends street observation, fashion-aware framing, and personal portraiture into a cinematic editorial piece. From bookstores to transit moments, the film builds identity through environment, gesture, and urban pacing.",
+    "services": [
+      "Creative Direction",
+      "Editorial Direction",
+      "Cinematography",
+      "Editing",
+      "Color Grading"
+    ],
+    "results": [
+      "Built a distinct editorial visual language",
+      "Captured a strong set of still-worthy frames and transitions",
+      "Created a portrait-driven piece with both cinematic and documentary character"
+    ],
+    "credits": [
+      { "role": "Direction", "value": "Anton Panchenko" },
+      { "role": "Cinematography", "value": "Anton Panchenko" },
+      { "role": "Editing", "value": "Anton Panchenko" },
+      { "role": "Talent", "value": "Featured Subject" }
+    ]
+  },
+  {
+    "source": "IMG_4101",
+    "slug": "city-frequency",
+    "title": "City Frequency",
+    "category": "Reels",
+    "year": "2025",
+    "headline": "A street-driven reel built around motion, color contrast, and night-city energy.",
+    "description": "A fast, stylized social reel using storefront glow, reflective streets, and movement through the city as the core visual language. The piece is compact, expressive, and designed to hit immediately in a short-form format.",
+    "services": [
+      "Concept Development",
+      "Reel Direction",
+      "Cinematography",
+      "Editing",
+      "Color Grading"
+    ],
+    "results": [
+      "Delivered a highly visual reel with strong first-impression value",
+      "Used location and color to create instant identity",
+      "Built a short-form asset suited for social and portfolio presentation"
+    ],
+    "credits": [
+      { "role": "Direction", "value": "Anton Panchenko" },
+      { "role": "Cinematography", "value": "Anton Panchenko" },
+      { "role": "Editing", "value": "Anton Panchenko" },
+      { "role": "Talent", "value": "Featured Subject" }
+    ]
+  },
+  {
+    "source": "IMG_5165",
+    "slug": "red-room-session",
+    "title": "Red Room Session",
+    "category": "Music Video",
+    "year": "2025",
+    "headline": "A performance-focused music visual built on lighting, presence, and controlled studio mood.",
+    "description": "A stripped-back artist visual where the frame, performance, and lighting do the heavy lifting. The result is minimal but intentional: a clean music-driven piece with strong silhouette, texture, and atmosphere.",
+    "services": [
+      "Creative Direction",
+      "Performance Direction",
+      "Cinematography",
+      "Editing",
+      "Color Grading"
+    ],
+    "results": [
+      "Created a focused artist visual with a clear mood and identity",
+      "Proved that a minimal setup can still feel cinematic and premium",
+      "Delivered a performance piece suitable for both promo use and portfolio display"
+    ],
+    "credits": [
+      { "role": "Direction", "value": "Anton Panchenko" },
+      { "role": "Cinematography", "value": "Anton Panchenko" },
+      { "role": "Editing", "value": "Anton Panchenko" },
+      { "role": "Artist", "value": "Performer" }
+    ]
+  }
+]

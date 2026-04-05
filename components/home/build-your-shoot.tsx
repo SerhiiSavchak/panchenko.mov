@@ -10,11 +10,10 @@ import { CONSTRUCTOR_MEDIA } from "@/lib/media";
 import { useScrollReveal } from "@/lib/scroll-animate";
 
 const PROJECT_TYPES = [
-  { id: "rap", label: "Rap / Trap", min: 650, max: 950 },
-  { id: "cars", label: "Cars", min: 450, max: 750 },
-  { id: "fight", label: "Fight", min: 350, max: 650 },
   { id: "brand", label: "Brand", min: 550, max: 900 },
   { id: "reels", label: "Reels", min: 300, max: 600 },
+  { id: "editorial", label: "Editorial", min: 500, max: 850 },
+  { id: "music-video", label: "Music Video", min: 600, max: 1100 },
 ] as const;
 
 const EDIT_TIERS = [
@@ -57,7 +56,7 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
   });
 
   const reducedMotion = useReducedMotion();
-  const [projectType, setProjectType] = useState<string>("rap");
+  const [projectType, setProjectType] = useState<string>("brand");
   const [editTier, setEditTier] = useState<string>("basic");
   const [team, setTeam] = useState<string>("solo");
   const [rush, setRush] = useState<string>("normal");
@@ -101,7 +100,7 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
     return items;
   }, [editTier, addOns]);
 
-  const media = CONSTRUCTOR_MEDIA[projectType as keyof typeof CONSTRUCTOR_MEDIA] ?? CONSTRUCTOR_MEDIA.rap;
+  const media = CONSTRUCTOR_MEDIA[projectType as keyof typeof CONSTRUCTOR_MEDIA] ?? CONSTRUCTOR_MEDIA.brand;
 
   return (
     <Section id="build-your-shoot">
@@ -244,7 +243,12 @@ export function BuildYourShoot({ onQuoteOpen }: BuildYourShootProps) {
   );
 }
 
-const DISPLAY_LABELS = { rap: "RAP / TRAP", cars: "CARS", fight: "FIGHT", brand: "BRAND", reels: "REELS" };
+const DISPLAY_LABELS: Record<string, string> = {
+  brand: "BRAND",
+  reels: "REELS",
+  editorial: "EDITORIAL",
+  "music-video": "MUSIC VIDEO",
+};
 
 // Overlay animations per project type - CSS only
 function MediaOverlay({ type, reducedMotion }: { type: string; reducedMotion: boolean }) {

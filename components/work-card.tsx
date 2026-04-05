@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import type { WorkItem } from "@/data/work";
+import { categoryLabels, type WorkItem } from "@/data/work";
 import { Badge } from "@/components/ui";
 import { VideoPosterHover } from "@/components/video-poster-hover";
 import { useLongPressPreview } from "@/lib/use-long-press-preview";
@@ -59,8 +59,8 @@ export function WorkCard({ work, index, priority = false }: WorkCardProps) {
       >
         <div className="relative aspect-[4/5] bg-muted overflow-hidden">
           <VideoPosterHover
-            src={work.previewVideo}
-            poster={work.thumbnail}
+            src={work.video}
+            poster={work.poster}
             alt={work.title}
             aspectRatio="4/5"
             isActive={isActive}
@@ -69,7 +69,7 @@ export function WorkCard({ work, index, priority = false }: WorkCardProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
           <span className="absolute top-3 left-3">
-            <Badge>{work.category}</Badge>
+            <Badge>{categoryLabels[work.category]}</Badge>
           </span>
         </div>
 
@@ -78,7 +78,7 @@ export function WorkCard({ work, index, priority = false }: WorkCardProps) {
             <h3 className="font-display text-xl leading-none text-foreground group-hover:text-accent group-focus-visible:text-accent transition-colors">
               {work.title}
             </h3>
-            <p className="text-xs text-muted-foreground mt-1">{work.shortDesc}</p>
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{work.headline}</p>
           </div>
           <span className="text-xs text-muted-foreground shrink-0">{work.year}</span>
         </div>

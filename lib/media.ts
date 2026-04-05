@@ -1,15 +1,25 @@
 // Comprehensive media system - Pexels free stock
 
-// Hero: одно видео. Для быстрой загрузки — сожмите и положите в /public/videos/hero.mp4, useLocalHero: true
+// Hero: локальный монтаж из портфолио — /public/videos/hero-cut.mp4 + hero-cut-poster.jpg
 export const HERO_VIDEO = {
   video: "https://assets.mixkit.co/videos/46422/46422-720.mp4",
   poster: "https://assets.mixkit.co/videos/46422/46422-thumb-720-0.jpg",
   fallbackImage: null as string | null,
-  /** true = использовать /videos/hero.mp4 (сжатое локально, ~700KB вместо 3–5MB) */
   useLocalHero: true,
+  localVideo: "/videos/hero-cut.mp4",
+  localPoster: "/videos/hero-cut-poster.jpg",
 } as const;
 
-// Rap: Mixkit реперский клип. Cars: Pexels drift (Tokyo Drift style). Fight: boxing
+/** Active hero URLs (local montage or remote fallback). */
+export function getHeroVideoSrc(): string {
+  return HERO_VIDEO.useLocalHero ? HERO_VIDEO.localVideo : HERO_VIDEO.video;
+}
+
+export function getHeroPosterSrc(): string {
+  return HERO_VIDEO.useLocalHero ? HERO_VIDEO.localPoster : HERO_VIDEO.poster;
+}
+
+// Stock fallbacks for generic video components (not portfolio works)
 export const REEL_VIDEOS = [
   "https://assets.mixkit.co/videos/47497/47497-720.mp4",
   "https://assets.mixkit.co/videos/13019/13019-720.mp4",
@@ -21,22 +31,6 @@ export const REEL_VIDEOS = [
   "https://videos.pexels.com/video-files/3571264/3571264-sd_640_360_30fps.mp4",
   "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4",
   "https://assets.mixkit.co/videos/47497/47497-720.mp4",
-];
-
-// Rap indices 0,1,6: studio/mic/urban. Cars 2,8: drift/night. Fight 3,9: boxing
-export const WORK_IMAGES = [
-  "https://images.pexels.com/photos/7619638/pexels-photo-7619638.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/3209261/pexels-photo-3209261.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/4761671/pexels-photo-4761671.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/2693212/pexels-photo-2693212.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/3721311/pexels-photo-3721311.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/2628207/pexels-photo-2628207.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/3721941/pexels-photo-3721941.jpeg?auto=compress&w=800",
-  "https://images.pexels.com/photos/1005638/pexels-photo-1005638.jpeg?auto=compress&w=800",
 ];
 
 // BTS (behind the scenes) — качественные фото съёмочного процесса
@@ -52,18 +46,6 @@ export const BUILD_SHOOT_HERO =
   "https://images.pexels.com/photos/3062545/pexels-photo-3062545.jpeg?auto=compress&w=1920";
 
 export const CONSTRUCTOR_MEDIA = {
-  rap: {
-    image: BUILD_SHOOT_HERO,
-    overlay: "graffiti",
-  },
-  cars: {
-    image: BUILD_SHOOT_HERO,
-    overlay: "motion-blur",
-  },
-  fight: {
-    image: BUILD_SHOOT_HERO,
-    overlay: "impact",
-  },
   brand: {
     image: BUILD_SHOOT_HERO,
     overlay: "light-sweep",
@@ -72,27 +54,21 @@ export const CONSTRUCTOR_MEDIA = {
     image: BUILD_SHOOT_HERO,
     overlay: "none",
   },
+  editorial: {
+    image: BUILD_SHOOT_HERO,
+    overlay: "graffiti",
+  },
+  "music-video": {
+    image: BUILD_SHOOT_HERO,
+    overlay: "impact",
+  },
 } as const;
 
-// Signature Lanes - rap, cars (Tokyo Drift), fight, brand
-// Mobile: SD/720p for reliable decode on iPhone; desktop can use higher res
-export const SIGNATURE_LANE_VIDEOS = [
-  { video: "https://assets.mixkit.co/videos/47497/47497-720.mp4", videoMobile: "https://assets.mixkit.co/videos/47497/47497-720.mp4", poster: "https://assets.mixkit.co/videos/47497/47497-thumb-720-4.jpg" },
-  { video: "https://videos.pexels.com/video-files/27974758/12279599_2560_1440_60fps.mp4", videoMobile: "https://videos.pexels.com/video-files/27974758/12279599-sd_640_360_60fps.mp4", poster: "https://images.pexels.com/photos/1639897/pexels-photo-1639897.jpeg?auto=compress&w=400" },
-  { video: "https://videos.pexels.com/video-files/9943217/9943217-sd_640_360_24fps.mp4", videoMobile: "https://videos.pexels.com/video-files/9943217/9943217-sd_640_360_24fps.mp4", poster: "https://images.pexels.com/photos/4761671/pexels-photo-4761671.jpeg?auto=compress&w=400" },
-  { video: "https://videos.pexels.com/video-files/3571264/3571264-sd_640_360_30fps.mp4", videoMobile: "https://videos.pexels.com/video-files/3571264/3571264-sd_640_360_30fps.mp4", poster: "https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&w=400" },
-  { video: "https://videos.pexels.com/video-files/5752729/5752729-sd_640_360_30fps.mp4", videoMobile: "https://videos.pexels.com/video-files/5752729/5752729-sd_640_360_30fps.mp4", poster: "https://images.pexels.com/photos/7619638/pexels-photo-7619638.jpeg?auto=compress&w=400" },
-] as const;
-
-export function pickFallback(arr: string[], index = 0): string {
-  return arr[index % arr.length];
-}
-
-// BTS cards — local assets for ReelRail (link to work)
+// BTS cards — ReelRail: клиентские превью из featured
 export const BTS_RAW_CARDS = [
-  { title: "BTS", href: "/#works", badge: "BTS", video: "/assets/featured/hutsy-financial-brand/preview.mp4", poster: "/assets/featured/hutsy-financial-brand/poster.jpg" },
-  { title: "BTS: Drift", href: "/#works", badge: "BTS", video: "/assets/featured/drift-session/preview.mp4", poster: "/assets/featured/drift-session/poster.jpg" },
-  { title: "BTS: On Set", href: "/#works", badge: "BTS", video: "/assets/featured/midnight-run-mv/preview.mp4", poster: "/assets/featured/midnight-run-mv/poster.jpg" },
-  { title: "BTS: Fight", href: "/#works", badge: "BTS", video: "/assets/featured/fight-night/preview.mp4", poster: "/assets/featured/fight-night/poster.jpg" },
-  { title: "BTS: Street", href: "/#works", badge: "BTS", video: "/assets/featured/streetwear-lookbook/preview.mp4", poster: "/assets/featured/streetwear-lookbook/poster.jpg" },
+  { title: "After Hours", href: "/work/after-hours", badge: "Brand", video: "/assets/featured/after-hours/preview.mp4", poster: "/assets/featured/after-hours/poster.jpg" },
+  { title: "Built Daily", href: "/work/built-daily", badge: "Reels", video: "/assets/featured/built-daily/preview.mp4", poster: "/assets/featured/built-daily/poster.jpg" },
+  { title: "Relocation", href: "/work/relocation", badge: "Editorial", video: "/assets/featured/relocation/preview.mp4", poster: "/assets/featured/relocation/poster.jpg" },
+  { title: "City Frequency", href: "/work/city-frequency", badge: "Reels", video: "/assets/featured/city-frequency/preview.mp4", poster: "/assets/featured/city-frequency/poster.jpg" },
+  { title: "Red Room Session", href: "/work/red-room-session", badge: "MV", video: "/assets/featured/red-room-session/preview.mp4", poster: "/assets/featured/red-room-session/poster.jpg" },
 ] as const;

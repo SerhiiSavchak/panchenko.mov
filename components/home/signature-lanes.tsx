@@ -5,15 +5,49 @@ import { SectionHeader } from "@/components/ui";
 import { VideoPosterHover } from "@/components/video-poster-hover";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import { SIGNATURE_LANE_VIDEOS } from "@/lib/media";
 import { useLongPressPreview } from "@/lib/use-long-press-preview";
 
 const lanes = [
-  { title: "Rap Clips", category: "rap", video: SIGNATURE_LANE_VIDEOS[0] },
-  { title: "Cars", category: "cars", video: SIGNATURE_LANE_VIDEOS[1] },
-  { title: "Fight", category: "fight", video: SIGNATURE_LANE_VIDEOS[2] },
-  { title: "Brand", category: "brand", video: SIGNATURE_LANE_VIDEOS[3] },
-  { title: "Reels", category: "reels", video: SIGNATURE_LANE_VIDEOS[4] },
+  {
+    title: "Brand",
+    href: "/work/after-hours",
+    video: {
+      video: "/assets/featured/after-hours/preview.mp4",
+      poster: "/assets/featured/after-hours/poster.jpg",
+    },
+  },
+  {
+    title: "Reels",
+    href: "/work/built-daily",
+    video: {
+      video: "/assets/featured/built-daily/preview.mp4",
+      poster: "/assets/featured/built-daily/poster.jpg",
+    },
+  },
+  {
+    title: "City",
+    href: "/work/city-frequency",
+    video: {
+      video: "/assets/featured/city-frequency/preview.mp4",
+      poster: "/assets/featured/city-frequency/poster.jpg",
+    },
+  },
+  {
+    title: "Editorial",
+    href: "/work/relocation",
+    video: {
+      video: "/assets/featured/relocation/preview.mp4",
+      poster: "/assets/featured/relocation/poster.jpg",
+    },
+  },
+  {
+    title: "Music Video",
+    href: "/work/red-room-session",
+    video: {
+      video: "/assets/featured/red-room-session/preview.mp4",
+      poster: "/assets/featured/red-room-session/poster.jpg",
+    },
+  },
 ];
 
 function LaneCard({
@@ -26,11 +60,10 @@ function LaneCard({
   inView: boolean;
 }) {
   const [isHovered, setIsHovered] = useState(false);
-  const cardId = `lane-${lane.category}`;
-  const href = "/#works";
+  const cardId = `lane-${lane.title}`;
   const longPress = useLongPressPreview(cardId);
   const isActive = longPress.isActive || isHovered;
-  const v = lane.video as { video: string; videoMobile?: string; poster: string };
+  const v = lane.video;
 
   return (
     <div
@@ -38,7 +71,7 @@ function LaneCard({
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <Link
-        href={href}
+        href={lane.href}
         className="interactive-card group block"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -47,23 +80,22 @@ function LaneCard({
         onTouchCancel={longPress.onTouchCancel}
         onClick={longPress.onClick}
       >
-              <div className="relative aspect-[3/4] overflow-hidden bg-muted group-hover:scale-105 transition-transform duration-700">
-                <VideoPosterHover
-                  src={v.video}
-                  poster={v.poster}
-                  alt={lane.title}
-                  mobileSrc={v.videoMobile}
-                  aspectRatio="3/4"
-                  isActive={isActive}
-                  fill
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
-                <h3 className="absolute bottom-4 left-4 font-display text-2xl text-foreground group-hover:text-accent transition-colors z-10">
-                  {lane.title}
-                </h3>
-              </div>
-            </Link>
-          </div>
+        <div className="relative aspect-[3/4] overflow-hidden bg-muted group-hover:scale-105 transition-transform duration-700">
+          <VideoPosterHover
+            src={v.video}
+            poster={v.poster}
+            alt={lane.title}
+            aspectRatio="3/4"
+            isActive={isActive}
+            fill
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
+          <h3 className="absolute bottom-4 left-4 font-display text-2xl text-foreground group-hover:text-accent transition-colors z-10">
+            {lane.title}
+          </h3>
+        </div>
+      </Link>
+    </div>
   );
 }
 
@@ -74,10 +106,10 @@ export function SignatureLanes() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => e.isIntersecting && setInView(true),
-      { threshold: 0.2, rootMargin: "-60px" }
-    );
+    const obs = new IntersectionObserver(([e]) => e.isIntersecting && setInView(true), {
+      threshold: 0.2,
+      rootMargin: "-60px",
+    });
     obs.observe(el);
     return () => obs.disconnect();
   }, []);

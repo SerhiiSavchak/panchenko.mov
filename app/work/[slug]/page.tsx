@@ -16,7 +16,7 @@ export async function generateMetadata({
   if (!work) return { title: "Not Found" };
   return {
     title: `${work.title} | PANchenko`,
-    description: work.shortDesc,
+    description: work.headline,
   };
 }
 

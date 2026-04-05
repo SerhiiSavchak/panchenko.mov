@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Bebas_Neue } from "next/font/google";
 import { GraffitiLoader } from "@/components/graffiti-loader";
-import { HERO_VIDEO } from "@/lib/media";
+import { getHeroPosterSrc, getHeroVideoSrc } from "@/lib/media";
 import { Providers } from "@/components/providers";
 import { LoaderDismissedProvider } from "@/lib/loader-dismissed-context";
 import "lenis/dist/lenis.css";
@@ -32,9 +32,10 @@ export const metadata: Metadata = {
     "cinematic",
     "short-form",
     "editor",
-    "rap",
-    "trap",
-    "cars",
+    "brand",
+    "reels",
+    "editorial",
+    "music video",
     "brand storytelling",
   ],
   openGraph: {
@@ -64,8 +65,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://assets.mixkit.co" crossOrigin="" />
         <link rel="preconnect" href="https://videos.pexels.com" />
         <link rel="preconnect" href="https://images.pexels.com" />
-        <link rel="preload" as="video" href={HERO_VIDEO.useLocalHero ? "/videos/hero.mp4" : HERO_VIDEO.video} fetchPriority="high" />
-        <link rel="preload" as="image" href={HERO_VIDEO.poster} fetchPriority="high" />
+        <link rel="preload" as="video" href={getHeroVideoSrc()} fetchPriority="high" />
+        <link rel="preload" as="image" href={getHeroPosterSrc()} fetchPriority="high" />
         <style
           dangerouslySetInnerHTML={{
             __html: `html{background:#050505}body{background:#050505;color:#f0f0f0}`,

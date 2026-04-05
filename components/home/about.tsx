@@ -18,9 +18,9 @@ export function About() {
   });
 
   const lines = [
-    "Started on the streets of Toronto shooting rap videos with no budget and too much ambition.",
+    "Started on the streets of Toronto shooting music and brand pieces with no budget and too much ambition.",
     "Every frame was practice. Every edit was school. The grind turned into a language -- cinematic short-form that hits hard and feels real.",
-    "From underground music videos to high-end brand storytelling. From raw fight night coverage to polished automotive content.",
+    "From underground music visuals to high-end brand and editorial storytelling — cinematic short-form built for impact.",
     "Now in-house at @hutsyfinancial, building brand narratives while still taking on passion projects that push the craft.",
     "Rap. Cars. Fight energy. Brand storytelling. If it moves, I make it cinematic.",
   ];
@@ -114,7 +114,7 @@ export function About() {
             className={`mt-8 flex flex-wrap gap-3 about-tags ${inView ? "about-visible" : ""}`}
             style={{ animationDelay: "600ms" }}
           >
-            {["Street Culture", "Rap Visuals", "Brand Storytelling", "Toronto"].map(
+            {["Brand", "Reels", "Editorial", "Music Video", "Worldwide"].map(
               (tag) => (
                 <span
                   key={tag}

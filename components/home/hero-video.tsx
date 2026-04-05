@@ -1,23 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { HERO_VIDEO } from "@/lib/media";
+import { getHeroPosterSrc, getHeroVideoSrc } from "@/lib/media";
 import { HERO_MEDIA_TIMING } from "@/lib/hero-media-context";
 import { useHeroMedia } from "@/lib/hero-media-context";
 import { useHeroMediaLifecycle } from "@/lib/use-hero-media-lifecycle";
 
 /**
- * Hero background video — non-interactive visual layer.
- *
- * Architecture:
- * - Video loads with opacity 1 (poster covers it) — avoids browser throttling of hidden media
- * - Poster is on top; fades out when video reaches "playing"
- * - Retry play() when loader dismisses (Hero becomes visible) if first attempt failed
+ * Hero background video — full-bleed, non-interactive visual layer.
+ * Poster fades out when video plays.
  */
 interface HeroVideoProps {
-  /** When true, video is paused (e.g. when hero is off-screen) */
   paused?: boolean;
-  /** When true, loader has dismissed — Hero is visible, safe to retry play if in fallback */
   loaderDismissed?: boolean;
 }
 
@@ -56,22 +50,22 @@ export function HeroVideo({ paused = false, loaderDismissed = false }: HeroVideo
     return () => clearTimeout(t);
   }, [loaderDismissed, status, retryPlay]);
 
-  const videoSrc = HERO_VIDEO.useLocalHero ? "/videos/hero.mp4" : HERO_VIDEO.video;
+  const videoSrc = getHeroVideoSrc();
+  const posterSrc = getHeroPosterSrc();
 
   if (!ctx) return null;
 
   return (
     <div className="absolute inset-0" aria-hidden>
-      {/* Video: native poster covers black until loaded; our div layer provides stable first frame */}
       <video
         ref={setVideoRef}
         src={`${videoSrc}#t=0.001`}
-        poster={HERO_VIDEO.poster}
+        poster={posterSrc}
         muted
         loop
         playsInline
         autoPlay
-        preload="auto"
+        preload="metadata"
         disablePictureInPicture
         disableRemotePlayback
         tabIndex={-1}
@@ -80,12 +74,11 @@ export function HeroVideo({ paused = false, loaderDismissed = false }: HeroVideo
         className="hero-video-bg absolute inset-0 h-full w-full object-cover"
         style={{ opacity: 1 }}
       />
-      {/* Poster: on top, solid bg fallback so never transparent over black; fades out when video playing */}
       <div
         className="absolute inset-0 bg-cover bg-center transition-opacity duration-500 z-[1]"
         style={{
           backgroundColor: "var(--color-background)",
-          backgroundImage: `url(${HERO_VIDEO.poster})`,
+          backgroundImage: `url(${posterSrc})`,
           opacity: showPoster ? 1 : 0,
           pointerEvents: "none",
         }}
