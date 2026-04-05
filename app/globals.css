@@ -28,6 +28,21 @@ html {
   overflow-x: clip;
 }
 
+/*
+ * Telegram WebView: unstable dynamic viewport + overlay chrome — prefer svh for first screen.
+ * data-telegram-webview is set in TelegramWebViewProvider (client).
+ */
+html[data-telegram-webview="true"] {
+  min-height: 100%;
+  min-height: -webkit-fill-available;
+}
+
+/* svh = stable “small” viewport; avoids 100vh/dvh jumpiness in Telegram’s embedded WebView */
+html[data-telegram-webview="true"] .hero-first-screen {
+  min-height: 100svh;
+  height: 100svh;
+}
+
 body {
   position: relative;
   background-color: var(--color-background);

@@ -6,10 +6,12 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import { useLenis } from "@/components/lenis-provider";
+import { useTelegramWebView } from "@/lib/telegram-webview-context";
 
 export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
   const pathname = usePathname();
   const lenis = useLenis();
+  const { isTelegram } = useTelegramWebView();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -34,10 +36,13 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
     e.preventDefault();
     const el = document.getElementById("works");
     if (!el) return;
+    const headerEl = document.querySelector("header");
+    const headerH = headerEl?.getBoundingClientRect().height ?? 80;
     if (lenis) {
-      lenis.scrollTo(el, { offset: -80 });
+      lenis.scrollTo(el, { offset: -headerH });
     } else {
-      el.scrollIntoView({ behavior: "smooth" });
+      const top = el.getBoundingClientRect().top + window.scrollY - headerH;
+      window.scrollTo({ top, behavior: "smooth" });
     }
   };
 
@@ -69,8 +74,11 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-colors duration-300",
+          "pt-[env(safe-area-inset-top,0px)]",
           scrolled
-            ? "bg-background/80 backdrop-blur-md border-b border-border"
+            ? isTelegram
+              ? "bg-background/[0.96] border-b border-border"
+              : "bg-background/80 backdrop-blur-md border-b border-border"
             : "bg-transparent"
         )}
       >
@@ -182,7 +190,12 @@ export function Header({ onQuoteOpen }: { onQuoteOpen: () => void }) {
         </div>
       </div>
 
-      <div className="mobile-bottom-bar md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-background/90 backdrop-blur-md">
+      <div
+        className={cn(
+          "mobile-bottom-bar md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-border",
+          isTelegram ? "bg-background/[0.96]" : "bg-background/90 backdrop-blur-md"
+        )}
+      >
         <button onClick={onQuoteOpen} className="flex-1 py-3 text-xs uppercase tracking-widest font-semibold bg-accent text-accent-foreground">
           Book
         </button>

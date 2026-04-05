@@ -1,10 +1,12 @@
 "use client";
 
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { useTelegramWebView } from "@/lib/telegram-webview-context";
 
 const SCROLL_THRESHOLD = 80;
 
 export function ScrollProgress() {
+  const { isTelegram } = useTelegramWebView();
   const { scrollY, scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -24,8 +26,12 @@ export function ScrollProgress() {
     <>
       {/* Mobile: below header */}
       <motion.div
-        className="fixed top-20 md:top-28 left-0 right-0 z-[9999] h-[3px] w-full overflow-hidden pointer-events-none md:hidden"
-        style={{ opacity: springOpacity, y: springYTop }}
+        className="fixed left-0 right-0 z-[9999] h-[3px] w-full overflow-hidden pointer-events-none md:hidden"
+        style={{
+          top: "calc(5rem + env(safe-area-inset-top, 0px))",
+          opacity: springOpacity,
+          ...(isTelegram ? {} : { y: springYTop }),
+        }}
         role="progressbar"
         aria-label="Scroll progress"
       >

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import Lenis from "lenis";
 import type { LenisOptions } from "lenis";
+import { useTelegramWebView } from "@/lib/telegram-webview-context";
 
 const LenisContext = createContext<Lenis | null>(null);
 
@@ -19,12 +20,18 @@ export function LenisProvider({
 }) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
   const optionsRef = useRef(options);
+  const { resolved, isTelegram } = useTelegramWebView();
 
   useEffect(() => {
     optionsRef.current = options;
   }, [options]);
 
   useEffect(() => {
+    if (!resolved) return;
+    if (isTelegram) {
+      return;
+    }
+
     const prefersReducedMotion =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -49,7 +56,7 @@ export function LenisProvider({
       lenisInstance.destroy();
       setLenis(null);
     };
-  }, []);
+  }, [resolved, isTelegram]);
 
   return (
     <LenisContext.Provider value={lenis}>{children}</LenisContext.Provider>
